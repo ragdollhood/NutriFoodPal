@@ -631,7 +631,7 @@ function renderBestWalk(weatherData, unit) {
       <span class="hour-chip-time" aria-hidden="true">${timeStr}</span>
       <span class="hour-chip-icon" aria-hidden="true">${icon}</span>
       <span class="hour-chip-temp" aria-hidden="true">${tempStr}</span>
-      <span class="hour-chip-score" aria-hidden="true">${n(h.comfort.score, 1)}/10</span>
+      <span class="hour-chip-score" aria-hidden="true">🐾 ${n(h.comfort.score, 1)}/10</span>
     </div>`;
   }).join('');
 
