@@ -541,7 +541,6 @@ function render(weatherData, loc, source) {
     : desc;
 
   const reasonsText = escapeHtml(comfort.reasons.join(', '));
-  const recommendationsHtml = comfort.recommendations.map(r => `<li>${escapeHtml(r)}</li>`).join('');
 
   currentEl.className = 'current';
   currentEl.innerHTML = `
@@ -554,19 +553,18 @@ function render(weatherData, loc, source) {
       </div>
     </div>
     <div class="metrics">
-      <div class="metric"><span>VIND</span><b>${n(cur.wind, 1)} m/s</b></div>
-      <div class="metric"><span>BYVIND</span><b>${n(cur.gust, 1)} m/s</b></div>
-      <div class="metric"><span>LUFTFUKTIGHET</span><b>${n(cur.humidity)} %</b></div>
+      <div class="metric"><span>Vind</span><b>${n(cur.wind, 1)} m/s</b></div>
+      <div class="metric"><span>Byvind</span><b>${n(cur.gust, 1)} m/s</b></div>
+      <div class="metric"><span>Luftfuktighet</span><b>${n(cur.humidity)} %</b></div>
     </div>
     <div class="comfort" role="group" aria-label="Hundkomfortindex">
-      <div class="comfort-head"><span>HUNDKOMFORTINDEX</span><b style="color:${comfort.color}">${n(comfort.score, 1)} / 10</b></div>
+      <div class="comfort-head"><span>Hundkomfortindex</span><b style="color:${comfort.color}">${n(comfort.score, 1)} / 10</b></div>
       <div class="comfort-bar"><div class="comfort-fill" style="width:${comfort.score * 10}%;background:${comfort.color}"></div></div>
       <p class="comfort-label" style="color:${comfort.color}">${escapeHtml(comfort.label)}</p>
-      <p class="comfort-reasons">Bidragande faktorer: ${reasonsText}.</p>
-      <ul class="comfort-recommendations">${recommendationsHtml}</ul>
-      <p class="comfort-disclaimer">Hundkomfortindex är en generell uppskattning baserad på väderdata. Hundens ras, storlek, ålder, hälsa, päls, kondition och individuella tolerans påverkar vad som är lämpligt. Indexet är ingen kliniskt validerad, vetenskapligt fastställd eller veterinärmedicinsk bedömning.</p>
+      <p class="comfort-reasons">${reasonsText}.</p>
     </div>
     <div class="dog-verdict">🐕 ${escapeHtml(comfort.recommendations[0])}</div>
+    <p class="comfort-footnote"><a href="#komfortindex-forklaring">Så räknas indexet ut *</a></p>
   `;
 
   renderAlerts(cur);
