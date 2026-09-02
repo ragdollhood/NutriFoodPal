@@ -16,7 +16,10 @@
 <header class="topbar"><a class="brand" href="#">Hundväder <span>•</span></a><nav aria-label="Huvudmeny"><a href="#prognos">Prognos</a><a href="#hundrad">Hundråd</a><a href="#kunskap">Kunskap</a></nav></header>
 <main id="main">
 <section class="hero">
-  <img src="assets/hero-hundvader.jpg" alt="Hund och hundägare på en skogspromenad efter regn">
+  <picture class="hero-media">
+    <source id="heroImgWebp" type="image/webp" srcset="assets/hero-sun.webp">
+    <img id="heroImg" src="assets/hero-sun.jpg" alt="Hund ute på promenad" fetchpriority="high">
+  </picture>
   <div class="shade"></div>
   <div class="hero-inner hero-inner--split">
     <div class="hero-text">
@@ -37,12 +40,17 @@
 <section id="prognos" class="weather-wrap" aria-labelledby="forecastTitle">
   <div class="section-head"><div><span class="kicker">PROMENADLÄGET</span><h2 id="forecastTitle">Vädret just nu</h2></div><p id="updated">Prognosdata hämtas från SMHI när du söker.</p></div>
   <div id="alerts" class="alerts" aria-live="polite"></div>
-  <h3 class="subheading">Vädertolkning för hunden</h3>
-  <div id="walkAdvice" class="advice-grid">
-    <div class="skeleton advice-skeleton"></div><div class="skeleton advice-skeleton"></div><div class="skeleton advice-skeleton"></div><div class="skeleton advice-skeleton"></div><div class="skeleton advice-skeleton"></div><div class="skeleton advice-skeleton"></div><div class="skeleton advice-skeleton"></div>
+  <div class="panel panel--advice">
+    <h3 class="subheading">Vädertolkning för hunden</h3>
+    <div id="walkAdvice" class="advice-grid">
+      <div class="skeleton advice-skeleton"></div><div class="skeleton advice-skeleton"></div><div class="skeleton advice-skeleton"></div><div class="skeleton advice-skeleton"></div><div class="skeleton advice-skeleton"></div><div class="skeleton advice-skeleton"></div><div class="skeleton advice-skeleton"></div>
+    </div>
+    <p class="advice-disclaimer">Bedömningarna räknas fram automatiskt utifrån väderdata (temperatur, nederbörd, vind) och årstid — ingen AI-modell och ingen koppling till riktiga pollen- eller fästingmätningar. Se aktuell pollennivå hos <a href="https://www.nrm.se/natur--och-miljoovervakning/pollenovervakning/pollenrapporten" target="_blank" rel="noopener">Pollenrapporten (Naturhistoriska riksmuseet)</a> och fästingläget hos <a href="https://www.sva.se/aktuellt/insamlingar/rapportera-faesting/karta-och-tabell-oever-faestingfynd/" target="_blank" rel="noopener">SVA:s fästingkarta</a>. Läs mer om hur Hundkomfortindex räknas ut <a href="#komfortindex-forklaring">här</a>.</p>
   </div>
-  <p class="advice-disclaimer">Bedömningarna räknas fram automatiskt utifrån väderdata (temperatur, nederbörd, vind) och årstid — ingen AI-modell och ingen koppling till riktiga pollen- eller fästingmätningar. Se aktuell pollennivå hos <a href="https://www.nrm.se/natur--och-miljoovervakning/pollenovervakning/pollenrapporten" target="_blank" rel="noopener">Pollenrapporten (Naturhistoriska riksmuseet)</a> och fästingläget hos <a href="https://www.sva.se/aktuellt/insamlingar/rapportera-faesting/karta-och-tabell-oever-faestingfynd/" target="_blank" rel="noopener">SVA:s fästingkarta</a>. Läs mer om hur Hundkomfortindex räknas ut <a href="#komfortindex-forklaring">här</a>.</p>
-  <h3 class="subheading">Kommande dagar</h3><div id="daily" class="daily"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+  <div class="panel panel--daily">
+    <h3 class="subheading">Kommande dagar</h3>
+    <div id="daily" class="daily"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+  </div>
 </section>
 
 <section id="hundrad" class="advice-section"><div class="section-head"><div><span class="kicker">ANPASSA EFTER INDIVIDEN</span><h2>Snälla råd i alla väder</h2></div><p>Hundens ålder, ras, päls, hälsa och vana påverkar vad som känns bra.</p></div>

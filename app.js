@@ -10,6 +10,8 @@ const alertsEl = $('#alerts');
 const walkAdviceEl = $('#walkAdvice');
 const placeResultsEl = $('#placeResults');
 const updatedEl = $('#updated');
+const heroImgEl = $('#heroImg');
+const heroImgWebpEl = $('#heroImgWebp');
 
 const SMHI_BASE = 'https://opendata-download-metfcst.smhi.se/api/category/snow1g/version/1';
 
@@ -78,6 +80,31 @@ const conditionInfo = {
   snowHeavy: ['❄️', 'Kraftigt snöfall'],
   unknown: ['🌤️', 'Växlande väder']
 };
+
+/* ---------- Hero-bakgrund: väljer en av de fördefinierade foton beroende på väder ---------- */
+/* "hero-fog" och "hero-windy" är reserverade som stillbilder för sektionerna "Vädertolkning
+   för hunden" och "Kommande dagar" (se styles.css) och används därför inte i hjältebilden,
+   så att den bakgrunden aldrig visar samma foto som just då syns i hero-sektionen. */
+
+const HERO_SNOWY = new Set(['snow', 'snowLight', 'snowHeavy', 'sleet']);
+const HERO_RAINY = new Set(['rain', 'rainLight', 'rainHeavy', 'drizzle', 'thunder']);
+
+function chooseHeroImage(cur) {
+  if (cur.isDay === false) return 'hero-evening';
+  if (HERO_SNOWY.has(cur.condition)) return 'hero-snow';
+  if (HERO_RAINY.has(cur.condition)) return 'hero-rain';
+  const feelsLike = cur.apparentTemp != null ? cur.apparentTemp : cur.temp;
+  if (feelsLike != null && feelsLike >= 24) return 'hero-hot';
+  return 'hero-sun';
+}
+
+function updateHeroBackground(cur, altText) {
+  if (!heroImgEl || !heroImgWebpEl) return;
+  const base = chooseHeroImage(cur);
+  heroImgWebpEl.srcset = `assets/${base}.webp`;
+  heroImgEl.src = `assets/${base}.jpg`;
+  if (altText) heroImgEl.alt = altText;
+}
 
 // SMHI:s kodtabell Wsymb2 (1–27). Källa: SMHI Öppna data, https://opendata.smhi.se/
 function smhiCondition(code) {
@@ -664,6 +691,8 @@ function render(weatherData, loc, source) {
   const feelsLine = (cur.apparentTemp != null && Math.round(cur.apparentTemp) !== Math.round(cur.temp))
     ? `${desc} · Känns som ${formatTemp(cur.apparentTemp, unit)}°${unit}`
     : desc;
+
+  updateHeroBackground(cur, `Hund ute i väder: ${desc.toLowerCase()}, ${escapeHtml(loc.name)}`);
 
   const reasonsText = escapeHtml(comfort.reasons.join(', '));
 
