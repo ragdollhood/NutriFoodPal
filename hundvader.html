@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#153b32">
+  <meta name="description" content="Lokal väderprognos ur hundens perspektiv med öppna prognosdata från SMHI.">
+  <title>Hundväder | Promenadprognosen för dig och din hund</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Hoppa till innehållet</a>
+<header class="topbar"><a class="brand" href="#">Hundväder <span>•</span></a><nav aria-label="Huvudmeny"><a href="#prognos">Prognos</a><a href="#hundrad">Hundråd</a><a href="#kunskap">Kunskap</a></nav></header>
+<main id="main">
+<section class="hero">
+  <img src="assets/hero-hundvader.jpg" alt="Hund och hundägare på en skogspromenad efter regn">
+  <div class="shade"></div>
+  <div class="hero-inner">
+    <span class="eyebrow">VÄDER FÖR FYRA TASSAR</span>
+    <h1>Blir det en långrunda<br>eller soffmys?</h1>
+    <p>Se vädret där du är och få varsamma promenadråd anpassade för dagens förhållanden.</p>
+    <form id="searchForm" class="search" role="search"><label class="sr-only" for="place">Sök ort</label><input id="place" autocomplete="off" placeholder="Sök ort, till exempel Umeå" required><button>Sök väder</button><button id="locate" type="button" class="locate" aria-label="Använd min position">◎</button></form>
+    <p id="searchStatus" class="status" role="status" aria-live="polite">Sök efter en plats eller använd din position.</p>
+  </div>
+</section>
+
+<section id="prognos" class="weather-wrap" aria-labelledby="forecastTitle">
+  <div class="section-head"><div><span class="kicker">PROMENADLÄGET</span><h2 id="forecastTitle">Vädret just nu</h2></div><p id="updated">Prognosdata hämtas från SMHI när du söker.</p></div>
+  <div id="current" class="current empty"><div class="paw">🐾</div><div><h3>Redo när du är</h3><p>Välj en plats för att få temperatur, nederbörd, vind och hundanpassade råd.</p></div></div>
+  <div id="alerts" class="alerts" aria-live="polite"></div>
+  <h3 class="subheading">Kommande dagar</h3><div id="daily" class="daily"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+</section>
+
+<section id="hundrad" class="advice-section"><div class="section-head"><div><span class="kicker">ANPASSA EFTER INDIVIDEN</span><h2>Snälla råd i alla väder</h2></div><p>Hundens ålder, ras, päls, hälsa och vana påverkar vad som känns bra.</p></div>
+<div class="story-grid">
+<article class="story image-card"><img src="assets/hund-vatten.jpg" alt="Hund vilar i skugga vid en vattenskål"><div><span>VARMA DAGAR</span><h3>Vatten, skugga och lugnare tempo</h3><p>Ta med färskt vatten, välj svalare tider och håll uppsikt efter tecken på överhettning. Lämna aldrig hunden i en varm bil.</p><a href="https://www.agria.se/hund/artiklar/skotsel-och-vard/sa-tar-du-hand-om-hunden-i-varmen/" target="_blank" rel="noopener">Läs veterinärgranskade råd hos Agria ↗</a></div></article>
+<article class="story image-card"><img src="assets/hund-regnjacka.jpg" alt="Hund i gul regnjacka på våt parkväg"><div><span>REGN & RUSK</span><h3>Torka varsamt efter promenaden</h3><p>Handdukstorka päls, mage och tassar. Kontrollera mellan trampdynorna och låt hunden vila varmt och dragfritt.</p><a href="https://www.skk.se/hundagande/skotsel/hygien-och-palsvard/" target="_blank" rel="noopener">Läs om pälsvård hos SKK ↗</a></div></article>
+</div>
+<div class="tips">
+<article><i>☂</i><h3>Regnkläder?</h3><p>Ett lätt regntäcke kan vara praktiskt för vissa hundar, men plagget ska sitta bekvämt och inte begränsa rörelse, syn eller möjlighet att kissa. Vänj in det lugnt och respektera hundens signaler.</p></article>
+<article><i>❄</i><h3>Kyla, is och salt</h3><p>Korta, tunpälsade, unga, äldre eller sjuka hundar kan behöva extra skydd. Skölj och torka tassarna efter vägsalt. Hundskor kan skydda men kräver försiktig tillvänjning.</p></article>
+<article><i>⚡</i><h3>Åska och oro</h3><p>Låt hunden välja en trygg plats, dämpa ljud och ljus och undvik att tvinga fram kontakt. Vid svår rädsla bör du söka råd från veterinär eller kvalificerad beteendeexpert.</p></article>
+</div></section>
+
+<section id="kunskap" class="science"><div class="science-copy"><span class="kicker">VAD VETENSKAPEN SÄGER</span><h2>Vädret kan ändra aktiviteten, men inte alla hundar reagerar lika</h2><p>Forskning baserad på ägarenkäter visar samband mellan väder och rapporterad aktivitet. Den ger inte stöd för att vädret påverkar varje hunds ”humör” på samma sätt. Läs därför kroppsspråket och anpassa promenaden efter individen.</p><div class="stat"><b>3 153</b><span>hundägare deltog i en internationell enkätstudie om säsongsväder och hundars aktivitet.</span></div><div class="source-links"><a href="https://www.mdpi.com/2076-2615/11/11/3302" target="_blank" rel="noopener">Studien i Animals ↗</a><a href="https://www.frontiersin.org/journals/veterinary-science/articles/10.3389/fvets.2022.973574/full" target="_blank" rel="noopener">Studie om extrema väderhändelser ↗</a></div></div><aside class="note"><span>VIKTIGT</span><h3>Råd ersätter inte veterinärvård</h3><p>Om hunden blir slö, förvirrad, får tydliga andningsproblem, kräks, kollapsar eller verkar snabbt försämrad ska du kontakta veterinär akut.</p></aside></section>
+
+<section class="sources"><h2>Källor och datatransparens</h2><div class="source-grid"><a href="https://opendata.smhi.se/metfcst/snow1gv1" target="_blank" rel="noopener"><b>SMHI Open Data</b><span>Prognosdata, SNOW1gv1</span></a><a href="https://www.smhi.se/data" target="_blank" rel="noopener"><b>SMHI</b><span>Öppna data och användning</span></a><a href="https://www.mdpi.com/2076-2615/11/11/3302" target="_blank" rel="noopener"><b>Animals, 2021</b><span>Säsongsväder och aktivitet</span></a><a href="https://jordbruksverket.se/djur/hundar-katter-och-smadjur/hundar" target="_blank" rel="noopener"><b>Jordbruksverket</b><span>Skötsel och djurskydd</span></a><a href="https://www.agria.se/hund/artiklar/skotsel-och-vard/sa-tar-du-hand-om-hunden-i-varmen/" target="_blank" rel="noopener"><b>Agria</b><span>Hundar i värme</span></a></div><p class="fine">Platsökning använder OpenStreetMaps Nominatim-tjänst. Prognoser är modeller och kan ändras. Visa alltid SMHI:s officiella varningar separat i en skarp tjänst.</p></section>
+</main>
+<footer><div class="brand">Hundväder <span>•</span></div><p>Gjord med omtanke om blöta nosar och trygga promenader.</p><p>Väderdata: © SMHI, öppna data.</p></footer>
+<script src="app.js"></script></body></html>
