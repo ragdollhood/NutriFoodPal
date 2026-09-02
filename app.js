@@ -248,7 +248,9 @@ function normalizeSmhi(data) {
     };
   });
 
-  const hourly = ts.filter(x => new Date(x.time).getTime() >= now).slice(0, 12).map(mapSmhiHour);
+  // "Bästa promenadtiden" ska visa resten av dagens timmar (samma data som "idag" i
+  // Kommande dagar), inte bara ett fåtal timmar framåt.
+  const hourly = daily[0]?.hours ?? [];
 
   return { timezone: 'Europe/Stockholm', current, daily, hourly, updatedAt: new Date() };
 }
@@ -341,14 +343,9 @@ function normalizeOpenMeteo(data) {
     });
   }
 
-  let startIdx = 0;
-  for (let i = 0; i < hLen; i++) {
-    if (new Date(h.time[i]).getTime() >= now) { startIdx = i; break; }
-  }
-  const hourly = [];
-  for (let i = startIdx; i < Math.min(startIdx + 12, hLen); i++) {
-    hourly.push(mapOpenMeteoHour(h, i));
-  }
+  // "Bästa promenadtiden" ska visa resten av dagens timmar (samma data som "idag" i
+  // Kommande dagar), inte bara ett fåtal timmar framåt.
+  const hourly = daily[0]?.hours ?? [];
 
   return { timezone: data.timezone || null, current, daily, hourly, updatedAt: new Date() };
 }
