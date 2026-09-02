@@ -40,6 +40,23 @@ function val(obj, name) {
   return null;
 }
 
+/* ---------- Temperaturenhet ---------- */
+/* Alla väderkällor hämtas och beräknas internt i Celsius (bland annat för att
+   Hundkomfortindex-tröskelvärdena är satta i Celsius). Vid visning väljer vi
+   automatiskt Fahrenheit för länder som normalt använder det i vardagen. */
+
+const FAHRENHEIT_COUNTRIES = new Set(['US', 'BS', 'BZ', 'KY', 'PW', 'LR', 'FM', 'MH']);
+
+function tempUnitFor(countryCode) {
+  return FAHRENHEIT_COUNTRIES.has((countryCode || '').toUpperCase()) ? 'F' : 'C';
+}
+
+function formatTemp(celsius, unit, decimals = 0) {
+  if (celsius == null || Number.isNaN(Number(celsius))) return '–';
+  const value = unit === 'F' ? (Number(celsius) * 9 / 5 + 32) : Number(celsius);
+  return value.toFixed(decimals);
+}
+
 /* ---------- Vädersymboler: en gemensam uppsättning oavsett datakälla ---------- */
 
 const conditionInfo = {
@@ -489,17 +506,17 @@ function renderAlerts(cur) {
   alertsEl.innerHTML = alerts.join('');
 }
 
-function renderDaily(weatherData) {
+function renderDaily(weatherData, unit) {
   const tz = weatherData.timezone || 'Europe/Stockholm';
   const names = new Intl.DateTimeFormat('sv-SE', { weekday: 'short', day: 'numeric', month: 'short', timeZone: tz });
 
   dailyEl.innerHTML = weatherData.daily.map((d, i) => {
     const [icon, desc] = conditionInfo[d.condition] || conditionInfo.unknown;
     const label = i === 0 ? 'Idag' : names.format(new Date(d.date));
-    const max = d.tempMax != null ? Math.round(d.tempMax) : '–';
-    const min = d.tempMin != null ? Math.round(d.tempMin) : '–';
+    const max = formatTemp(d.tempMax, unit);
+    const min = formatTemp(d.tempMin, unit);
     const rain = d.precipSum != null ? n(d.precipSum, 1) : '–';
-    return `<article class="day ${i === 0 ? 'today' : ''}"><b>${label}</b><div class="day-icon">${icon}</div><div class="range">${max}° / ${min}°</div><small>${desc} · nederbörd ${rain} mm</small></article>`;
+    return `<article class="day ${i === 0 ? 'today' : ''}"><b>${label}</b><div class="day-icon">${icon}</div><div class="range">${max}° / ${min}°${unit}</div><small>${desc} · nederbörd ${rain} mm</small></article>`;
   }).join('');
 }
 
@@ -517,8 +534,10 @@ function render(weatherData, loc, source) {
     snowfall: cur.snowfall
   });
 
+  const unit = tempUnitFor(loc.countryCode);
+
   const feelsLine = (cur.apparentTemp != null && Math.round(cur.apparentTemp) !== Math.round(cur.temp))
-    ? `${desc} · Känns som ${n(cur.apparentTemp)}°`
+    ? `${desc} · Känns som ${formatTemp(cur.apparentTemp, unit)}°${unit}`
     : desc;
 
   const reasonsText = escapeHtml(comfort.reasons.join(', '));
@@ -530,7 +549,7 @@ function render(weatherData, loc, source) {
       <div class="weather-icon">${icon}</div>
       <div>
         <div class="place-name">${escapeHtml(loc.name)}</div>
-        <div class="temp">${n(cur.temp)}°</div>
+        <div class="temp">${formatTemp(cur.temp, unit)}°${unit}</div>
         <div>${feelsLine}</div>
       </div>
     </div>
@@ -551,7 +570,7 @@ function render(weatherData, loc, source) {
   `;
 
   renderAlerts(cur);
-  renderDaily(weatherData);
+  renderDaily(weatherData, unit);
 
   const tz = weatherData.timezone || 'Europe/Stockholm';
   const sourceName = source === 'smhi' ? 'SMHI' : 'Open-Meteo';
