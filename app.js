@@ -622,12 +622,16 @@ function renderBestWalk(weatherData, unit) {
   const timeFmt = new Intl.DateTimeFormat('sv-SE', { hour: '2-digit', minute: '2-digit', timeZone: tz });
 
   const chips = withComfort.map(h => {
-    const [icon] = conditionInfo[h.condition] || conditionInfo.unknown;
+    const [icon, desc] = conditionInfo[h.condition] || conditionInfo.unknown;
     const best_ = h.time === best.time;
-    return `<div class="hour-chip${best_ ? ' hour-chip--best' : ''}" style="--dot:${h.comfort.color}" title="${escapeHtml(timeFmt.format(new Date(h.time)))} · ${escapeHtml(h.comfort.label)} · ${formatTemp(h.temp, unit)}°${unit}">
-      <span class="hour-chip-time">${timeFmt.format(new Date(h.time))}</span>
-      <span class="hour-chip-icon">${icon}</span>
-      <span class="hour-chip-dot"></span>
+    const timeStr = timeFmt.format(new Date(h.time));
+    const tempStr = `${formatTemp(h.temp, unit)}°${unit}`;
+    const label = `${timeStr}, ${desc}, ${tempStr}, Hundkomfortindex ${n(h.comfort.score, 1)} av 10, ${h.comfort.label}`;
+    return `<div class="hour-chip${best_ ? ' hour-chip--best' : ''}" style="--dot:${h.comfort.color}" role="group" aria-label="${escapeHtml(label)}">
+      <span class="hour-chip-time" aria-hidden="true">${timeStr}</span>
+      <span class="hour-chip-icon" aria-hidden="true">${icon}</span>
+      <span class="hour-chip-temp" aria-hidden="true">${tempStr}</span>
+      <span class="hour-chip-score" aria-hidden="true">${n(h.comfort.score, 1)}/10</span>
     </div>`;
   }).join('');
 
@@ -644,6 +648,7 @@ function renderBestWalk(weatherData, unit) {
         <p class="best-walk-desc">${introText}</p>
       </div>
     </div>
+    <p class="hour-strip-caption">Väder och Hundkomfortindex timme för timme</p>
     <div class="hour-strip">${chips}</div>
   `;
 }
