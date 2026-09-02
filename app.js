@@ -5,6 +5,7 @@
 const $ = s => document.querySelector(s);
 const statusEl = $('#searchStatus');
 const dailyEl = $('#daily');
+const bestWalkEl = $('#bestWalk');
 const currentEl = $('#current');
 const alertsEl = $('#alerts');
 const walkAdviceEl = $('#walkAdvice');
@@ -240,7 +241,25 @@ function normalizeSmhi(data) {
     };
   });
 
-  return { timezone: 'Europe/Stockholm', current, daily, updatedAt: new Date() };
+  const hourly = ts.filter(x => new Date(x.time).getTime() >= now).slice(0, 12).map(x => {
+    const hp = val(x, 'precipitation_amount_mean') ?? val(x, 'precipitation_amount_median') ?? val(x, 'precipitation_amount_max');
+    const hSym = Number(val(x, 'symbol_code') ?? 1);
+    const hCond = smhiCondition(hSym);
+    const hSnow = ['snow', 'snowLight', 'snowHeavy', 'sleet'].includes(hCond) ? (hp ?? 0) : 0;
+    return {
+      time: x.time,
+      temp: val(x, 'air_temperature'),
+      apparentTemp: null,
+      humidity: val(x, 'relative_humidity'),
+      wind: val(x, 'wind_speed'),
+      gust: val(x, 'wind_speed_of_gust'),
+      precip: hp,
+      snowfall: hSnow,
+      condition: hCond
+    };
+  });
+
+  return { timezone: 'Europe/Stockholm', current, daily, hourly, updatedAt: new Date() };
 }
 
 async function fetchOpenMeteo(loc) {
@@ -295,7 +314,29 @@ function normalizeOpenMeteo(data) {
     });
   }
 
-  return { timezone: data.timezone || null, current, daily, updatedAt: new Date() };
+  const h = data.hourly || {};
+  const hLen = Array.isArray(h.time) ? h.time.length : 0;
+  const now = Date.now();
+  let startIdx = 0;
+  for (let i = 0; i < hLen; i++) {
+    if (new Date(h.time[i]).getTime() >= now) { startIdx = i; break; }
+  }
+  const hourly = [];
+  for (let i = startIdx; i < Math.min(startIdx + 12, hLen); i++) {
+    hourly.push({
+      time: h.time[i],
+      temp: h.temperature_2m ? h.temperature_2m[i] : null,
+      apparentTemp: h.apparent_temperature ? h.apparent_temperature[i] : null,
+      humidity: h.relative_humidity_2m ? h.relative_humidity_2m[i] : null,
+      wind: h.wind_speed_10m ? h.wind_speed_10m[i] : null,
+      gust: h.wind_gusts_10m ? h.wind_gusts_10m[i] : null,
+      precip: h.precipitation ? h.precipitation[i] : null,
+      snowfall: h.snowfall ? h.snowfall[i] : null,
+      condition: wmoCondition(h.weather_code ? h.weather_code[i] : null)
+    });
+  }
+
+  return { timezone: data.timezone || null, current, daily, hourly, updatedAt: new Date() };
 }
 
 /* ---------- Hundkomfortindex (0,0–10,0) ---------- */
@@ -548,6 +589,65 @@ function renderDaily(weatherData, unit) {
   }).join('');
 }
 
+/* ---------- Bästa promenadtiden: rankar de kommande timmarna efter Hundkomfortindex ---------- */
+
+function computeHourlyComfort(hourly) {
+  return (hourly || [])
+    .filter(h => h && h.temp != null)
+    .map(h => ({
+      ...h,
+      comfort: calculateDogComfortIndex({
+        temperature: h.temp,
+        apparentTemperature: h.apparentTemp,
+        humidity: h.humidity,
+        precipitation: h.precip,
+        windSpeed: h.wind,
+        windGusts: h.gust,
+        snowfall: h.snowfall
+      })
+    }));
+}
+
+function renderBestWalk(weatherData, unit) {
+  if (!bestWalkEl) return;
+  const tz = weatherData.timezone || 'Europe/Stockholm';
+  const withComfort = computeHourlyComfort(weatherData.hourly);
+
+  if (!withComfort.length) {
+    bestWalkEl.innerHTML = '';
+    return;
+  }
+
+  const best = withComfort.reduce((a, b) => (b.comfort.score > a.comfort.score ? b : a));
+  const timeFmt = new Intl.DateTimeFormat('sv-SE', { hour: '2-digit', minute: '2-digit', timeZone: tz });
+
+  const chips = withComfort.map(h => {
+    const [icon] = conditionInfo[h.condition] || conditionInfo.unknown;
+    const best_ = h.time === best.time;
+    return `<div class="hour-chip${best_ ? ' hour-chip--best' : ''}" style="--dot:${h.comfort.color}" title="${escapeHtml(timeFmt.format(new Date(h.time)))} · ${escapeHtml(h.comfort.label)} · ${formatTemp(h.temp, unit)}°${unit}">
+      <span class="hour-chip-time">${timeFmt.format(new Date(h.time))}</span>
+      <span class="hour-chip-icon">${icon}</span>
+      <span class="hour-chip-dot"></span>
+    </div>`;
+  }).join('');
+
+  const allSimilar = withComfort.every(h => h.comfort.score >= best.comfort.score - 0.5);
+  const introText = allSimilar
+    ? `Jämn komfort den närmaste tiden — det mesta av dagen fungerar bra för en promenad.`
+    : `Det bästa promenadfönstret den närmaste tiden, jämfört med övriga kommande timmar.`;
+
+  bestWalkEl.innerHTML = `
+    <div class="best-walk-highlight" style="--dot:${best.comfort.color}">
+      <div class="best-walk-time">🐾 ${timeFmt.format(new Date(best.time))}</div>
+      <div class="best-walk-body">
+        <p class="best-walk-label" style="color:${best.comfort.color}">${escapeHtml(best.comfort.label)} · ${n(best.comfort.score, 1)}/10</p>
+        <p class="best-walk-desc">${introText}</p>
+      </div>
+    </div>
+    <div class="hour-strip">${chips}</div>
+  `;
+}
+
 /* ---------- Vädertolkning: sju konkreta hundråd baserat på aktuellt väder ---------- */
 /* Regelbaserad tolkning av väderdata – inte en AI-modell och inte kopplad till några
    pollen- eller fästingsensorer. Pollen- och fästingbedömningen är särskilt förenklad
@@ -722,6 +822,7 @@ function render(weatherData, loc, source) {
   `;
 
   renderAlerts(cur);
+  renderBestWalk(weatherData, unit);
   renderWalkAdvisories(cur, comfort);
   renderDaily(weatherData, unit);
 
