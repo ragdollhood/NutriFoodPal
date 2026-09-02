@@ -7,6 +7,7 @@ const statusEl = $('#searchStatus');
 const dailyEl = $('#daily');
 const currentEl = $('#current');
 const alertsEl = $('#alerts');
+const walkAdviceEl = $('#walkAdvice');
 const placeResultsEl = $('#placeResults');
 const updatedEl = $('#updated');
 
@@ -520,6 +521,130 @@ function renderDaily(weatherData, unit) {
   }).join('');
 }
 
+/* ---------- Vädertolkning: sju konkreta hundråd baserat på aktuellt väder ---------- */
+/* Regelbaserad tolkning av väderdata – inte en AI-modell och inte kopplad till några
+   pollen- eller fästingsensorer. Pollen- och fästingbedömningen är särskilt förenklad
+   (baserad på årstid och grundläggande väderfaktorer) eftersom det inte finns någon öppen,
+   avgiftsfri realtidsdata för detta i appen. Se den riktiga prognosen via länkarna i
+   panelens fotnot. */
+
+const LEVELS = {
+  ok: { label: 'Bra', color: '#2f7d5c' },
+  caution: { label: 'Var uppmärksam', color: '#d5a33c' },
+  risk: { label: 'Hög risk', color: '#bd4747' }
+};
+
+function computeWalkAdvisories(cur, comfort) {
+  const temp = cur.temp;
+  const apparent = cur.apparentTemp != null ? cur.apparentTemp : temp;
+  const gust = cur.gust != null ? cur.gust : cur.wind;
+  const precip = cur.precip || 0;
+  const isSunnyish = ['clear', 'mostlyClear', 'partlyCloudy'].includes(cur.condition);
+  const month = new Date().getMonth() + 1; // 1–12, baserat på enhetens lokala datum
+
+  const items = [];
+
+  // 1. Varm asfalt
+  if (temp != null && (temp >= 28 || (temp >= 24 && isSunnyish))) {
+    items.push({ icon: '🛣️', title: 'Varm asfalt', level: 'risk',
+      text: 'Solvärmd asfalt kan bli brännhet. Håll handryggen mot marken i 5 sekunder — obehagligt för dig betyder för hett för trampdynorna. Välj gräs eller skugga.' });
+  } else if (temp != null && temp >= 20 && isSunnyish) {
+    items.push({ icon: '🛣️', title: 'Varm asfalt', level: 'caution',
+      text: 'Asfalten kan hinna bli varm i solen. Testa gärna med handen innan en längre runda på hårt underlag.' });
+  } else {
+    items.push({ icon: '🛣️', title: 'Varm asfalt', level: 'ok',
+      text: 'Underlaget bedöms inte vara hett nog för att skada trampdynorna just nu.' });
+  }
+
+  // 2. Kyla mot tassar
+  const coldTemp = apparent;
+  if (coldTemp != null && coldTemp <= -15) {
+    items.push({ icon: '❄️', title: 'Kyla mot tassar', level: 'risk',
+      text: 'Sträng kyla. Håll promenaden kort och kontrollera tassar, öron och svans ofta.' });
+  } else if (coldTemp != null && coldTemp <= -5) {
+    items.push({ icon: '❄️', title: 'Kyla mot tassar', level: 'caution',
+      text: 'Kallt för trampdynorna, särskilt på kortpälsade eller små hundar. Överväg tassvax eller hundskor.' });
+  } else {
+    items.push({ icon: '❄️', title: 'Kyla mot tassar', level: 'ok',
+      text: 'Temperaturen bedöms inte vara ett problem för tassarna just nu.' });
+  }
+
+  // 3. Blöt päls
+  if (precip >= 3) {
+    items.push({ icon: '💧', title: 'Blöt päls', level: 'risk',
+      text: 'Kraftigt regn. Päls och tassar blir rejält blöta — planera för ordentlig torkning efteråt.' });
+  } else if (precip >= 0.5) {
+    items.push({ icon: '💧', title: 'Blöt päls', level: 'caution',
+      text: 'Regn just nu. Räkna med att torka päls, mage och tassar efter promenaden.' });
+  } else {
+    items.push({ icon: '💧', title: 'Blöt päls', level: 'ok',
+      text: 'Torrt eller nästan torrt just nu.' });
+  }
+
+  // 4. Blåsigt för små hundar
+  if (gust != null && gust >= 20) {
+    items.push({ icon: '💨', title: 'Blåsigt för små hundar', level: 'risk',
+      text: 'Mycket kraftiga vindbyar. Kan skrämma eller vara jobbigt för små och lätta hundar — håll koppel och undvik skog.' });
+  } else if (gust != null && gust >= 12) {
+    items.push({ icon: '💨', title: 'Blåsigt för små hundar', level: 'caution',
+      text: 'Blåsigt. Kan kännas jobbigt för små eller kortbenta hundar — välj gärna en skyddad väg.' });
+  } else {
+    items.push({ icon: '💨', title: 'Blåsigt för små hundar', level: 'ok',
+      text: 'Vindnivån bedöms vara okej även för mindre hundar.' });
+  }
+
+  // 5. Pollen (grov uppskattning – se fotnot för riktig mätdata)
+  const pollenSeason = month >= 3 && month <= 8;
+  if (!pollenSeason) {
+    items.push({ icon: '🌼', title: 'Pollen', level: 'ok',
+      text: 'Utanför den intensiva pollensäsongen — halterna är oftast lägre.' });
+  } else if (precip >= 1) {
+    items.push({ icon: '🌼', title: 'Pollen', level: 'ok',
+      text: 'Regnet binder pollenet, så halterna är oftast lägre just nu.' });
+  } else if ((cur.wind || 0) >= 3 && isSunnyish) {
+    items.push({ icon: '🌼', title: 'Pollen', level: 'risk',
+      text: 'Pollensäsong, torrt och lite bris — halterna kan vara höga. Torka gärna av pälsen om hunden reagerar.' });
+  } else {
+    items.push({ icon: '🌼', title: 'Pollen', level: 'caution',
+      text: 'Pollensäsong pågår. Halterna varierar mycket lokalt och under dagen.' });
+  }
+
+  // 6. Fästingrisk (grov uppskattning – se fotnot för riktig mätdata)
+  const tickActive = coldTemp != null && coldTemp >= 5 && month >= 3 && month <= 11;
+  if (!tickActive) {
+    items.push({ icon: '🕷️', title: 'Fästingrisk', level: 'ok',
+      text: 'Fästingar är oftast inaktiva vid den här temperaturen eller årstiden.' });
+  } else if ([5, 6, 8, 9].includes(month)) {
+    items.push({ icon: '🕷️', title: 'Fästingrisk', level: 'risk',
+      text: 'Högsäsong för fästingar. Kontrollera hunden noga efter promenaden, särskilt i gräs och skog.' });
+  } else {
+    items.push({ icon: '🕷️', title: 'Fästingrisk', level: 'caution',
+      text: 'Fästingar kan vara aktiva. Kolla igenom pälsen efter promenaden.' });
+  }
+
+  // 7. Helhetsbedömning (bygger på samma Hundkomfortindex som visas ovan)
+  const overallLevel = comfort.score >= 7 ? 'ok' : comfort.score >= 5 ? 'caution' : 'risk';
+  items.push({ icon: '🚶', title: 'Bra promenadväder', level: overallLevel,
+    text: `${comfort.label} · Hundkomfortindex ${n(comfort.score, 1)}/10.` });
+
+  return items;
+}
+
+function renderWalkAdvisories(cur, comfort) {
+  const items = computeWalkAdvisories(cur, comfort);
+  walkAdviceEl.innerHTML = items.map(item => {
+    const lvl = LEVELS[item.level];
+    return `<article class="advice-card">
+      <div class="advice-card-head">
+        <span class="advice-icon">${item.icon}</span>
+        <span class="advice-pill" style="color:${lvl.color};background:${lvl.color}1a">${lvl.label}</span>
+      </div>
+      <h4>${escapeHtml(item.title)}</h4>
+      <p>${escapeHtml(item.text)}</p>
+    </article>`;
+  }).join('');
+}
+
 function render(weatherData, loc, source) {
   const cur = weatherData.current;
   const [icon, desc] = conditionInfo[cur.condition] || conditionInfo.unknown;
@@ -568,6 +693,7 @@ function render(weatherData, loc, source) {
   `;
 
   renderAlerts(cur);
+  renderWalkAdvisories(cur, comfort);
   renderDaily(weatherData, unit);
 
   const tz = weatherData.timezone || 'Europe/Stockholm';
