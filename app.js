@@ -227,39 +227,48 @@ function normalizeSmhi(data) {
     (days[key] ??= []).push(x);
   });
 
+  // Liten buffert (30 min) så att den pågående timmen inte försvinner ur dagens timlista
+  // precis efter att den passerat.
+  const hourCutoff = now - 30 * 60 * 1000;
+
   const daily = Object.values(days).slice(0, 7).map(arr => {
     const temps = arr.map(x => val(x, 'air_temperature')).filter(Number.isFinite);
     const rain = arr.map(x => val(x, 'precipitation_amount_mean') ?? val(x, 'precipitation_amount_median') ?? 0);
     const mid = arr[Math.floor(arr.length / 2)];
     const sc = Number(val(mid, 'symbol_code') ?? 1);
+    const hours = arr.map(mapSmhiHour).filter(h => new Date(h.time).getTime() >= hourCutoff);
     return {
       date: mid.time,
       tempMax: temps.length ? Math.max(...temps) : null,
       tempMin: temps.length ? Math.min(...temps) : null,
       precipSum: rain.length ? Math.max(...rain) : null,
-      condition: smhiCondition(sc)
+      condition: smhiCondition(sc),
+      hours,
+      comfort: summarizeDayComfort(hours)
     };
   });
 
-  const hourly = ts.filter(x => new Date(x.time).getTime() >= now).slice(0, 12).map(x => {
-    const hp = val(x, 'precipitation_amount_mean') ?? val(x, 'precipitation_amount_median') ?? val(x, 'precipitation_amount_max');
-    const hSym = Number(val(x, 'symbol_code') ?? 1);
-    const hCond = smhiCondition(hSym);
-    const hSnow = ['snow', 'snowLight', 'snowHeavy', 'sleet'].includes(hCond) ? (hp ?? 0) : 0;
-    return {
-      time: x.time,
-      temp: val(x, 'air_temperature'),
-      apparentTemp: null,
-      humidity: val(x, 'relative_humidity'),
-      wind: val(x, 'wind_speed'),
-      gust: val(x, 'wind_speed_of_gust'),
-      precip: hp,
-      snowfall: hSnow,
-      condition: hCond
-    };
-  });
+  const hourly = ts.filter(x => new Date(x.time).getTime() >= now).slice(0, 12).map(mapSmhiHour);
 
   return { timezone: 'Europe/Stockholm', current, daily, hourly, updatedAt: new Date() };
+}
+
+function mapSmhiHour(x) {
+  const hp = val(x, 'precipitation_amount_mean') ?? val(x, 'precipitation_amount_median') ?? val(x, 'precipitation_amount_max');
+  const hSym = Number(val(x, 'symbol_code') ?? 1);
+  const hCond = smhiCondition(hSym);
+  const hSnow = ['snow', 'snowLight', 'snowHeavy', 'sleet'].includes(hCond) ? (hp ?? 0) : 0;
+  return {
+    time: x.time,
+    temp: val(x, 'air_temperature'),
+    apparentTemp: null,
+    humidity: val(x, 'relative_humidity'),
+    wind: val(x, 'wind_speed'),
+    gust: val(x, 'wind_speed_of_gust'),
+    precip: hp,
+    snowfall: hSnow,
+    condition: hCond
+  };
 }
 
 async function fetchOpenMeteo(loc) {
@@ -301,42 +310,61 @@ function normalizeOpenMeteo(data) {
     isDay: c.is_day !== 0
   };
 
+  const h = data.hourly || {};
+  const hLen = Array.isArray(h.time) ? h.time.length : 0;
+  const now = Date.now();
+  // Liten buffert (30 min) så att den pågående timmen inte försvinner ur dagens timlista
+  // precis efter att den passerat.
+  const hourCutoff = now - 30 * 60 * 1000;
+
+  // Gruppera all timdata (Open-Meteo levererar redan lokal tid för hela 7-dagarsperioden)
+  // per kalenderdag, så varje dag i "daily" kan visa sin egen timprognos vid klick.
+  const hoursByDay = {};
+  for (let i = 0; i < hLen; i++) {
+    const dayKey = String(h.time[i]).slice(0, 10);
+    (hoursByDay[dayKey] ??= []).push(mapOpenMeteoHour(h, i));
+  }
+
   const d = data.daily || {};
   const len = Array.isArray(d.time) ? d.time.length : 0;
   const daily = [];
   for (let i = 0; i < len; i++) {
+    const dayHours = (hoursByDay[d.time[i]] || []).filter(hh => new Date(hh.time).getTime() >= hourCutoff);
     daily.push({
       date: d.time[i],
       tempMax: d.temperature_2m_max ? d.temperature_2m_max[i] : null,
       tempMin: d.temperature_2m_min ? d.temperature_2m_min[i] : null,
       precipSum: d.precipitation_sum ? d.precipitation_sum[i] : null,
-      condition: wmoCondition(d.weather_code ? d.weather_code[i] : null)
+      condition: wmoCondition(d.weather_code ? d.weather_code[i] : null),
+      hours: dayHours,
+      comfort: summarizeDayComfort(dayHours)
     });
   }
 
-  const h = data.hourly || {};
-  const hLen = Array.isArray(h.time) ? h.time.length : 0;
-  const now = Date.now();
   let startIdx = 0;
   for (let i = 0; i < hLen; i++) {
     if (new Date(h.time[i]).getTime() >= now) { startIdx = i; break; }
   }
   const hourly = [];
   for (let i = startIdx; i < Math.min(startIdx + 12, hLen); i++) {
-    hourly.push({
-      time: h.time[i],
-      temp: h.temperature_2m ? h.temperature_2m[i] : null,
-      apparentTemp: h.apparent_temperature ? h.apparent_temperature[i] : null,
-      humidity: h.relative_humidity_2m ? h.relative_humidity_2m[i] : null,
-      wind: h.wind_speed_10m ? h.wind_speed_10m[i] : null,
-      gust: h.wind_gusts_10m ? h.wind_gusts_10m[i] : null,
-      precip: h.precipitation ? h.precipitation[i] : null,
-      snowfall: h.snowfall ? h.snowfall[i] : null,
-      condition: wmoCondition(h.weather_code ? h.weather_code[i] : null)
-    });
+    hourly.push(mapOpenMeteoHour(h, i));
   }
 
   return { timezone: data.timezone || null, current, daily, hourly, updatedAt: new Date() };
+}
+
+function mapOpenMeteoHour(h, i) {
+  return {
+    time: h.time[i],
+    temp: h.temperature_2m ? h.temperature_2m[i] : null,
+    apparentTemp: h.apparent_temperature ? h.apparent_temperature[i] : null,
+    humidity: h.relative_humidity_2m ? h.relative_humidity_2m[i] : null,
+    wind: h.wind_speed_10m ? h.wind_speed_10m[i] : null,
+    gust: h.wind_gusts_10m ? h.wind_gusts_10m[i] : null,
+    precip: h.precipitation ? h.precipitation[i] : null,
+    snowfall: h.snowfall ? h.snowfall[i] : null,
+    condition: wmoCondition(h.weather_code ? h.weather_code[i] : null)
+  };
 }
 
 /* ---------- Hundkomfortindex (0,0–10,0) ---------- */
@@ -348,6 +376,16 @@ function normalizeOpenMeteo(data) {
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
+}
+
+// Delar upp en poäng (0–10) i samma nivåer/etiketter/färger som används genomgående i appen,
+// så att både en enskild avläsning och ett dagssnitt (se summarizeDayComfort) blir konsekventa.
+function comfortTier(score) {
+  if (score >= 8.5) return { level: 'excellent', label: 'Utmärkt promenadväder', color: '#2f7d5c' };
+  if (score >= 7) return { level: 'good', label: 'Bra promenadväder', color: '#659b4b' };
+  if (score >= 5) return { level: 'moderate', label: 'Okej med anpassning', color: '#d5a33c' };
+  if (score >= 3) return { level: 'poor', label: 'Ta det försiktigt', color: '#dc7835' };
+  return { level: 'very-poor', label: 'Olämpligt för längre aktivitet', color: '#bd4747' };
 }
 
 function calculateDogComfortIndex(weather) {
@@ -462,32 +500,7 @@ function calculateDogComfortIndex(weather) {
   }
 
   score = clamp(score, 0, 10);
-
-  let level;
-  let label;
-  let color;
-
-  if (score >= 8.5) {
-    level = "excellent";
-    label = "Utmärkt promenadväder";
-    color = "#2f7d5c";
-  } else if (score >= 7) {
-    level = "good";
-    label = "Bra promenadväder";
-    color = "#659b4b";
-  } else if (score >= 5) {
-    level = "moderate";
-    label = "Okej med anpassning";
-    color = "#d5a33c";
-  } else if (score >= 3) {
-    level = "poor";
-    label = "Ta det försiktigt";
-    color = "#dc7835";
-  } else {
-    level = "very-poor";
-    label = "Olämpligt för längre aktivitet";
-    color = "#bd4747";
-  }
+  const { level, label, color } = comfortTier(score);
 
   if (reasons.length === 0) {
     reasons.push("behagliga väderförhållanden");
@@ -575,9 +588,21 @@ function renderAlerts(cur) {
   alertsEl.innerHTML = alerts.join('');
 }
 
+/* ---------- Kommande dagar: håller reda på vilken dag som är expanderad och med vilka data ---------- */
+
+const dayHoursEl = $('#dayHours');
+const dayHoursTitleEl = $('#dayHoursTitle');
+const dayHoursBodyEl = $('#dayHoursBody');
+const dayHoursCloseEl = $('#dayHoursClose');
+
+let dailyState = { days: [], tz: 'Europe/Stockholm', unit: 'C', openIndex: null };
+
 function renderDaily(weatherData, unit) {
   const tz = weatherData.timezone || 'Europe/Stockholm';
   const names = new Intl.DateTimeFormat('sv-SE', { weekday: 'short', day: 'numeric', month: 'short', timeZone: tz });
+
+  dailyState = { days: weatherData.daily, tz, unit, openIndex: null };
+  if (dayHoursEl) { dayHoursEl.hidden = true; dayHoursBodyEl.innerHTML = ''; }
 
   dailyEl.innerHTML = weatherData.daily.map((d, i) => {
     const [icon, desc] = conditionInfo[d.condition] || conditionInfo.unknown;
@@ -585,9 +610,100 @@ function renderDaily(weatherData, unit) {
     const max = formatTemp(d.tempMax, unit);
     const min = formatTemp(d.tempMin, unit);
     const rain = d.precipSum != null ? n(d.precipSum, 1) : '–';
-    return `<article class="day ${i === 0 ? 'today' : ''}"><b>${label}</b><div class="day-icon">${icon}</div><div class="range">${max}° / ${min}°${unit}</div><small>${desc} · nederbörd ${rain} mm</small></article>`;
+    const comfortPill = d.comfort
+      ? `<span class="day-comfort" style="color:${d.comfort.color};background:${d.comfort.color}1a">🐾 ${n(d.comfort.score, 1)}/10 · ${escapeHtml(d.comfort.label)}</span>`
+      : '';
+    const hint = (d.hours && d.hours.length)
+      ? `<p class="day-hint">Visa klockslag ▾</p>`
+      : `<p class="day-hint">Ingen timprognos ännu</p>`;
+    return `<article class="day ${i === 0 ? 'today' : ''}" role="button" tabindex="0" aria-expanded="false" aria-controls="dayHours" data-day-index="${i}">
+      <b>${label}</b>
+      <div class="day-icon">${icon}</div>
+      <div class="range">${max}° / ${min}°${unit}</div>
+      <small>${desc} · nederbörd ${rain} mm</small>
+      ${comfortPill}
+      ${hint}
+    </article>`;
   }).join('');
 }
+
+function hideDayHours() {
+  if (!dayHoursEl) return;
+  dayHoursEl.hidden = true;
+  dayHoursBodyEl.innerHTML = '';
+  dailyEl.querySelectorAll('.day.active').forEach(el => {
+    el.classList.remove('active');
+    el.setAttribute('aria-expanded', 'false');
+  });
+  dailyState.openIndex = null;
+}
+
+function showDayHours(index) {
+  const d = dailyState.days[index];
+  if (!d || !dayHoursEl) return;
+
+  dailyEl.querySelectorAll('.day').forEach(el => {
+    const active = Number(el.dataset.dayIndex) === index;
+    el.classList.toggle('active', active);
+    el.setAttribute('aria-expanded', String(active));
+  });
+
+  const dayNameFmt = new Intl.DateTimeFormat('sv-SE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: dailyState.tz });
+  dayHoursTitleEl.textContent = `Klockslag ${index === 0 ? 'idag' : dayNameFmt.format(new Date(d.date))}`;
+
+  const hours = d.hours || [];
+  if (!hours.length) {
+    dayHoursBodyEl.innerHTML = `<p class="day-hours-empty">Ingen timupplöst prognos tillgänglig för den här dagen ännu. Det brukar klarna när dagen kommer närmare — kika gärna tillbaka.</p>`;
+  } else {
+    const withComfort = computeHourlyComfort(hours);
+    const best = withComfort.reduce((a, b) => (b.comfort.score > a.comfort.score ? b : a), withComfort[0]);
+    const timeFmt = new Intl.DateTimeFormat('sv-SE', { hour: '2-digit', minute: '2-digit', timeZone: dailyState.tz });
+
+    const chips = withComfort.map(h => {
+      const [icon, desc] = conditionInfo[h.condition] || conditionInfo.unknown;
+      const isBest = h.time === best.time;
+      const timeStr = timeFmt.format(new Date(h.time));
+      const tempStr = `${formatTemp(h.temp, dailyState.unit)}°${dailyState.unit}`;
+      const chipLabel = `${timeStr}, ${desc}, ${tempStr}, Hundkomfortindex ${n(h.comfort.score, 1)} av 10, ${h.comfort.label}`;
+      return `<div class="hour-chip${isBest ? ' hour-chip--best' : ''}" style="--dot:${h.comfort.color}" role="group" aria-label="${escapeHtml(chipLabel)}">
+        <span class="hour-chip-time" aria-hidden="true">${timeStr}</span>
+        <span class="hour-chip-icon" aria-hidden="true">${icon}</span>
+        <span class="hour-chip-temp" aria-hidden="true">${tempStr}</span>
+        <span class="hour-chip-score" aria-hidden="true">🐾 ${n(h.comfort.score, 1)}/10</span>
+      </div>`;
+    }).join('');
+
+    dayHoursBodyEl.innerHTML = `<div class="hour-strip">${chips}</div>`;
+  }
+
+  dayHoursEl.hidden = false;
+  dailyState.openIndex = index;
+  dayHoursEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function toggleDayHours(index) {
+  if (dailyState.openIndex === index) {
+    hideDayHours();
+  } else {
+    showDayHours(index);
+  }
+}
+
+dailyEl.addEventListener('click', e => {
+  const card = e.target.closest('.day');
+  if (!card) return;
+  toggleDayHours(Number(card.dataset.dayIndex));
+});
+
+dailyEl.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const card = e.target.closest('.day');
+  if (!card) return;
+  e.preventDefault();
+  toggleDayHours(Number(card.dataset.dayIndex));
+});
+
+dayHoursCloseEl?.addEventListener('click', hideDayHours);
 
 /* ---------- Bästa promenadtiden: rankar de kommande timmarna efter Hundkomfortindex ---------- */
 
@@ -606,6 +722,24 @@ function computeHourlyComfort(hourly) {
         snowfall: h.snowfall
       })
     }));
+}
+
+// Räknar ut ett Hundkomfortindex-snitt för en hel dag, baserat på dagtidstimmarna (ca 07–21)
+// om sådana finns tillgängliga, annars på de timmar som faktiskt finns. Används i "Kommande
+// dagar" så att varje dag får samma index som visas för nuläget och för "Bästa promenadtiden".
+function summarizeDayComfort(hours) {
+  const withComfort = computeHourlyComfort(hours);
+  if (!withComfort.length) return null;
+
+  const daytime = withComfort.filter(h => {
+    const hh = new Date(h.time).getHours();
+    return hh >= 7 && hh <= 21;
+  });
+  const pool = daytime.length ? daytime : withComfort;
+  const avg = pool.reduce((sum, h) => sum + h.comfort.score, 0) / pool.length;
+  const score = Number(avg.toFixed(1));
+
+  return { score, ...comfortTier(score) };
 }
 
 function renderBestWalk(weatherData, unit) {

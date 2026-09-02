@@ -53,6 +53,14 @@
   <div class="panel panel--daily">
     <h3 class="subheading">Kommande dagar</h3>
     <div id="daily" class="daily"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+    <div id="dayHours" class="day-hours" hidden>
+      <div class="day-hours-head">
+        <h4 id="dayHoursTitle"></h4>
+        <button type="button" class="day-hours-close" id="dayHoursClose">Stäng</button>
+      </div>
+      <div id="dayHoursBody"></div>
+    </div>
+    <p class="daily-footnote">Hundkomfortindex per dag är ett snitt för dagtid (ca 07–21), uträknat med samma metod som ovan. Klicka eller tryck Enter på en dag för att se klockslag och timme-för-timme-index där det finns tillgängligt. <a href="#komfortindex-forklaring">Så räknas indexet ut *</a></p>
   </div>
 </section>
 
@@ -79,7 +87,7 @@
     <li><b>Snöfall</b> – ett mindre avdrag, bland annat för risken att snö och is fastnar mellan trampdynorna.</li>
     <li><b>Vind och vindbyar</b> – kraftiga byvindar ger störst avdrag, måttlig blåst ett mindre.</li>
   </ul>
-  <p>Poängen ger nivåerna Utmärkt, Bra, Okej med anpassning, Ta det försiktigt och Olämpligt för längre aktivitet, tillsammans med de förhållanden som bidragit mest och ett kort råd. Samma index används dessutom timme för timme i "Bästa promenadtiden just nu", där den kommande timmen med högst poäng lyfts fram. Hundens ras, storlek, ålder, hälsa, päls, kondition och individuella tolerans påverkar alltid vad som faktiskt är lämpligt, och indexet ersätter aldrig bedömning från veterinär.</p>
+  <p>Poängen ger nivåerna Utmärkt, Bra, Okej med anpassning, Ta det försiktigt och Olämpligt för längre aktivitet, tillsammans med de förhållanden som bidragit mest och ett kort råd. Samma index används dessutom timme för timme i "Bästa promenadtiden just nu", där den kommande timmen med högst poäng lyfts fram, samt som ett dagtidssnitt för varje dag i "Kommande dagar" — klicka på en dag där för att se klockslagen bakom snittet. Hundens ras, storlek, ålder, hälsa, päls, kondition och individuella tolerans påverkar alltid vad som faktiskt är lämpligt, och indexet ersätter aldrig bedömning från veterinär.</p>
   <a href="#prognos">↑ Tillbaka till dagens väder</a>
 </section>
 
