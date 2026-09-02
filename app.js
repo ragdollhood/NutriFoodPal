@@ -611,7 +611,7 @@ function renderDaily(weatherData, unit) {
     const min = formatTemp(d.tempMin, unit);
     const rain = d.precipSum != null ? n(d.precipSum, 1) : '–';
     const comfortPill = d.comfort
-      ? `<span class="day-comfort" style="color:${d.comfort.color};background:${d.comfort.color}1a">🐾 ${n(d.comfort.score, 1)}/10 · ${escapeHtml(d.comfort.label)}</span>`
+      ? `<span class="day-comfort" style="color:${d.comfort.color};background:${d.comfort.color}1a">${n(d.comfort.score, 1)}/10 · ${escapeHtml(d.comfort.label)}</span>`
       : '';
     const hint = (d.hours && d.hours.length)
       ? `<p class="day-hint">Visa klockslag ▾</p>`
@@ -669,7 +669,7 @@ function showDayHours(index) {
         <span class="hour-chip-time" aria-hidden="true">${timeStr}</span>
         <span class="hour-chip-icon" aria-hidden="true">${icon}</span>
         <span class="hour-chip-temp" aria-hidden="true">${tempStr}</span>
-        <span class="hour-chip-score" aria-hidden="true">🐾 ${n(h.comfort.score, 1)}/10</span>
+        <span class="hour-chip-score" aria-hidden="true">${n(h.comfort.score, 1)}/10</span>
       </div>`;
     }).join('');
 
@@ -765,7 +765,7 @@ function renderBestWalk(weatherData, unit) {
       <span class="hour-chip-time" aria-hidden="true">${timeStr}</span>
       <span class="hour-chip-icon" aria-hidden="true">${icon}</span>
       <span class="hour-chip-temp" aria-hidden="true">${tempStr}</span>
-      <span class="hour-chip-score" aria-hidden="true">🐾 ${n(h.comfort.score, 1)}/10</span>
+      <span class="hour-chip-score" aria-hidden="true">${n(h.comfort.score, 1)}/10</span>
     </div>`;
   }).join('');
 
