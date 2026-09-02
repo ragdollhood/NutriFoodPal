@@ -15,24 +15,29 @@
 <a class="skip" href="#main">Hoppa till innehållet</a>
 <header class="topbar"><a class="brand" href="#">Hundväder <span>•</span></a><nav aria-label="Huvudmeny"><a href="#prognos">Prognos</a><a href="#hundrad">Hundråd</a><a href="#kunskap">Kunskap</a></nav></header>
 <main id="main">
-<section id="prognos" class="weather-wrap" aria-labelledby="forecastTitle">
-  <div class="section-head"><div><span class="kicker">PROMENADLÄGET</span><h2 id="forecastTitle">Vädret just nu</h2></div><p id="updated">Prognosdata hämtas från SMHI när du söker.</p></div>
-  <div id="current" class="current empty"><div class="paw">🐾</div><div><h3>Redo när du är</h3><p>Välj en plats för att få temperatur, nederbörd, vind och hundanpassade råd.</p></div></div>
-  <div id="alerts" class="alerts" aria-live="polite"></div>
-  <h3 class="subheading">Kommande dagar</h3><div id="daily" class="daily"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
-</section>
-
 <section class="hero">
   <img src="assets/hero-hundvader.jpg" alt="Hund och hundägare på en skogspromenad efter regn">
   <div class="shade"></div>
-  <div class="hero-inner">
-    <span class="eyebrow">VÄDER FÖR FYRA TASSAR</span>
-    <h1>Blir det en långrunda<br> med lek idag?</h1>
-    <p>Se vädret där du är och få varsamma promenadråd anpassade för dagens förhållanden.</p>
-    <form id="searchForm" class="search" role="search"><label class="sr-only" for="place">Sök ort</label><input id="place" autocomplete="off" placeholder="Sök ort, till exempel Umeå" required><button>Sök väder</button><button id="locate" type="button" class="locate" aria-label="Använd min position">◎</button></form>
-    <p id="searchStatus" class="status" role="status" aria-live="polite">Sök efter en plats eller använd din position.</p>
-    <div id="placeResults" class="place-results" role="region" aria-label="Sökresultat, välj rätt plats" hidden></div>
+  <div class="hero-inner hero-inner--split">
+    <div class="hero-text">
+      <span class="eyebrow">VÄDER FÖR FYRA TASSAR</span>
+      <h1>Blir det en långrunda<br> med lek idag?</h1>
+      <p>Se vädret där du är och få varsamma promenadråd anpassade för dagens förhållanden.</p>
+      <form id="searchForm" class="search" role="search"><label class="sr-only" for="place">Sök ort</label><input id="place" autocomplete="off" placeholder="Sök ort, till exempel Umeå" required><button>Sök väder</button><button id="locate" type="button" class="locate" aria-label="Använd min position">◎</button></form>
+      <p id="searchStatus" class="status" role="status" aria-live="polite">Sök efter en plats eller använd din position.</p>
+      <div id="placeResults" class="place-results" role="region" aria-label="Sökresultat, välj rätt plats" hidden></div>
+    </div>
+    <div class="hero-weather">
+      <span class="hero-weather-kicker">DAGENS VÄDER</span>
+      <div id="current" class="current empty"><div class="paw">🐾</div><div><h3>Redo när du är</h3><p>Välj en plats för att få temperatur, nederbörd, vind och hundanpassade råd.</p></div></div>
+    </div>
   </div>
+</section>
+
+<section id="prognos" class="weather-wrap" aria-labelledby="forecastTitle">
+  <div class="section-head"><div><span class="kicker">PROMENADLÄGET</span><h2 id="forecastTitle">Vädret just nu</h2></div><p id="updated">Prognosdata hämtas från SMHI när du söker.</p></div>
+  <div id="alerts" class="alerts" aria-live="polite"></div>
+  <h3 class="subheading">Kommande dagar</h3><div id="daily" class="daily"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
 </section>
 
 <section id="hundrad" class="advice-section"><div class="section-head"><div><span class="kicker">ANPASSA EFTER INDIVIDEN</span><h2>Snälla råd i alla väder</h2></div><p>Hundens ålder, ras, päls, hälsa och vana påverkar vad som känns bra.</p></div>
