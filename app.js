@@ -161,10 +161,17 @@ function normalizeSmhi(data) {
   const h = val(cur, 'relative_humidity');
   const p = val(cur, 'precipitation_amount_mean') ?? val(cur, 'precipitation_amount_median') ?? val(cur, 'precipitation_amount_max');
   const sym = Number(val(cur, 'symbol_code') ?? 1);
+  const conditionKey = smhiCondition(sym);
+
+  // SMHI:s punktprognos (snow1g) exponerar ingen egen "snöfallsmängd"-parameter (till skillnad
+  // från Open-Meteos "snowfall"). Vi uppskattar därför snöfall genom att använda den totala
+  // nederbördsmängden när vädersymbolen anger snö eller snöblandat väder, annars 0.
+  const isSnowCondition = ['snow', 'snowLight', 'snowHeavy', 'sleet'].includes(conditionKey);
+  const snowfallEstimate = isSnowCondition ? (p ?? 0) : 0;
 
   const current = {
-    temp: t, apparentTemp: null, humidity: h, wind: w, gust: g, precip: p,
-    condition: smhiCondition(sym), isDay: true
+    temp: t, apparentTemp: null, humidity: h, wind: w, gust: g, precip: p, snowfall: snowfallEstimate,
+    condition: conditionKey, isDay: true
   };
 
   const days = {};
@@ -225,6 +232,7 @@ function normalizeOpenMeteo(data) {
     wind: c.wind_speed_10m,
     gust: c.wind_gusts_10m,
     precip: c.precipitation,
+    snowfall: c.snowfall,
     condition: wmoCondition(c.weather_code),
     isDay: c.is_day !== 0
   };
@@ -245,63 +253,174 @@ function normalizeOpenMeteo(data) {
   return { timezone: data.timezone || null, current, daily, updatedAt: new Date() };
 }
 
-/* ---------- Hundkomfortindex (0–10) ---------- */
-/* Uppskattning baserad på temperatur (känns-som om tillgängligt), nederbörd, vind och
-   luftfuktighet vid höga temperaturer. Det är en vägledning – inte veterinärmedicinsk rådgivning. */
+/* ---------- Hundkomfortindex (0,0–10,0) ---------- */
+/* Egen pedagogisk uppskattning baserad på väderdata (upplevd och faktisk temperatur,
+   luftfuktighet, nederbörd, vindhastighet, vindbyar och snöfall). Indexet är INGEN kliniskt
+   validerad, vetenskapligt fastställd eller veterinärmedicinsk bedömning – det är en
+   vägledning som alltid ska kombineras med hundens ras, storlek, ålder, hälsa, päls,
+   kondition och individuella tolerans. */
 
-function comfortIndex(cur) {
-  const feels = cur.apparentTemp != null ? cur.apparentTemp : cur.temp;
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function calculateDogComfortIndex(weather) {
+  const temperature = Number(weather.temperature ?? 0);
+  const apparentTemperature = Number(
+    weather.apparentTemperature ?? temperature
+  );
+  const humidity = Number(weather.humidity ?? 0);
+  const precipitation = Number(weather.precipitation ?? 0);
+  const windSpeed = Number(weather.windSpeed ?? 0);
+  const windGusts = Number(weather.windGusts ?? windSpeed);
+  const snowfall = Number(weather.snowfall ?? 0);
+
   let score = 10;
+  const reasons = [];
+  const recommendations = [];
 
-  if (feels != null) {
-    if (feels >= 32) score -= 7;
-    else if (feels >= 28) score -= 5;
-    else if (feels >= 24) score -= 3;
-    else if (feels >= 20) score -= 1;
-    else if (feels <= -15) score -= 6;
-    else if (feels <= -5) score -= 3;
-    else if (feels <= 0) score -= 1;
-  }
-
-  if (feels != null && feels >= 24 && cur.humidity != null && cur.humidity >= 70) {
+  if (apparentTemperature >= 30) {
+    score -= 7;
+    reasons.push("mycket hög upplevd temperatur");
+    recommendations.push(
+      "Undvik ansträngande promenader och välj endast mycket korta rastningar i skugga."
+    );
+  } else if (apparentTemperature >= 26) {
+    score -= 5;
+    reasons.push("hög upplevd temperatur");
+    recommendations.push(
+      "Välj en kortare promenad, håll lugnt tempo och ta med färskt vatten."
+    );
+  } else if (apparentTemperature >= 22) {
+    score -= 2.5;
+    reasons.push("varmt väder");
+    recommendations.push(
+      "Ta med vatten och välj gärna skugga eller en svalare tid på dagen."
+    );
+  } else if (apparentTemperature >= 18) {
     score -= 1;
+    reasons.push("milt till varmt väder");
   }
 
-  if (cur.precip != null) {
-    if (cur.precip >= 4) score -= 2;
-    else if (cur.precip >= 1) score -= 1;
-    else if (cur.precip > 0) score -= 0.5;
+  if (apparentTemperature <= -15) {
+    score -= 6;
+    reasons.push("extrem kyla");
+    recommendations.push(
+      "Begränsa tiden utomhus och anpassa skyddet efter hundens individuella behov."
+    );
+  } else if (apparentTemperature <= -8) {
+    score -= 4;
+    reasons.push("mycket kallt väder");
+    recommendations.push(
+      "Överväg kortare promenad och kontrollera tassar och kroppstemperatur."
+    );
+  } else if (apparentTemperature <= -2) {
+    score -= 2;
+    reasons.push("kallt väder");
+    recommendations.push(
+      "Håll uppsikt över tassarna och anpassa promenadens längd."
+    );
+  } else if (apparentTemperature <= 3) {
+    score -= 0.5;
+    reasons.push("svalt väder");
   }
 
-  const windVal = cur.gust != null ? cur.gust : cur.wind;
-  if (windVal != null) {
-    if (windVal >= 17) score -= 2.5;
-    else if (windVal >= 12) score -= 1.5;
-    else if (windVal >= 8) score -= 0.5;
+  if (humidity >= 80 && apparentTemperature >= 22) {
+    score -= 1.5;
+    reasons.push("hög luftfuktighet i kombination med värme");
+    recommendations.push(
+      "Hög luftfuktighet kan göra varmt väder mer ansträngande. Sänk tempot och erbjud vatten."
+    );
   }
 
-  score = Math.max(0, Math.min(10, score));
-  return Math.round(score * 10) / 10;
-}
+  if (precipitation >= 5) {
+    score -= 2.5;
+    reasons.push("kraftig nederbörd");
+    recommendations.push(
+      "Planera en kortare runda och torka päls, mage och tassar noggrant efteråt."
+    );
+  } else if (precipitation >= 1) {
+    score -= 1.5;
+    reasons.push("regn eller blötsnö");
+    recommendations.push(
+      "Torka hundens päls, mage och tassar efter promenaden."
+    );
+  } else if (precipitation > 0) {
+    score -= 0.5;
+    reasons.push("lätt nederbörd");
+  }
 
-function comfortLabel(score) {
-  if (score >= 8) return 'Utmärkt promenadläge';
-  if (score >= 6) return 'Bra läge – tänk på detaljerna nedan';
-  if (score >= 4) return 'Använd omdöme och anpassa efter din hund';
-  if (score >= 2) return 'Utmanande väder – korta gärna ned rundan';
-  return 'Avrådande väder – överväg att vänta eller hålla rundan mycket kort';
-}
+  if (snowfall >= 2) {
+    score -= 1;
+    reasons.push("snöfall");
+    recommendations.push(
+      "Kontrollera om snö eller is fastnar mellan trampdynorna."
+    );
+  }
 
-function advice(cur) {
-  const t = cur.apparentTemp != null ? cur.apparentTemp : cur.temp;
-  const p = cur.precip;
-  const w = cur.gust != null ? cur.gust : cur.wind;
-  if (t != null && t >= 25) return 'Varmt promenadläge: välj skugga och lugnt tempo, ta med vatten och undvik heta underlag.';
-  if (t != null && t >= 20) return 'Ta med vatten och planera gärna den längre rundan till en svalare del av dagen.';
-  if ((p || 0) > 1) return 'Blöt runda: överväg regntäcke om hunden trivs i det och torka päls, mage och tassar efteråt.';
-  if (w != null && w >= 10) return 'Blåsigt: välj en skyddad runda och var uppmärksam på grenar och lösa föremål.';
-  if (t != null && t <= 0) return 'Kallt promenadläge: håll koll på tassar, is och vägsalt. Anpassa längden efter din hund.';
-  return 'Fint vardagsläge för promenad. Anpassa tempo och längd efter hundens signaler.';
+  if (windGusts >= 20) {
+    score -= 3.5;
+    reasons.push("mycket kraftiga vindbyar");
+    recommendations.push(
+      "Undvik skog och platser där grenar eller lösa föremål kan falla."
+    );
+  } else if (windGusts >= 15) {
+    score -= 2;
+    reasons.push("kraftiga vindbyar");
+    recommendations.push(
+      "Välj en skyddad promenadväg och håll hunden nära."
+    );
+  } else if (windSpeed >= 10) {
+    score -= 1;
+    reasons.push("blåsigt väder");
+  }
+
+  score = clamp(score, 0, 10);
+
+  let level;
+  let label;
+  let color;
+
+  if (score >= 8.5) {
+    level = "excellent";
+    label = "Utmärkt promenadväder";
+    color = "#2f7d5c";
+  } else if (score >= 7) {
+    level = "good";
+    label = "Bra promenadväder";
+    color = "#659b4b";
+  } else if (score >= 5) {
+    level = "moderate";
+    label = "Okej med anpassning";
+    color = "#d5a33c";
+  } else if (score >= 3) {
+    level = "poor";
+    label = "Ta det försiktigt";
+    color = "#dc7835";
+  } else {
+    level = "very-poor";
+    label = "Olämpligt för längre aktivitet";
+    color = "#bd4747";
+  }
+
+  if (reasons.length === 0) {
+    reasons.push("behagliga väderförhållanden");
+  }
+
+  if (recommendations.length === 0) {
+    recommendations.push(
+      "Vädret ser lämpligt ut för en vanlig promenad, men anpassa alltid efter hundens signaler."
+    );
+  }
+
+  return {
+    score: Number(score.toFixed(1)),
+    level,
+    label,
+    color,
+    reasons: [...new Set(reasons)],
+    recommendations: [...new Set(recommendations)]
+  };
 }
 
 /* ---------- Rendering ---------- */
@@ -387,11 +506,23 @@ function renderDaily(weatherData) {
 function render(weatherData, loc, source) {
   const cur = weatherData.current;
   const [icon, desc] = conditionInfo[cur.condition] || conditionInfo.unknown;
-  const comfort = comfortIndex(cur);
-  const label = comfortLabel(comfort);
+
+  const comfort = calculateDogComfortIndex({
+    temperature: cur.temp,
+    apparentTemperature: cur.apparentTemp,
+    humidity: cur.humidity,
+    precipitation: cur.precip,
+    windSpeed: cur.wind,
+    windGusts: cur.gust,
+    snowfall: cur.snowfall
+  });
+
   const feelsLine = (cur.apparentTemp != null && Math.round(cur.apparentTemp) !== Math.round(cur.temp))
     ? `${desc} · Känns som ${n(cur.apparentTemp)}°`
     : desc;
+
+  const reasonsText = escapeHtml(comfort.reasons.join(', '));
+  const recommendationsHtml = comfort.recommendations.map(r => `<li>${escapeHtml(r)}</li>`).join('');
 
   currentEl.className = 'current';
   currentEl.innerHTML = `
@@ -409,12 +540,14 @@ function render(weatherData, loc, source) {
       <div class="metric"><span>LUFTFUKTIGHET</span><b>${n(cur.humidity)} %</b></div>
     </div>
     <div class="comfort" role="group" aria-label="Hundkomfortindex">
-      <div class="comfort-head"><span>HUNDKOMFORTINDEX</span><b>${n(comfort, 1)} / 10</b></div>
-      <div class="comfort-bar"><div class="comfort-fill" style="width:${comfort * 10}%"></div></div>
-      <p class="comfort-label">${label}</p>
-      <p class="comfort-disclaimer">Uppskattat index baserat på temperatur, nederbörd och vind. Detta är ingen veterinärmedicinsk bedömning – lita alltid i första hand på din egen hunds signaler och kontakta veterinär vid oro.</p>
+      <div class="comfort-head"><span>HUNDKOMFORTINDEX</span><b style="color:${comfort.color}">${n(comfort.score, 1)} / 10</b></div>
+      <div class="comfort-bar"><div class="comfort-fill" style="width:${comfort.score * 10}%;background:${comfort.color}"></div></div>
+      <p class="comfort-label" style="color:${comfort.color}">${escapeHtml(comfort.label)}</p>
+      <p class="comfort-reasons">Bidragande faktorer: ${reasonsText}.</p>
+      <ul class="comfort-recommendations">${recommendationsHtml}</ul>
+      <p class="comfort-disclaimer">Hundkomfortindex är en generell uppskattning baserad på väderdata. Hundens ras, storlek, ålder, hälsa, päls, kondition och individuella tolerans påverkar vad som är lämpligt. Indexet är ingen kliniskt validerad, vetenskapligt fastställd eller veterinärmedicinsk bedömning.</p>
     </div>
-    <div class="dog-verdict">🐕 ${advice(cur)}</div>
+    <div class="dog-verdict">🐕 ${escapeHtml(comfort.recommendations[0])}</div>
   `;
 
   renderAlerts(cur);

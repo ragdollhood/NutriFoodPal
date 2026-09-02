@@ -14,4 +14,7 @@
 .comfort-bar{height:10px;border-radius:6px;background:#ffffff26;overflow:hidden;margin:10px 0}
 .comfort-fill{height:100%;background:linear-gradient(90deg,#e9a84b,#f5c472);border-radius:6px;transition:width .4s ease}
 .comfort-label{margin:6px 0 8px;font-weight:700}
+.comfort-reasons{font-size:13px;color:#dcebe4;margin:0 0 8px}
+.comfort-recommendations{margin:0 0 12px;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:13px;color:#eef5f1}
+.comfort-recommendations li{line-height:1.5}
 .comfort-disclaimer{font-size:12px;line-height:1.5;color:#c7dad2;margin:0}@media(max-width:900px){nav{display:none}.hero{min-height:720px}.hero h1 br{display:none}.search{flex-wrap:wrap}.search input{height:52px;flex-basis:100%}.search button{flex:1}.section-head{display:block}.current{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(3,1fr)}.daily{grid-template-columns:repeat(2,1fr)}.story-grid,.science{grid-template-columns:1fr}.tips,.sources .source-grid{grid-template-columns:1fr}.science{gap:30px}footer{align-items:flex-start;flex-direction:column}}@media(max-width:520px){.weather-wrap,.advice-section,.sources{padding:64px 18px}.hero-inner{width:91%}.hero h1{font-size:48px}.current{padding:22px}.temp{font-size:58px}.metrics{grid-template-columns:1fr}.daily{grid-template-columns:1fr}.story img{height:240px}}
