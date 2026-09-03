@@ -83,12 +83,19 @@
 .advice-disclaimer a{color:var(--pine2);font-weight:600}
 .panel{position:relative;isolation:isolate;overflow:hidden;border-radius:var(--radius);padding:38px clamp(20px,4vw,44px);margin:44px 0 0}
 .panel::before{content:"";position:absolute;inset:0;z-index:-2;background-position:center;background-size:cover}
-.panel::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(165deg,rgba(10,36,29,.93) 0%,rgba(10,36,29,.82) 55%,rgba(10,36,29,.7) 100%)}
+.panel::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(165deg,rgba(21,59,50,.82) 0%,rgba(36,90,76,.58) 45%,rgba(233,168,75,.4) 100%)}
 .panel .subheading{color:#fff;margin-top:0}
 .panel .advice-disclaimer{color:#dcebe4;border-top-color:#ffffff30}
 .panel .advice-disclaimer a{color:#f5c472}
 .panel--advice::before{background-image:url("assets/hero-fog.jpg");background-image:-webkit-image-set(url("assets/hero-fog.webp") 1x);background-image:image-set(url("assets/hero-fog.webp") 1x,url("assets/hero-fog.jpg") 1x)}
 .panel--daily::before{background-image:url("assets/hero-windy.jpg");background-image:-webkit-image-set(url("assets/hero-windy.webp") 1x);background-image:image-set(url("assets/hero-windy.webp") 1x,url("assets/hero-windy.jpg") 1x)}
+.panel--hero-sun::before{background-image:url("assets/hero-sun.jpg");background-image:-webkit-image-set(url("assets/hero-sun.webp") 1x);background-image:image-set(url("assets/hero-sun.webp") 1x,url("assets/hero-sun.jpg") 1x)}
+.panel--hero-rain::before{background-image:url("assets/hero-rain.jpg");background-image:-webkit-image-set(url("assets/hero-rain.webp") 1x);background-image:image-set(url("assets/hero-rain.webp") 1x,url("assets/hero-rain.jpg") 1x)}
+.panel--hero-snow::before{background-image:url("assets/hero-snow.jpg");background-image:-webkit-image-set(url("assets/hero-snow.webp") 1x);background-image:image-set(url("assets/hero-snow.webp") 1x,url("assets/hero-snow.jpg") 1x)}
+.panel--hero-hot::before{background-image:url("assets/hero-hot.jpg");background-image:-webkit-image-set(url("assets/hero-hot.webp") 1x);background-image:image-set(url("assets/hero-hot.webp") 1x,url("assets/hero-hot.jpg") 1x)}
+.panel--hero-evening::before{background-image:url("assets/hero-evening.jpg");background-image:-webkit-image-set(url("assets/hero-evening.webp") 1x);background-image:image-set(url("assets/hero-evening.webp") 1x,url("assets/hero-evening.jpg") 1x)}
+.panel--random{display:flex;align-items:flex-end;min-height:220px}
+.panel-caption{margin:0;color:#fff;font:600 19px/1.5 Fraunces,serif;max-width:520px;text-shadow:0 2px 12px rgba(10,25,20,.45)}
 .place-results:not([hidden]){display:block}
 .place-list{display:flex;flex-direction:column;gap:8px;background:#ffffffee;border-radius:16px;padding:10px;max-width:650px;box-shadow:0 16px 40px #0004}
 .place-list-hint{font-size:12px;color:var(--muted);padding:2px 6px 6px}
@@ -107,9 +114,7 @@
 .comfort-recommendations{margin:0 0 12px;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:13px;color:#eef5f1}
 .comfort-recommendations li{line-height:1.5}
 .comfort-disclaimer{font-size:12px;line-height:1.5;color:#c7dad2;margin:0}
-.random-photo-wrap{display:block;margin-top:40px}
-.random-photo{width:100%;height:280px;object-fit:cover;border-radius:var(--radius);box-shadow:0 14px 34px #153b3220;display:block}
-@media(max-width:900px){nav{display:none}.hero{min-height:720px}.hero h1 br{display:none}.hero-inner--split{grid-template-columns:1fr;width:91%}.hero-weather{max-width:380px}.search{flex-wrap:wrap}.search input{height:52px;flex-basis:100%}.search button{flex:1}.section-head{display:block}.current{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(3,1fr)}.daily{grid-template-columns:repeat(2,1fr)}.story-grid,.science{grid-template-columns:1fr}.tips,.sources .source-grid{grid-template-columns:1fr}.science{gap:30px}footer{align-items:flex-start;flex-direction:column}.panel{padding:30px 22px}}@media(max-width:520px){.weather-wrap,.advice-section,.sources{padding:64px 18px}.hero-inner{width:91%}.hero h1{font-size:48px}.current{padding:22px}.temp{font-size:58px}.metrics{grid-template-columns:1fr}.daily{grid-template-columns:1fr}.story img{height:240px}.panel{padding:24px 16px;margin-top:32px}.best-walk-highlight{flex-direction:column;align-items:flex-start;gap:12px}.random-photo{height:200px}}
+@media(max-width:900px){nav{display:none}.hero{min-height:720px}.hero h1 br{display:none}.hero-inner--split{grid-template-columns:1fr;width:91%}.hero-weather{max-width:380px}.search{flex-wrap:wrap}.search input{height:52px;flex-basis:100%}.search button{flex:1}.section-head{display:block}.current{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(3,1fr)}.daily{grid-template-columns:repeat(2,1fr)}.story-grid,.science{grid-template-columns:1fr}.tips,.sources .source-grid{grid-template-columns:1fr}.science{gap:30px}footer{align-items:flex-start;flex-direction:column}.panel{padding:30px 22px}}@media(max-width:520px){.weather-wrap,.advice-section,.sources{padding:64px 18px}.hero-inner{width:91%}.hero h1{font-size:48px}.current{padding:22px}.temp{font-size:58px}.metrics{grid-template-columns:1fr}.daily{grid-template-columns:1fr}.story img{height:240px}.panel{padding:24px 16px;margin-top:32px}.best-walk-highlight{flex-direction:column;align-items:flex-start;gap:12px}.panel--random{min-height:170px}}
 
 /* ===== Daily log & calendar ===== */
 .log-section{padding:90px max(24px,6vw);max-width:1400px;margin:auto}

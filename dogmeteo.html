@@ -84,10 +84,9 @@
     </div>
     <p class="daily-footnote" data-i18n="dailyFootnote">The Dog Comfort Index for each day is a daytime average (approx. 07:00–21:00), calculated the same way as above. Click or press Enter on a day to see the times of day and hour-by-hour index where available. <a href="#komfortindex-forklaring">How the index is calculated *</a></p>
   </div>
-  <picture class="random-photo-wrap">
-    <source id="heroImgTodayWebp" type="image/webp">
-    <img id="heroImgToday" class="random-photo" alt="Dog photo" data-i18n-alt="weatherPhotoAlt" loading="lazy">
-  </picture>
+  <div class="panel panel--random" id="heroPanelToday">
+    <p class="panel-caption" data-i18n="weatherPhotoCaption">A little walk inspiration for today.</p>
+  </div>
 </section>
 
 <section id="logg" class="log-section" aria-labelledby="logTitle">
@@ -148,10 +147,9 @@
     </div>
     <div class="panel-plain log-day-detail" id="logDayDetail" aria-live="polite"></div>
   </div>
-  <picture class="random-photo-wrap">
-    <source id="heroImgLogWebp" type="image/webp">
-    <img id="heroImgLog" class="random-photo" alt="Dog photo" data-i18n-alt="logPhotoAlt" loading="lazy">
-  </picture>
+  <div class="panel panel--random" id="heroPanelLog">
+    <p class="panel-caption" data-i18n="logPhotoCaption">Every walk and little moment counts.</p>
+  </div>
 </section>
 
 <section id="hundrad" class="advice-section"><div class="section-head"><div><span class="kicker" data-i18n="hundradKicker">ADAPT TO THE INDIVIDUAL</span><h2 data-i18n="hundradTitle">Gentle advice for all weather</h2></div><p data-i18n="hundradSubtitle">Your dog's age, breed, coat, health and habits all affect what feels right.</p></div>

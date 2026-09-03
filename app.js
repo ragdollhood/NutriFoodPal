@@ -14,10 +14,8 @@ const placeResultsEl = $('#placeResults');
 const updatedEl = $('#updated');
 const heroImgEl = $('#heroImg');
 const heroImgWebpEl = $('#heroImgWebp');
-const heroImgTodayEl = $('#heroImgToday');
-const heroImgTodayWebpEl = $('#heroImgTodayWebp');
-const heroImgLogEl = $('#heroImgLog');
-const heroImgLogWebpEl = $('#heroImgLogWebp');
+const heroPanelTodayEl = $('#heroPanelToday');
+const heroPanelLogEl = $('#heroPanelLog');
 const langBtnSvEl = $('#langBtnSv');
 const langBtnEnEl = $('#langBtnEn');
 
@@ -61,8 +59,8 @@ const STR = {
     emptyTitle: "Ready when you are",
     emptyText: "Choose a place to get temperature, precipitation, wind and dog-friendly advice.",
     heroImgAlt: "Dog out on a walk",
-    weatherPhotoAlt: "Dog photo",
-    logPhotoAlt: "Dog photo",
+    weatherPhotoCaption: "A little walk inspiration for today.",
+    logPhotoCaption: "Every walk and little moment counts.",
     forecastKicker: "WALK CONDITIONS",
     forecastTitle: "Weather right now",
     updatedInitial: "Forecast data is fetched from SMHI when you search.",
@@ -225,8 +223,8 @@ const STR = {
     emptyTitle: "Redo när du är",
     emptyText: "Välj en plats för att få temperatur, nederbörd, vind och hundanpassade råd.",
     heroImgAlt: "Hund ute på promenad",
-    weatherPhotoAlt: "Hundfoto",
-    logPhotoAlt: "Hundfoto",
+    weatherPhotoCaption: "Lite promenadinspiration för dagen.",
+    logPhotoCaption: "Varje promenad och liten stund räknas.",
     forecastKicker: "PROMENADLÄGET",
     forecastTitle: "Vädret just nu",
     updatedInitial: "Prognosdata hämtas från SMHI när du söker.",
@@ -531,15 +529,19 @@ function updateHeroBackground(cur, altText) {
   if (altText) heroImgEl.alt = altText;
 }
 
-/* ---------- Slumpade hero-foton: en under "Vädret idag" och en under "Logga hundens dag" ---------- */
+/* ---------- Slumpade hero-foton: bakgrundsbild bakom "Vädret idag" och bakom
+   "Logga hundens dag", på samma sätt som fog/windy-bilderna bakom övriga paneler ---------- */
 
-const RANDOM_HERO_BASENAMES = ['hero-sun', 'hero-rain', 'hero-snow', 'hero-hot', 'hero-evening', 'hero-fog', 'hero-windy'];
+// hero-fog och hero-windy används redan som fasta bakgrunder för de andra panelerna
+// på sidan, så de utesluts här för att undvika att samma foto dyker upp två gånger.
+const RANDOM_HERO_BASENAMES = ['hero-sun', 'hero-rain', 'hero-snow', 'hero-hot', 'hero-evening'];
+const RANDOM_HERO_CLASSES = RANDOM_HERO_BASENAMES.map(base => `panel--${base}`);
 
-function setRandomHeroPhoto(imgEl, webpSourceEl) {
-  if (!imgEl) return;
+function setRandomHeroPanel(panelEl) {
+  if (!panelEl) return;
+  panelEl.classList.remove(...RANDOM_HERO_CLASSES);
   const base = RANDOM_HERO_BASENAMES[Math.floor(Math.random() * RANDOM_HERO_BASENAMES.length)];
-  if (webpSourceEl) webpSourceEl.srcset = `assets/${base}.webp`;
-  imgEl.src = `assets/${base}.jpg`;
+  panelEl.classList.add(`panel--${base}`);
 }
 
 // SMHI:s kodtabell Wsymb2 (1–27). Källa: SMHI Öppna data, https://opendata.smhi.se/
@@ -1775,10 +1777,10 @@ langBtnEnEl?.addEventListener('click', () => setLang('en'));
 
 applyStaticTranslations();
 
-// Slumpar fram ett hero-foto under "Vädret idag" och ett under "Logga hundens dag"
+// Slumpar fram ett hero-foto bakom "Vädret idag" och ett bakom "Logga hundens dag"
 // (samma bildbank som används för de väderberoende bakgrunderna på sidan).
-setRandomHeroPhoto(heroImgTodayEl, heroImgTodayWebpEl);
-setRandomHeroPhoto(heroImgLogEl, heroImgLogWebpEl);
+setRandomHeroPanel(heroPanelTodayEl);
+setRandomHeroPanel(heroPanelLogEl);
 
 /* Automatiskt språkval: besökare i Sverige får svenska automatiskt om de inte
    redan valt språk manuellt (då respekteras alltid det sparade valet). */
