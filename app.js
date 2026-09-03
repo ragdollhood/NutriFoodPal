@@ -145,20 +145,27 @@ const STR = {
     logTitle: "Log your dog's day",
     logSubtitle: "Walks, bathroom breaks and grooming — logged in one calm, tappable calendar.",
     logQuickHeading: "Log something",
+    logDateLabel: "Date",
+    logDateToday: "Today",
     logTypeWalk: "Walk",
     logTypePoop: "Poop",
     logTypePee: "Pee",
     logTypeNails: "Nails trimmed",
     logTypeBath: "Bath",
     logTypeCoat: "Coat trimmed",
+    logTypeCustom: "Event",
     logWalkPrompt: "How long was the walk?",
     logWalkCustomPlaceholder: "Custom minutes",
     logWalkCustomBtn: "Log walk",
+    logCustomLabel: "Or log any event",
+    logCustomPlaceholder: "E.g. vet visit",
+    logCustomBtn: "Log",
     logCancel: "Cancel",
-    logConfirmLogged: "Logged: {type}, {time}.",
-    logConfirmWalkLogged: "Logged a {min} min walk, {time}.",
+    logConfirmLogged: "Logged: {type}.",
+    logConfirmWalkLogged: "Logged a {min} min walk.",
     logConfirmDeleted: "Entry removed.",
     logConfirmInvalidMinutes: "Enter the walk length in minutes first.",
+    logConfirmEmptyCustom: "Type what happened first.",
     calPrevAria: "Previous month",
     calNextAria: "Next month",
     logDayDetailEmpty: "Nothing logged this day yet.",
@@ -300,20 +307,27 @@ const STR = {
     logTitle: "Logga hundens dag",
     logSubtitle: "Promenader, uteliv och pälsvård — loggat i en lugn, klickbar kalender.",
     logQuickHeading: "Logga något",
+    logDateLabel: "Datum",
+    logDateToday: "Idag",
     logTypeWalk: "Promenad",
     logTypePoop: "Bajs",
     logTypePee: "Kiss",
     logTypeNails: "Klippt klorna",
     logTypeBath: "Bad",
     logTypeCoat: "Klippt pälsen",
+    logTypeCustom: "Händelse",
     logWalkPrompt: "Hur lång blev promenaden?",
     logWalkCustomPlaceholder: "Eget antal minuter",
     logWalkCustomBtn: "Logga promenad",
+    logCustomLabel: "Eller logga en valfri händelse",
+    logCustomPlaceholder: "T.ex. veterinärbesök",
+    logCustomBtn: "Logga",
     logCancel: "Avbryt",
-    logConfirmLogged: "Loggat: {type}, kl {time}.",
-    logConfirmWalkLogged: "Loggade en {min} min promenad, kl {time}.",
+    logConfirmLogged: "Loggat: {type}.",
+    logConfirmWalkLogged: "Loggade en {min} min promenad.",
     logConfirmDeleted: "Posten togs bort.",
     logConfirmInvalidMinutes: "Ange promenadens längd i minuter först.",
+    logConfirmEmptyCustom: "Skriv vad som hände först.",
     calPrevAria: "Föregående månad",
     calNextAria: "Nästa månad",
     logDayDetailEmpty: "Inget loggat den här dagen än.",
@@ -652,7 +666,8 @@ function normalizeSmhi(data) {
     const rain = arr.map(x => val(x, 'precipitation_amount_mean') ?? val(x, 'precipitation_amount_median') ?? 0);
     const mid = arr[Math.floor(arr.length / 2)];
     const sc = Number(val(mid, 'symbol_code') ?? 1);
-    const hours = arr.map(mapSmhiHour).filter(hh => new Date(hh.time).getTime() >= hourCutoff);
+    const hoursAll = arr.map(mapSmhiHour);
+    const hours = hoursAll.filter(hh => new Date(hh.time).getTime() >= hourCutoff);
     return {
       date: mid.time,
       tempMax: temps.length ? Math.max(...temps) : null,
@@ -660,13 +675,14 @@ function normalizeSmhi(data) {
       precipSum: rain.length ? Math.max(...rain) : null,
       condition: smhiCondition(sc),
       hours,
+      hoursAll,
       comfort: summarizeDayComfort(hours)
     };
   });
 
-  // "Bästa promenadtiden" ska visa resten av dagens timmar (samma data som "idag" i
-  // Kommande dagar), inte bara ett fåtal timmar framåt.
-  const hourly = daily[0]?.hours ?? [];
+  // "Bästa promenadtiden" ska visa alla av dagens timmar (00–23), inte bara de som
+  // återstår framåt, så hela dagen syns i timremsan.
+  const hourly = daily[0]?.hoursAll ?? [];
 
   return { timezone: 'Europe/Stockholm', current, daily, hourly, updatedAt: new Date() };
 }
@@ -747,7 +763,8 @@ function normalizeOpenMeteo(data) {
   const len = Array.isArray(d.time) ? d.time.length : 0;
   const daily = [];
   for (let i = 0; i < len; i++) {
-    const dayHours = (hoursByDay[d.time[i]] || []).filter(hh => new Date(hh.time).getTime() >= hourCutoff);
+    const dayHoursAll = hoursByDay[d.time[i]] || [];
+    const dayHours = dayHoursAll.filter(hh => new Date(hh.time).getTime() >= hourCutoff);
     daily.push({
       date: d.time[i],
       tempMax: d.temperature_2m_max ? d.temperature_2m_max[i] : null,
@@ -755,13 +772,14 @@ function normalizeOpenMeteo(data) {
       precipSum: d.precipitation_sum ? d.precipitation_sum[i] : null,
       condition: wmoCondition(d.weather_code ? d.weather_code[i] : null),
       hours: dayHours,
+      hoursAll: dayHoursAll,
       comfort: summarizeDayComfort(dayHours)
     });
   }
 
-  // "Bästa promenadtiden" ska visa resten av dagens timmar (samma data som "idag" i
-  // Kommande dagar), inte bara ett fåtal timmar framåt.
-  const hourly = daily[0]?.hours ?? [];
+  // "Bästa promenadtiden" ska visa alla av dagens timmar (00–23), inte bara de som
+  // återstår framåt, så hela dagen syns i timremsan.
+  const hourly = daily[0]?.hoursAll ?? [];
 
   return { timezone: data.timezone || null, current, daily, hourly, updatedAt: new Date() };
 }
@@ -1234,16 +1252,24 @@ function renderBestWalk(weatherData, unit) {
     return;
   }
 
-  const best = withComfort.reduce((a, b) => (b.comfort.score > a.comfort.score ? b : a));
+  // Timremsan visar alla av dagens timmar, men "bästa timmen" ska bara utses bland de
+  // timmar som återstår framåt (annars kan en redan passerad timme lyftas fram som bäst).
+  const now = Date.now();
+  const hourCutoff = now - 30 * 60 * 1000;
+  const upcoming = withComfort.filter(h => new Date(h.time).getTime() >= hourCutoff);
+  const bestPool = upcoming.length ? upcoming : withComfort;
+  const best = bestPool.reduce((a, b) => (b.comfort.score > a.comfort.score ? b : a));
   const timeFmt = new Intl.DateTimeFormat(LOCALE[lang], { hour: '2-digit', minute: '2-digit', timeZone: tz });
 
   const chips = withComfort.map(h => {
     const [icon, desc] = conditionInfo(h.condition);
     const best_ = h.time === best.time;
+    const isPast = new Date(h.time).getTime() < hourCutoff;
     const timeStr = timeFmt.format(new Date(h.time));
     const tempStr = `${formatTemp(h.temp, unit)}°${unit}`;
     const label = `${timeStr}, ${desc}, ${tempStr}, ${t('comfortIndexLabel')} ${n(h.comfort.score, 1)} ${t('outOf10')}, ${h.comfort.label}`;
-    return `<div class="hour-chip${best_ ? ' hour-chip--best' : ''}" style="--dot:${h.comfort.color}" role="group" aria-label="${escapeHtml(label)}">
+    const classes = ['hour-chip', best_ ? 'hour-chip--best' : '', isPast ? 'hour-chip--past' : ''].filter(Boolean).join(' ');
+    return `<div class="${classes}" style="--dot:${h.comfort.color}" role="group" aria-label="${escapeHtml(label)}">
       <span class="hour-chip-time" aria-hidden="true">${timeStr}</span>
       <span class="hour-chip-icon" aria-hidden="true">${icon}</span>
       <span class="hour-chip-temp" aria-hidden="true">${tempStr}</span>
@@ -1251,7 +1277,7 @@ function renderBestWalk(weatherData, unit) {
     </div>`;
   }).join('');
 
-  const allSimilar = withComfort.every(h => h.comfort.score >= best.comfort.score - 0.5);
+  const allSimilar = bestPool.every(h => h.comfort.score >= best.comfort.score - 0.5);
   const introText = allSimilar ? t('bestWalkEvenComfort') : t('bestWalkBestWindow');
 
   bestWalkEl.innerHTML = `
@@ -1265,6 +1291,11 @@ function renderBestWalk(weatherData, unit) {
     <p class="hour-strip-caption">${escapeHtml(t('hourStripCaption'))}</p>
     <div class="hour-strip">${chips}</div>
   `;
+
+  // Rulla fram timremsan till den framhävda timmen, så man inte behöver skrolla
+  // förbi de redan passerade timmarna för att se dagens bästa promenadtid.
+  const bestChip = bestWalkEl.querySelector('.hour-chip--best');
+  bestChip?.scrollIntoView({ block: 'nearest', inline: 'center' });
 }
 
 /* ---------- Vädertolkning: sju konkreta hundråd baserat på aktuellt väder ---------- */
@@ -1766,6 +1797,9 @@ const LOG_TYPES = [
   { id: 'coat',  icon: '✂️', labelKey: 'logTypeCoat' }
 ];
 const LOG_TYPE_BY_ID = Object.fromEntries(LOG_TYPES.map(x => [x.id, x]));
+// Fritextloggade händelser ("valfri händelse") har ingen fast typ i LOG_TYPES ovan,
+// men behöver ändå en ikon i kalendern och dagvyn.
+LOG_TYPE_BY_ID.custom = { id: 'custom', icon: '📝', labelKey: 'logTypeCustom' };
 
 function loadLogEntries() {
   try {
@@ -1782,8 +1816,14 @@ function saveLogEntries(entries) {
 let logEntries = loadLogEntries();
 
 function addLogEntry(typeId, extra) {
+  // Loggade händelser visar inget klockslag, men vi behåller ett fullständigt
+  // tidsstämpel internt (vald dag + aktuell tid på dygnet) så poster kan sorteras
+  // och hamna på rätt dag i kalendern — även för dagar bakåt eller framåt i tiden.
+  const now = new Date();
+  const picked = getSelectedLogDate();
+  const ts = new Date(picked.getFullYear(), picked.getMonth(), picked.getDate(), now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
   const entry = Object.assign(
-    { id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, type: typeId, ts: new Date().toISOString() },
+    { id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, type: typeId, ts: ts.toISOString() },
     extra || {}
   );
   logEntries.push(entry);
@@ -1815,11 +1855,27 @@ const logDayDetailEl = $('#logDayDetail');
 const logConfirmEl = $('#logConfirm');
 const walkDurationPickerEl = $('#walkDurationPicker');
 const walkCustomMinutesEl = $('#walkCustomMinutes');
+const logDateEl = $('#logDate');
+const logDateTodayEl = $('#logDateToday');
+const logCustomTextEl = $('#logCustomText');
+const logCustomConfirmEl = $('#logCustomConfirm');
 
 const logToday = new Date();
 let calViewYear = logToday.getFullYear();
 let calViewMonth = logToday.getMonth();
 let selectedDateKey = dateKey(logToday);
+
+// Datumet man loggar mot (kan vara en annan dag än idag, både bakåt och framåt).
+if (logDateEl) logDateEl.value = dateKey(logToday);
+
+function getSelectedLogDate() {
+  const raw = logDateEl?.value;
+  if (raw) {
+    const [y, m, d] = raw.split('-').map(Number);
+    if (y && m && d) return new Date(y, m - 1, d);
+  }
+  return new Date(logToday.getFullYear(), logToday.getMonth(), logToday.getDate());
+}
 
 function monthNames() { return t('monthNames').split(','); }
 function weekdayNames() { return t('weekdaysShort').split(','); }
@@ -1829,6 +1885,9 @@ function formatEntryTime(entry) {
 }
 
 function entryLabel(entry) {
+  if (entry.type === 'custom') {
+    return entry.label ? entry.label : t('logTypeCustom');
+  }
   const typeLabel = t((LOG_TYPE_BY_ID[entry.type] && LOG_TYPE_BY_ID[entry.type].labelKey) || entry.type);
   if (entry.type === 'walk' && entry.duration) {
     return `${typeLabel} · ${entry.duration} ${t('minutesShort')}`;
@@ -1911,7 +1970,6 @@ function renderDayDetail() {
     const info = LOG_TYPE_BY_ID[e.type];
     return `<li class="log-entry" data-id="${e.id}">
       <span class="log-entry-icon" aria-hidden="true">${info ? info.icon : '🐾'}</span>
-      <span class="log-entry-time">${formatEntryTime(e)}</span>
       <span class="log-entry-label">${escapeHtml(entryLabel(e))}</span>
       <button type="button" class="log-entry-del" data-id="${e.id}" aria-label="${escapeHtml(t('logDeleteAria'))}">✕</button>
     </li>`;
@@ -1954,7 +2012,7 @@ function jumpToEntryDate(entry) {
 function logSimpleType(typeId) {
   const entry = addLogEntry(typeId);
   flashLoggedButton(typeId);
-  showLogConfirm(t('logConfirmLogged', { type: t(LOG_TYPE_BY_ID[typeId].labelKey), time: formatEntryTime(entry) }));
+  showLogConfirm(t('logConfirmLogged', { type: t(LOG_TYPE_BY_ID[typeId].labelKey) }));
   jumpToEntryDate(entry);
 }
 
@@ -1966,8 +2024,20 @@ function logWalk(minutes) {
   }
   const entry = addLogEntry('walk', { duration: mins });
   flashLoggedButton('walk');
-  showLogConfirm(t('logConfirmWalkLogged', { min: mins, time: formatEntryTime(entry) }));
+  showLogConfirm(t('logConfirmWalkLogged', { min: mins }));
   hideWalkDurationPicker();
+  jumpToEntryDate(entry);
+}
+
+function logCustomEvent(text) {
+  const label = (text || '').trim();
+  if (!label) {
+    showLogConfirm(t('logConfirmEmptyCustom'));
+    return;
+  }
+  const entry = addLogEntry('custom', { label });
+  showLogConfirm(t('logConfirmLogged', { type: label }));
+  if (logCustomTextEl) logCustomTextEl.value = '';
   jumpToEntryDate(entry);
 }
 
@@ -2012,6 +2082,18 @@ walkCustomMinutesEl?.addEventListener('keydown', e => {
 });
 
 $('#walkDurationCancel')?.addEventListener('click', hideWalkDurationPicker);
+
+logDateTodayEl?.addEventListener('click', () => {
+  if (logDateEl) logDateEl.value = dateKey(logToday);
+});
+
+logCustomConfirmEl?.addEventListener('click', () => {
+  logCustomEvent(logCustomTextEl?.value);
+});
+
+logCustomTextEl?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); logCustomEvent(logCustomTextEl.value); }
+});
 
 calPrevEl?.addEventListener('click', () => {
   calViewMonth -= 1;

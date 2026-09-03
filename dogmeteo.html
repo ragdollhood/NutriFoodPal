@@ -94,6 +94,11 @@
 
   <div class="panel-plain log-quick">
     <h3 class="subheading log-quick-heading" data-i18n="logQuickHeading">Log something</h3>
+    <div class="log-date-row">
+      <label for="logDate" data-i18n="logDateLabel">Date</label>
+      <input type="date" id="logDate">
+      <button type="button" id="logDateToday" class="log-date-today" data-i18n="logDateToday">Today</button>
+    </div>
     <div class="log-buttons" id="logButtons">
       <button type="button" class="log-btn" data-type="walk"><span class="log-btn-icon" aria-hidden="true">🚶</span><span data-i18n="logTypeWalk">Walk</span></button>
       <button type="button" class="log-btn" data-type="poop"><span class="log-btn-icon" aria-hidden="true">💩</span><span data-i18n="logTypePoop">Poop</span></button>
@@ -116,6 +121,13 @@
         <button type="button" id="walkCustomConfirm" data-i18n="logWalkCustomBtn">Log walk</button>
       </div>
       <button type="button" id="walkDurationCancel" class="log-cancel" data-i18n="logCancel">Cancel</button>
+    </div>
+    <div class="log-custom">
+      <label for="logCustomText" data-i18n="logCustomLabel">Or log any event</label>
+      <div class="log-custom-row">
+        <input type="text" id="logCustomText" maxlength="80" data-i18n-placeholder="logCustomPlaceholder" placeholder="E.g. vet visit">
+        <button type="button" id="logCustomConfirm" data-i18n="logCustomBtn">Log</button>
+      </div>
     </div>
     <p id="logConfirm" class="log-confirm" role="status" aria-live="polite"></p>
   </div>

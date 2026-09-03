@@ -53,6 +53,7 @@
 .hour-chip-temp{font-size:14px;font-weight:700;color:var(--ink);white-space:nowrap}
 .hour-chip-score{font-size:11px;font-weight:700;padding:1px 6px;border-radius:999px;background:color-mix(in srgb, var(--dot,#999) 16%, transparent);color:var(--dot,#64736d);white-space:nowrap}
 .hour-chip--best{border-color:var(--dot,var(--pine2));box-shadow:0 0 0 2px var(--dot,var(--pine2)) inset}
+.hour-chip--past{opacity:.5}
 .best-walk-footnote{font-size:13px;line-height:1.6;color:var(--muted);margin:2px 0 0}
 .best-walk-footnote a{color:var(--pine2);font-weight:600}.subheading{margin:42px 0 18px}.daily{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.day,.skeleton{min-height:190px;border:1px solid var(--line);border-radius:20px;padding:20px;background:#fff}.day.today{background:var(--cream);border-color:#d7cbb7}.day-icon{font-size:34px;margin:18px 0}.day .range{font-size:22px;font-weight:700}.day small{color:var(--muted)}
 .day{display:block;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer;transition:box-shadow .15s ease,border-color .15s ease}
@@ -111,6 +112,11 @@
 .log-section{padding:90px max(24px,6vw);max-width:1400px;margin:auto}
 .panel-plain{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:30px clamp(18px,3.5vw,38px)}
 .log-quick-heading{margin:0 0 18px}
+.log-date-row{display:flex;align-items:center;gap:10px;margin:0 0 18px;flex-wrap:wrap}
+.log-date-row label{font-weight:700;font-size:13.5px;color:var(--pine)}
+.log-date-row input[type="date"]{border:1px solid var(--line);border-radius:12px;padding:9px 12px;font:inherit;font-size:14px;color:var(--ink);background:#fff}
+.log-date-today{border:1px solid var(--line);background:var(--cream);border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;font-size:12.5px;cursor:pointer;color:var(--ink)}
+.log-date-today:hover,.log-date-today:focus-visible{border-color:var(--pine2);outline:none}
 .log-buttons{display:flex;flex-wrap:wrap;gap:10px}
 .log-btn{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:13px 20px;font:inherit;font-weight:700;font-size:14.5px;color:var(--ink);cursor:pointer;transition:border-color .15s ease,box-shadow .15s ease,background .15s ease,color .15s ease}
 .log-btn-icon{font-size:18px;line-height:1}
@@ -125,6 +131,11 @@
 .duration-custom{display:flex;gap:8px}
 .duration-custom input{width:150px;max-width:100%;border:1px solid var(--line);border-radius:12px;padding:10px 14px;font:inherit}
 .duration-custom button{border:0;border-radius:12px;background:var(--amber);color:#1b2a25;font-weight:700;padding:0 18px;cursor:pointer}
+.log-custom{margin-top:20px;padding-top:20px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.log-custom label{margin:0;font-weight:700;color:var(--pine);font-size:14px}
+.log-custom-row{display:flex;gap:8px}
+.log-custom-row input{flex:1;min-width:0;border:1px solid var(--line);border-radius:12px;padding:10px 14px;font:inherit}
+.log-custom-row button{border:0;border-radius:12px;background:var(--amber);color:#1b2a25;font-weight:700;padding:0 18px;cursor:pointer}
 .log-cancel{align-self:flex-start;border:0;background:transparent;color:var(--muted);font-weight:600;font-size:13px;text-decoration:underline;cursor:pointer;padding:0}
 .log-confirm{min-height:20px;margin:16px 0 0;font-size:13.5px;font-weight:700;color:var(--pine2)}
 .log-calendar-wrap{display:grid;grid-template-columns:1.35fr 1fr;gap:24px;align-items:start;margin-top:26px}
@@ -151,7 +162,6 @@
 .log-entry{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
 .log-entry:last-child{border-bottom:none}
 .log-entry-icon{font-size:19px;flex:0 0 auto}
-.log-entry-time{font-size:12px;color:var(--muted);min-width:50px;flex:0 0 auto}
 .log-entry-label{flex:1;font-weight:600;font-size:14px;min-width:0}
 .log-entry-del{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:16px;flex:0 0 auto;padding:4px}
 .log-entry-del:hover,.log-entry-del:focus-visible{color:#b2483b;outline:none}
