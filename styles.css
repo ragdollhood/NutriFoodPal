@@ -106,3 +106,63 @@
 .comfort-recommendations{margin:0 0 12px;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:13px;color:#eef5f1}
 .comfort-recommendations li{line-height:1.5}
 .comfort-disclaimer{font-size:12px;line-height:1.5;color:#c7dad2;margin:0}@media(max-width:900px){nav{display:none}.hero{min-height:720px}.hero h1 br{display:none}.hero-inner--split{grid-template-columns:1fr;width:91%}.hero-weather{max-width:380px}.search{flex-wrap:wrap}.search input{height:52px;flex-basis:100%}.search button{flex:1}.section-head{display:block}.current{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(3,1fr)}.daily{grid-template-columns:repeat(2,1fr)}.story-grid,.science{grid-template-columns:1fr}.tips,.sources .source-grid{grid-template-columns:1fr}.science{gap:30px}footer{align-items:flex-start;flex-direction:column}.panel{padding:30px 22px}}@media(max-width:520px){.weather-wrap,.advice-section,.sources{padding:64px 18px}.hero-inner{width:91%}.hero h1{font-size:48px}.current{padding:22px}.temp{font-size:58px}.metrics{grid-template-columns:1fr}.daily{grid-template-columns:1fr}.story img{height:240px}.panel{padding:24px 16px;margin-top:32px}.best-walk-highlight{flex-direction:column;align-items:flex-start;gap:12px}}
+
+/* ===== Daily log & calendar ===== */
+.log-section{padding:90px max(24px,6vw);max-width:1400px;margin:auto}
+.panel-plain{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:30px clamp(18px,3.5vw,38px)}
+.log-quick-heading{margin:0 0 18px}
+.log-buttons{display:flex;flex-wrap:wrap;gap:10px}
+.log-btn{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:13px 20px;font:inherit;font-weight:700;font-size:14.5px;color:var(--ink);cursor:pointer;transition:border-color .15s ease,box-shadow .15s ease,background .15s ease,color .15s ease}
+.log-btn-icon{font-size:18px;line-height:1}
+.log-btn:hover,.log-btn:focus-visible{border-color:var(--pine2);box-shadow:0 0 0 2px #245a4c26;outline:none}
+.log-btn.is-active{background:var(--pine);border-color:var(--pine);color:#fff}
+.log-btn.just-logged{background:var(--pine2);border-color:var(--pine2);color:#fff}
+.walk-duration{margin-top:20px;padding-top:20px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:14px}
+.walk-duration>p{margin:0;font-weight:700;color:var(--pine)}
+.duration-chips{display:flex;flex-wrap:wrap;gap:8px}
+.duration-chips button{border:1px solid var(--line);background:var(--cream);border-radius:999px;padding:9px 16px;font:inherit;font-weight:700;font-size:13.5px;cursor:pointer;color:var(--ink)}
+.duration-chips button:hover,.duration-chips button:focus-visible{border-color:var(--pine2);outline:none}
+.duration-custom{display:flex;gap:8px}
+.duration-custom input{width:150px;max-width:100%;border:1px solid var(--line);border-radius:12px;padding:10px 14px;font:inherit}
+.duration-custom button{border:0;border-radius:12px;background:var(--amber);color:#1b2a25;font-weight:700;padding:0 18px;cursor:pointer}
+.log-cancel{align-self:flex-start;border:0;background:transparent;color:var(--muted);font-weight:600;font-size:13px;text-decoration:underline;cursor:pointer;padding:0}
+.log-confirm{min-height:20px;margin:16px 0 0;font-size:13.5px;font-weight:700;color:var(--pine2)}
+.log-calendar-wrap{display:grid;grid-template-columns:1.35fr 1fr;gap:24px;align-items:start;margin-top:26px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.cal-head h3{margin:0;font:700 21px Fraunces,serif;color:var(--pine)}
+.cal-head button{border:0;background:#eef2ef;width:36px;height:36px;border-radius:999px;font-size:19px;line-height:1;cursor:pointer;color:var(--pine)}
+.cal-head button:hover,.cal-head button:focus-visible{background:#e1e8e3;outline:none}
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:16px 0 8px;text-align:center;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal-cell{aspect-ratio:1/1;border:1px solid var(--line);border-radius:14px;padding:6px;display:flex;flex-direction:column;justify-content:space-between;align-items:stretch;background:#fff;font:inherit;color:inherit;cursor:pointer;text-align:left}
+.cal-cell:hover,.cal-cell:focus-visible{border-color:var(--pine2);box-shadow:0 0 0 2px #245a4c26;outline:none}
+.cal-cell.is-empty{border-color:transparent;background:transparent;cursor:default;box-shadow:none}
+.cal-cell.is-today{border-color:var(--pine2)}
+.cal-cell.is-selected{background:var(--cream);border-color:#d7cbb7}
+.cal-daynum{font-size:12px;font-weight:700;color:var(--ink)}
+.cal-cell.is-today .cal-daynum{color:var(--pine2)}
+.cal-icons{display:flex;flex-wrap:wrap;gap:2px;line-height:1;font-size:11px}
+.cal-icons span{filter:grayscale(0)}
+.cal-more{font-size:10px;font-weight:700;color:var(--muted)}
+.log-day-detail{min-height:220px;display:flex;flex-direction:column}
+.log-day-detail-title{margin:0 0 4px;font:700 19px Fraunces,serif;color:var(--pine)}
+.log-day-detail-empty{color:var(--muted);font-size:13.5px;line-height:1.6;margin:auto 0}
+.log-entry-list{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column}
+.log-entry{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.log-entry:last-child{border-bottom:none}
+.log-entry-icon{font-size:19px;flex:0 0 auto}
+.log-entry-time{font-size:12px;color:var(--muted);min-width:50px;flex:0 0 auto}
+.log-entry-label{flex:1;font-weight:600;font-size:14px;min-width:0}
+.log-entry-del{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:16px;flex:0 0 auto;padding:4px}
+.log-entry-del:hover,.log-entry-del:focus-visible{color:#b2483b;outline:none}
+@media(max-width:900px){
+  .log-section{padding:64px 18px}
+  .log-calendar-wrap{grid-template-columns:1fr}
+  .duration-custom{flex-wrap:wrap}
+  .duration-custom input{flex:1}
+}
+@media(max-width:520px){
+  .cal-daynum{font-size:11px}
+  .cal-icons{font-size:10px}
+  .log-btn{padding:11px 16px;font-size:13.5px}
+}

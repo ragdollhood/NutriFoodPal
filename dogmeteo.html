@@ -19,6 +19,7 @@
   <div class="topbar-right">
     <nav aria-label="Main menu" data-i18n-aria-label="navAriaLabel">
       <a href="#prognos" data-i18n="navForecast">Forecast</a>
+      <a href="#logg" data-i18n="navLog">Log</a>
       <a href="#hundrad" data-i18n="navDogAdvice">Dog advice</a>
       <a href="#kunskap" data-i18n="navKnowledge">Knowledge</a>
     </nav>
@@ -75,6 +76,54 @@
       <div id="dayHoursBody"></div>
     </div>
     <p class="daily-footnote" data-i18n="dailyFootnote">The Dog Comfort Index for each day is a daytime average (approx. 07:00–21:00), calculated the same way as above. Click or press Enter on a day to see the times of day and hour-by-hour index where available. <a href="#komfortindex-forklaring">How the index is calculated *</a></p>
+  </div>
+</section>
+
+<section id="logg" class="log-section" aria-labelledby="logTitle">
+  <div class="section-head">
+    <div><span class="kicker" data-i18n="logKicker">DAILY LOG</span><h2 id="logTitle" data-i18n="logTitle">Log your dog's day</h2></div>
+    <p data-i18n="logSubtitle">Walks, bathroom breaks and grooming — logged in one calm, tappable calendar.</p>
+  </div>
+
+  <div class="panel-plain log-quick">
+    <h3 class="subheading log-quick-heading" data-i18n="logQuickHeading">Log something</h3>
+    <div class="log-buttons" id="logButtons">
+      <button type="button" class="log-btn" data-type="walk"><span class="log-btn-icon" aria-hidden="true">🚶</span><span data-i18n="logTypeWalk">Walk</span></button>
+      <button type="button" class="log-btn" data-type="poop"><span class="log-btn-icon" aria-hidden="true">💩</span><span data-i18n="logTypePoop">Poop</span></button>
+      <button type="button" class="log-btn" data-type="pee"><span class="log-btn-icon" aria-hidden="true">💦</span><span data-i18n="logTypePee">Pee</span></button>
+      <button type="button" class="log-btn" data-type="nails"><span class="log-btn-icon" aria-hidden="true">💅</span><span data-i18n="logTypeNails">Nails trimmed</span></button>
+      <button type="button" class="log-btn" data-type="bath"><span class="log-btn-icon" aria-hidden="true">🛁</span><span data-i18n="logTypeBath">Bath</span></button>
+      <button type="button" class="log-btn" data-type="coat"><span class="log-btn-icon" aria-hidden="true">✂️</span><span data-i18n="logTypeCoat">Coat trimmed</span></button>
+    </div>
+    <div id="walkDurationPicker" class="walk-duration" hidden>
+      <p data-i18n="logWalkPrompt">How long was the walk?</p>
+      <div class="duration-chips" id="durationChips">
+        <button type="button" data-min="10">10 min</button>
+        <button type="button" data-min="20">20 min</button>
+        <button type="button" data-min="30">30 min</button>
+        <button type="button" data-min="45">45 min</button>
+        <button type="button" data-min="60">60 min</button>
+      </div>
+      <div class="duration-custom">
+        <input type="number" id="walkCustomMinutes" min="1" max="600" inputmode="numeric" data-i18n-placeholder="logWalkCustomPlaceholder" placeholder="Custom minutes">
+        <button type="button" id="walkCustomConfirm" data-i18n="logWalkCustomBtn">Log walk</button>
+      </div>
+      <button type="button" id="walkDurationCancel" class="log-cancel" data-i18n="logCancel">Cancel</button>
+    </div>
+    <p id="logConfirm" class="log-confirm" role="status" aria-live="polite"></p>
+  </div>
+
+  <div class="log-calendar-wrap">
+    <div class="panel-plain log-calendar">
+      <div class="cal-head">
+        <button type="button" id="calPrev" data-i18n-aria-label="calPrevAria" aria-label="Previous month">‹</button>
+        <h3 id="calMonthLabel"></h3>
+        <button type="button" id="calNext" data-i18n-aria-label="calNextAria" aria-label="Next month">›</button>
+      </div>
+      <div class="cal-weekdays" id="calWeekdays"></div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+    <div class="panel-plain log-day-detail" id="logDayDetail" aria-live="polite"></div>
   </div>
 </section>
 

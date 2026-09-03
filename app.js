@@ -137,7 +137,34 @@ const STR = {
     errNoTimeSeries: "The forecast is missing time series data.",
     errOpenMeteoNetwork: "Couldn't reach Open-Meteo right now.",
     errOpenMeteoBadResponse: "Open-Meteo didn't respond as expected.",
-    errOpenMeteoNoData: "The forecast is missing data."
+    errOpenMeteoNoData: "The forecast is missing data.",
+
+    navLog: "Log",
+    logKicker: "DAILY LOG",
+    logTitle: "Log your dog's day",
+    logSubtitle: "Walks, bathroom breaks and grooming — logged in one calm, tappable calendar.",
+    logQuickHeading: "Log something",
+    logTypeWalk: "Walk",
+    logTypePoop: "Poop",
+    logTypePee: "Pee",
+    logTypeNails: "Nails trimmed",
+    logTypeBath: "Bath",
+    logTypeCoat: "Coat trimmed",
+    logWalkPrompt: "How long was the walk?",
+    logWalkCustomPlaceholder: "Custom minutes",
+    logWalkCustomBtn: "Log walk",
+    logCancel: "Cancel",
+    logConfirmLogged: "Logged: {type}, {time}.",
+    logConfirmWalkLogged: "Logged a {min} min walk, {time}.",
+    logConfirmDeleted: "Entry removed.",
+    logConfirmInvalidMinutes: "Enter the walk length in minutes first.",
+    calPrevAria: "Previous month",
+    calNextAria: "Next month",
+    logDayDetailEmpty: "Nothing logged this day yet.",
+    logDeleteAria: "Remove entry",
+    minutesShort: "min",
+    weekdaysShort: "Mo,Tu,We,Th,Fr,Sa,Su",
+    monthNames: "January,February,March,April,May,June,July,August,September,October,November,December"
   },
   sv: {
     pageTitle: "DogMeteo | Promenadprognosen för dig och din hund",
@@ -241,7 +268,34 @@ const STR = {
     errNoTimeSeries: "Prognosen saknar tidsserier.",
     errOpenMeteoNetwork: "Kunde inte nå Open-Meteo just nu.",
     errOpenMeteoBadResponse: "Open-Meteo svarade inte som väntat.",
-    errOpenMeteoNoData: "Prognosen saknar data."
+    errOpenMeteoNoData: "Prognosen saknar data.",
+
+    navLog: "Logga",
+    logKicker: "DAGBOK",
+    logTitle: "Logga hundens dag",
+    logSubtitle: "Promenader, uteliv och pälsvård — loggat i en lugn, klickbar kalender.",
+    logQuickHeading: "Logga något",
+    logTypeWalk: "Promenad",
+    logTypePoop: "Bajs",
+    logTypePee: "Kiss",
+    logTypeNails: "Klippt klorna",
+    logTypeBath: "Bad",
+    logTypeCoat: "Klippt pälsen",
+    logWalkPrompt: "Hur lång blev promenaden?",
+    logWalkCustomPlaceholder: "Eget antal minuter",
+    logWalkCustomBtn: "Logga promenad",
+    logCancel: "Avbryt",
+    logConfirmLogged: "Loggat: {type}, kl {time}.",
+    logConfirmWalkLogged: "Loggade en {min} min promenad, kl {time}.",
+    logConfirmDeleted: "Posten togs bort.",
+    logConfirmInvalidMinutes: "Ange promenadens längd i minuter först.",
+    calPrevAria: "Föregående månad",
+    calNextAria: "Nästa månad",
+    logDayDetailEmpty: "Inget loggat den här dagen än.",
+    logDeleteAria: "Ta bort post",
+    minutesShort: "min",
+    weekdaysShort: "Må,Ti,On,To,Fr,Lö,Sö",
+    monthNames: "januari,februari,mars,april,maj,juni,juli,augusti,september,oktober,november,december"
   }
 };
 
@@ -288,6 +342,7 @@ function setLang(newLang) {
   if (lastWeatherData && lastLoc) {
     render(lastWeatherData, lastLoc, lastSource);
   }
+  if (typeof refreshLogUI === 'function') refreshLogUI();
 }
 
 /* ---------- Hjälpfunktioner / helpers ---------- */
@@ -1557,3 +1612,282 @@ applyStaticTranslations();
     }
   } catch { /* ogiltig eller saknad sparad plats – ignorera tyst */ }
 })();
+
+/* ==================================================================================
+   Daily log & calendar
+   ================================================================================== */
+
+const LOG_STORAGE_KEY = 'dogWeatherLog';
+const LOG_TYPES = [
+  { id: 'walk',  icon: '🚶', labelKey: 'logTypeWalk' },
+  { id: 'poop',  icon: '💩', labelKey: 'logTypePoop' },
+  { id: 'pee',   icon: '💦', labelKey: 'logTypePee' },
+  { id: 'nails', icon: '💅', labelKey: 'logTypeNails' },
+  { id: 'bath',  icon: '🛁', labelKey: 'logTypeBath' },
+  { id: 'coat',  icon: '✂️', labelKey: 'logTypeCoat' }
+];
+const LOG_TYPE_BY_ID = Object.fromEntries(LOG_TYPES.map(x => [x.id, x]));
+
+function loadLogEntries() {
+  try {
+    const raw = localStorage.getItem(LOG_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch { return []; }
+}
+
+function saveLogEntries(entries) {
+  try { localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(entries)); } catch { /* localStorage kan vara otillgängligt */ }
+}
+
+let logEntries = loadLogEntries();
+
+function addLogEntry(typeId, extra) {
+  const entry = Object.assign(
+    { id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, type: typeId, ts: new Date().toISOString() },
+    extra || {}
+  );
+  logEntries.push(entry);
+  saveLogEntries(logEntries);
+  return entry;
+}
+
+function removeLogEntry(id) {
+  logEntries = logEntries.filter(e => e.id !== id);
+  saveLogEntries(logEntries);
+}
+
+function dateKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function entryDateKey(entry) {
+  return dateKey(new Date(entry.ts));
+}
+
+/* ---------- Kalender-UI ---------- */
+
+const calMonthLabelEl = $('#calMonthLabel');
+const calWeekdaysEl = $('#calWeekdays');
+const calGridEl = $('#calGrid');
+const calPrevEl = $('#calPrev');
+const calNextEl = $('#calNext');
+const logDayDetailEl = $('#logDayDetail');
+const logConfirmEl = $('#logConfirm');
+const walkDurationPickerEl = $('#walkDurationPicker');
+const walkCustomMinutesEl = $('#walkCustomMinutes');
+
+const logToday = new Date();
+let calViewYear = logToday.getFullYear();
+let calViewMonth = logToday.getMonth();
+let selectedDateKey = dateKey(logToday);
+
+function monthNames() { return t('monthNames').split(','); }
+function weekdayNames() { return t('weekdaysShort').split(','); }
+
+function formatEntryTime(entry) {
+  return new Date(entry.ts).toLocaleTimeString(LOCALE[lang], { hour: '2-digit', minute: '2-digit' });
+}
+
+function entryLabel(entry) {
+  const typeLabel = t((LOG_TYPE_BY_ID[entry.type] && LOG_TYPE_BY_ID[entry.type].labelKey) || entry.type);
+  if (entry.type === 'walk' && entry.duration) {
+    return `${typeLabel} · ${entry.duration} ${t('minutesShort')}`;
+  }
+  return typeLabel;
+}
+
+function renderCalendar() {
+  if (!calGridEl || !calMonthLabelEl || !calWeekdaysEl) return;
+
+  calMonthLabelEl.textContent = `${monthNames()[calViewMonth]} ${calViewYear}`;
+  calWeekdaysEl.innerHTML = weekdayNames().map(w => `<span>${escapeHtml(w)}</span>`).join('');
+
+  const firstOfMonth = new Date(calViewYear, calViewMonth, 1);
+  const startOffset = (firstOfMonth.getDay() + 6) % 7; // veckan börjar på måndag
+  const daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate();
+
+  const entriesByDay = {};
+  for (const e of logEntries) {
+    const k = entryDateKey(e);
+    (entriesByDay[k] = entriesByDay[k] || []).push(e);
+  }
+
+  const todayKey = dateKey(logToday);
+  let html = '';
+
+  for (let i = 0; i < startOffset; i++) {
+    html += `<div class="cal-cell is-empty" aria-hidden="true"></div>`;
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const cellDate = new Date(calViewYear, calViewMonth, day);
+    const k = dateKey(cellDate);
+    const dayEntries = entriesByDay[k] || [];
+    const classes = ['cal-cell'];
+    if (k === todayKey) classes.push('is-today');
+    if (k === selectedDateKey) classes.push('is-selected');
+
+    const iconTypes = [...new Set(dayEntries.map(e => e.type))].slice(0, 4);
+    const iconsHtml = iconTypes.map(tid => {
+      const info = LOG_TYPE_BY_ID[tid];
+      return `<span title="${escapeHtml(t(info ? info.labelKey : tid))}">${info ? info.icon : ''}</span>`;
+    }).join('');
+    const moreCount = dayEntries.length > 4 ? dayEntries.length - 4 : 0;
+
+    html += `<button type="button" class="${classes.join(' ')}" data-date="${k}" aria-pressed="${k === selectedDateKey}">
+      <span class="cal-daynum">${day}</span>
+      <span class="cal-icons">${iconsHtml}${moreCount ? `<span class="cal-more">+${moreCount}</span>` : ''}</span>
+    </button>`;
+  }
+
+  calGridEl.innerHTML = html;
+
+  calGridEl.querySelectorAll('.cal-cell[data-date]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedDateKey = btn.getAttribute('data-date');
+      renderCalendar();
+    });
+  });
+
+  renderDayDetail();
+}
+
+function renderDayDetail() {
+  if (!logDayDetailEl) return;
+  const dayEntries = logEntries
+    .filter(e => entryDateKey(e) === selectedDateKey)
+    .sort((a, b) => new Date(a.ts) - new Date(b.ts));
+
+  const [y, m, d] = selectedDateKey.split('-').map(Number);
+  const dateObj = new Date(y, m - 1, d);
+  const titleText = dateObj.toLocaleDateString(LOCALE[lang], { weekday: 'long', day: 'numeric', month: 'long' });
+
+  if (!dayEntries.length) {
+    logDayDetailEl.innerHTML = `<h3 class="log-day-detail-title">${escapeHtml(titleText)}</h3><p class="log-day-detail-empty">${escapeHtml(t('logDayDetailEmpty'))}</p>`;
+    return;
+  }
+
+  const itemsHtml = dayEntries.map(e => {
+    const info = LOG_TYPE_BY_ID[e.type];
+    return `<li class="log-entry" data-id="${e.id}">
+      <span class="log-entry-icon" aria-hidden="true">${info ? info.icon : '🐾'}</span>
+      <span class="log-entry-time">${formatEntryTime(e)}</span>
+      <span class="log-entry-label">${escapeHtml(entryLabel(e))}</span>
+      <button type="button" class="log-entry-del" data-id="${e.id}" aria-label="${escapeHtml(t('logDeleteAria'))}">✕</button>
+    </li>`;
+  }).join('');
+
+  logDayDetailEl.innerHTML = `<h3 class="log-day-detail-title">${escapeHtml(titleText)}</h3><ul class="log-entry-list">${itemsHtml}</ul>`;
+
+  logDayDetailEl.querySelectorAll('.log-entry-del').forEach(btn => {
+    btn.addEventListener('click', () => {
+      removeLogEntry(btn.getAttribute('data-id'));
+      showLogConfirm(t('logConfirmDeleted'));
+      renderCalendar();
+    });
+  });
+}
+
+let logConfirmTimer = null;
+function showLogConfirm(msg) {
+  if (!logConfirmEl) return;
+  logConfirmEl.textContent = msg;
+  clearTimeout(logConfirmTimer);
+  logConfirmTimer = setTimeout(() => { logConfirmEl.textContent = ''; }, 4000);
+}
+
+function flashLoggedButton(typeId) {
+  const btn = document.querySelector(`.log-btn[data-type="${typeId}"]`);
+  if (!btn) return;
+  btn.classList.add('just-logged');
+  setTimeout(() => btn.classList.remove('just-logged'), 900);
+}
+
+function jumpToEntryDate(entry) {
+  const d = new Date(entry.ts);
+  calViewYear = d.getFullYear();
+  calViewMonth = d.getMonth();
+  selectedDateKey = entryDateKey(entry);
+  renderCalendar();
+}
+
+function logSimpleType(typeId) {
+  const entry = addLogEntry(typeId);
+  flashLoggedButton(typeId);
+  showLogConfirm(t('logConfirmLogged', { type: t(LOG_TYPE_BY_ID[typeId].labelKey), time: formatEntryTime(entry) }));
+  jumpToEntryDate(entry);
+}
+
+function logWalk(minutes) {
+  const mins = Number(minutes);
+  if (!mins || mins <= 0) {
+    showLogConfirm(t('logConfirmInvalidMinutes'));
+    return;
+  }
+  const entry = addLogEntry('walk', { duration: mins });
+  flashLoggedButton('walk');
+  showLogConfirm(t('logConfirmWalkLogged', { min: mins, time: formatEntryTime(entry) }));
+  hideWalkDurationPicker();
+  jumpToEntryDate(entry);
+}
+
+function showWalkDurationPicker() {
+  if (!walkDurationPickerEl) return;
+  walkDurationPickerEl.hidden = false;
+  document.querySelector('.log-btn[data-type="walk"]')?.classList.add('is-active');
+}
+
+function hideWalkDurationPicker() {
+  if (!walkDurationPickerEl) return;
+  walkDurationPickerEl.hidden = true;
+  if (walkCustomMinutesEl) walkCustomMinutesEl.value = '';
+  document.querySelector('.log-btn[data-type="walk"]')?.classList.remove('is-active');
+}
+
+document.querySelectorAll('.log-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const typeId = btn.getAttribute('data-type');
+    if (typeId === 'walk') {
+      if (walkDurationPickerEl && !walkDurationPickerEl.hidden) {
+        hideWalkDurationPicker();
+      } else {
+        showWalkDurationPicker();
+      }
+      return;
+    }
+    logSimpleType(typeId);
+  });
+});
+
+$('#durationChips')?.querySelectorAll('button[data-min]').forEach(btn => {
+  btn.addEventListener('click', () => logWalk(btn.getAttribute('data-min')));
+});
+
+$('#walkCustomConfirm')?.addEventListener('click', () => {
+  logWalk(walkCustomMinutesEl?.value);
+});
+
+walkCustomMinutesEl?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); logWalk(walkCustomMinutesEl.value); }
+});
+
+$('#walkDurationCancel')?.addEventListener('click', hideWalkDurationPicker);
+
+calPrevEl?.addEventListener('click', () => {
+  calViewMonth -= 1;
+  if (calViewMonth < 0) { calViewMonth = 11; calViewYear -= 1; }
+  renderCalendar();
+});
+
+calNextEl?.addEventListener('click', () => {
+  calViewMonth += 1;
+  if (calViewMonth > 11) { calViewMonth = 0; calViewYear += 1; }
+  renderCalendar();
+});
+
+function refreshLogUI() {
+  renderCalendar();
+}
+
+renderCalendar();
