@@ -1302,6 +1302,9 @@ function renderBestWalk(weatherData, unit) {
   const introText = allSimilar ? t('bestWalkEvenComfort') : t('bestWalkBestWindow');
 
   bestWalkEl.innerHTML = `
+    <p class="hour-strip-caption">${escapeHtml(t('hourStripCaption'))}</p>
+    <div class="hour-strip">${chips}</div>
+    <h3 class="subheading" data-i18n="bestWalkHeading">${escapeHtml(t('bestWalkHeading'))}</h3>
     <div class="best-walk-highlight" style="--dot:${best.comfort.color}">
       <div class="best-walk-time">🐾 ${timeFmt.format(new Date(best.time))}</div>
       <div class="best-walk-body">
@@ -1309,8 +1312,6 @@ function renderBestWalk(weatherData, unit) {
         <p class="best-walk-desc">${escapeHtml(introText)}</p>
       </div>
     </div>
-    <p class="hour-strip-caption">${escapeHtml(t('hourStripCaption'))}</p>
-    <div class="hour-strip">${chips}</div>
   `;
 }
 
