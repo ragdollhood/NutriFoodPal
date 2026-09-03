@@ -1,97 +1,110 @@
 <!doctype html>
-<html lang="sv">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#153b32">
-  <meta name="description" content="Lokal väderprognos ur hundens perspektiv med öppna prognosdata från SMHI.">
-  <title>Hundväder | Promenadprognosen för dig och din hund</title>
+  <meta name="description" content="Local weather forecast from your dog's perspective, using open forecast data from SMHI.">
+  <title>Dog Weather | The walk forecast for you and your dog</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<a class="skip" href="#main">Hoppa till innehållet</a>
-<header class="topbar"><a class="brand" href="#">Hundväder <span>•</span></a><nav aria-label="Huvudmeny"><a href="#prognos">Prognos</a><a href="#hundrad">Hundråd</a><a href="#kunskap">Kunskap</a></nav></header>
+<a class="skip" href="#main" data-i18n="skipLink">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="#">Hundväder <span>•</span></a>
+  <div class="topbar-right">
+    <nav aria-label="Main menu" data-i18n-aria-label="navAriaLabel">
+      <a href="#prognos" data-i18n="navForecast">Forecast</a>
+      <a href="#hundrad" data-i18n="navDogAdvice">Dog advice</a>
+      <a href="#kunskap" data-i18n="navKnowledge">Knowledge</a>
+    </nav>
+    <div class="lang-switch">
+      <button type="button" id="langBtnSv" class="lang-btn" aria-label="Visa sidan på svenska" title="Svenska">🇸🇪</button>
+      <button type="button" id="langBtnEn" class="lang-btn" aria-label="Show the page in English" title="English" hidden>🇬🇧</button>
+    </div>
+  </div>
+</header>
 <main id="main">
 <section class="hero">
   <picture class="hero-media">
     <source id="heroImgWebp" type="image/webp" srcset="assets/hero-sun.webp">
-    <img id="heroImg" src="assets/hero-sun.jpg" alt="Hund ute på promenad" fetchpriority="high">
+    <img id="heroImg" src="assets/hero-sun.jpg" alt="Dog out on a walk" data-i18n-alt="heroImgAlt" fetchpriority="high">
   </picture>
   <div class="shade"></div>
   <div class="hero-inner hero-inner--split">
     <div class="hero-text">
-      <span class="eyebrow">VÄDER FÖR FYRA TASSAR</span>
-      <h1>Blir det en långrunda<br> med lek idag?</h1>
-      <p>Se vädret där du är och få varsamma promenadråd anpassade för dagens förhållanden.</p>
-      <form id="searchForm" class="search" role="search"><label class="sr-only" for="place">Sök ort</label><input id="place" autocomplete="off" placeholder="Sök ort, till exempel Umeå" required><button>Sök väder</button><button id="locate" type="button" class="locate" aria-label="Använd min position">◎</button></form>
-      <p id="searchStatus" class="status" role="status" aria-live="polite">Sök efter en plats eller använd din position.</p>
-      <div id="placeResults" class="place-results" role="region" aria-label="Sökresultat, välj rätt plats" hidden></div>
+      <span class="eyebrow" data-i18n="heroEyebrow">WEATHER FOR FOUR PAWS</span>
+      <h1 data-i18n="heroTitle">Going to be a long walk<br> with playtime today?</h1>
+      <p data-i18n="heroSubtitle">Check the weather where you are and get gentle walk advice tailored to today's conditions.</p>
+      <form id="searchForm" class="search" role="search"><label class="sr-only" for="place" data-i18n="searchLabel">Search location</label><input id="place" autocomplete="off" placeholder="Search for a place, e.g. Umeå" data-i18n-placeholder="searchPlaceholder" required><button data-i18n="searchButton">Search weather</button><button id="locate" type="button" class="locate" aria-label="Use my location" data-i18n-aria-label="locateAriaLabel">◎</button></form>
+      <p id="searchStatus" class="status" role="status" aria-live="polite" data-i18n="searchStatusInitial">Search for a place or use your location.</p>
+      <div id="placeResults" class="place-results" role="region" aria-label="Search results, choose the right place" data-i18n-aria-label="placeResultsAriaLabel" hidden></div>
     </div>
     <div class="hero-weather">
-      <span class="hero-weather-kicker">DAGENS VÄDER</span>
-      <div id="current" class="current empty"><div class="paw">🐾</div><div><h3>Redo när du är</h3><p>Välj en plats för att få temperatur, nederbörd, vind och hundanpassade råd.</p></div></div>
+      <span class="hero-weather-kicker" data-i18n="heroWeatherKicker">TODAY'S WEATHER</span>
+      <div id="current" class="current empty"><div class="paw">🐾</div><div><h3 data-i18n="emptyTitle">Ready when you are</h3><p data-i18n="emptyText">Choose a place to get temperature, precipitation, wind and dog-friendly advice.</p></div></div>
     </div>
   </div>
 </section>
 
 <section id="prognos" class="weather-wrap" aria-labelledby="forecastTitle">
-  <div class="section-head"><div><span class="kicker">PROMENADLÄGET</span><h2 id="forecastTitle">Vädret just nu</h2></div><p id="updated">Prognosdata hämtas från SMHI när du söker.</p></div>
+  <div class="section-head"><div><span class="kicker" data-i18n="forecastKicker">WALK CONDITIONS</span><h2 id="forecastTitle" data-i18n="forecastTitle">Weather right now</h2></div><p id="updated" data-i18n="updatedInitial">Forecast data is fetched from SMHI when you search.</p></div>
   <div id="alerts" class="alerts" aria-live="polite"></div>
-  <h3 class="subheading">Bästa promenadtiden just nu</h3>
+  <h3 class="subheading" data-i18n="bestWalkHeading">Best walk time right now</h3>
   <div id="bestWalk" class="best-walk"><div class="skeleton" style="min-height:104px;border-radius:20px"></div></div>
-  <p class="best-walk-footnote">Rangordningen bygger på samma Hundkomfortindex som ovan, uträknat timme för timme för de kommande timmarna utifrån SMHI/Open-Meteos timprognos (temperatur, känns-som-temperatur, nederbörd, vind och snöfall) — den timme med högst poäng lyfts fram. Ingen AI-modell, bara samma regelbaserade beräkning. <a href="#komfortindex-forklaring">Så räknas indexet ut *</a></p>
+  <p class="best-walk-footnote" data-i18n="bestWalkFootnote">The ranking is based on the same Dog Comfort Index as above, calculated hour by hour for the coming hours from SMHI/Open-Meteo's hourly forecast (temperature, feels-like temperature, precipitation, wind and snowfall) — the hour with the highest score is highlighted. No AI model, just the same rule-based calculation. <a href="#komfortindex-forklaring">How the index is calculated *</a></p>
   <div class="panel panel--advice">
-    <h3 class="subheading">Vädertolkning för hunden</h3>
+    <h3 class="subheading" data-i18n="adviceHeading">Weather interpretation for your dog</h3>
     <div id="walkAdvice" class="advice-grid">
       <div class="skeleton advice-skeleton"></div><div class="skeleton advice-skeleton"></div><div class="skeleton advice-skeleton"></div><div class="skeleton advice-skeleton"></div><div class="skeleton advice-skeleton"></div><div class="skeleton advice-skeleton"></div><div class="skeleton advice-skeleton"></div>
     </div>
-    <p class="advice-disclaimer">Bedömningarna räknas fram automatiskt utifrån väderdata (temperatur, nederbörd, vind) och årstid — ingen AI-modell och ingen koppling till riktiga pollen- eller fästingmätningar. Se aktuell pollennivå hos <a href="https://www.nrm.se/natur--och-miljoovervakning/pollenovervakning/pollenrapporten" target="_blank" rel="noopener">Pollenrapporten (Naturhistoriska riksmuseet)</a> och fästingläget hos <a href="https://www.sva.se/aktuellt/insamlingar/rapportera-faesting/karta-och-tabell-oever-faestingfynd/" target="_blank" rel="noopener">SVA:s fästingkarta</a>. Läs mer om hur Hundkomfortindex räknas ut <a href="#komfortindex-forklaring">här</a>.</p>
+    <p class="advice-disclaimer" data-i18n="adviceDisclaimer">These assessments are calculated automatically from weather data (temperature, precipitation, wind) and time of year — no AI model and no connection to real pollen or tick measurements. See current pollen levels at the <a href="https://www.nrm.se/natur--och-miljoovervakning/pollenovervakning/pollenrapporten" target="_blank" rel="noopener">Pollen Report (Swedish Museum of Natural History)</a> and the current tick situation at <a href="https://www.sva.se/aktuellt/insamlingar/rapportera-faesting/karta-och-tabell-oever-faestingfynd/" target="_blank" rel="noopener">SVA's tick map</a> (Swedish-language sites). Read more about how the Dog Comfort Index is calculated <a href="#komfortindex-forklaring">here</a>.</p>
   </div>
   <div class="panel panel--daily">
-    <h3 class="subheading">Kommande dagar</h3>
+    <h3 class="subheading" data-i18n="dailyHeading">Upcoming days</h3>
     <div id="daily" class="daily"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
     <div id="dayHours" class="day-hours" hidden>
       <div class="day-hours-head">
         <h4 id="dayHoursTitle"></h4>
-        <button type="button" class="day-hours-close" id="dayHoursClose">Stäng</button>
+        <button type="button" class="day-hours-close" id="dayHoursClose" data-i18n="dayHoursCloseBtn">Close</button>
       </div>
       <div id="dayHoursBody"></div>
     </div>
-    <p class="daily-footnote">Hundkomfortindex per dag är ett snitt för dagtid (ca 07–21), uträknat med samma metod som ovan. Klicka eller tryck Enter på en dag för att se klockslag och timme-för-timme-index där det finns tillgängligt. <a href="#komfortindex-forklaring">Så räknas indexet ut *</a></p>
+    <p class="daily-footnote" data-i18n="dailyFootnote">The Dog Comfort Index for each day is a daytime average (approx. 07:00–21:00), calculated the same way as above. Click or press Enter on a day to see the times of day and hour-by-hour index where available. <a href="#komfortindex-forklaring">How the index is calculated *</a></p>
   </div>
 </section>
 
-<section id="hundrad" class="advice-section"><div class="section-head"><div><span class="kicker">ANPASSA EFTER INDIVIDEN</span><h2>Snälla råd i alla väder</h2></div><p>Hundens ålder, ras, päls, hälsa och vana påverkar vad som känns bra.</p></div>
+<section id="hundrad" class="advice-section"><div class="section-head"><div><span class="kicker" data-i18n="hundradKicker">ADAPT TO THE INDIVIDUAL</span><h2 data-i18n="hundradTitle">Gentle advice for all weather</h2></div><p data-i18n="hundradSubtitle">Your dog's age, breed, coat, health and habits all affect what feels right.</p></div>
 <div class="story-grid">
-<article class="story image-card"><img src="assets/hund-vatten.jpg" alt="Hund vilar i skugga vid en vattenskål"><div><span>VARMA DAGAR</span><h3>Vatten, skugga och lugnare tempo</h3><p>Ta med färskt vatten, välj svalare tider och håll uppsikt efter tecken på överhettning som kraftig hässjning, orolighet eller slöhet. Lämna aldrig hunden i en bil: enligt Jordbruksverkets föreskrifter får ett djur inte lämnas utan tillsyn i en bil om innetemperaturen riskerar att stiga över 25 °C, och redan på 20–50 minuter i en het bil kan skadorna bli livshotande.</p><a href="https://www.agria.se/hund/artiklar/skotsel-och-vard/sa-tar-du-hand-om-hunden-i-varmen/" target="_blank" rel="noopener">Veterinärgranskade råd hos Agria ↗</a><a href="https://jordbruksverket.se/djur/hundar-katter-och-smadjur/hundar/transportera-hundar" target="_blank" rel="noopener">Reglerna om djur i bil, Jordbruksverket ↗</a></div></article>
-<article class="story image-card"><img src="assets/hund-regnjacka.jpg" alt="Hund i gul regnjacka på våt parkväg"><div><span>REGN & RUSK</span><h3>Torka varsamt efter promenaden</h3><p>Handdukstorka päls, mage och tassar. Gå igenom trampdynor, klor och pälsen mellan tårna, och låt hunden vila varmt och dragfritt. Under kallare delar av året drar vägsalt ut fukt ur trampdynorna, så skölj gärna bort saltet extra noga då.</p><a href="https://evidensia.se/djurvardguiden/tips-tassar-vinter-hund/" target="_blank" rel="noopener">Tasstips från Evidensia djursjukvård ↗</a></div></article>
+<article class="story image-card"><img src="assets/hund-vatten.jpg" alt="Dog resting in the shade by a water bowl" data-i18n-alt="story1ImgAlt"><div data-i18n="story1Body"><span>HOT DAYS</span><h3>Water, shade and a slower pace</h3><p>Bring fresh water, choose cooler times of day, and watch for signs of overheating such as heavy panting, restlessness or lethargy. Never leave your dog in a car: under Swedish Board of Agriculture (Jordbruksverket) regulations, an animal must not be left unattended in a car if the inside temperature risks rising above 25°C (77°F), and in as little as 20–50 minutes in a hot car the damage can become life-threatening.</p><a href="https://www.agria.se/hund/artiklar/skotsel-och-vard/sa-tar-du-hand-om-hunden-i-varmen/" target="_blank" rel="noopener">Vet-reviewed advice from Agria ↗</a><a href="https://jordbruksverket.se/djur/hundar-katter-och-smadjur/hundar/transportera-hundar" target="_blank" rel="noopener">Rules on animals in cars, Jordbruksverket ↗</a></div></article>
+<article class="story image-card"><img src="assets/hund-regnjacka.jpg" alt="Dog in a yellow raincoat on a wet park path" data-i18n-alt="story2ImgAlt"><div data-i18n="story2Body"><span>RAIN &amp; FOUL WEATHER</span><h3>Dry gently after the walk</h3><p>Towel-dry the coat, belly and paws. Check paw pads, claws and the fur between the toes, and let your dog rest somewhere warm and draught-free. In colder months, road salt draws moisture out of the paw pads, so rinse off the salt extra carefully then.</p><a href="https://evidensia.se/djurvardguiden/tips-tassar-vinter-hund/" target="_blank" rel="noopener">Paw tips from Evidensia veterinary care ↗</a></div></article>
 </div>
 <div class="tips">
-<article><i>☂</i><h3>Regnkläder?</h3><p>Ett lätt regntäcke kan vara praktiskt för vissa hundar, men plagget ska sitta bekvämt och inte begränsa rörelse, syn eller möjlighet att kissa. Vänj in det lugnt och respektera hundens signaler.</p></article>
-<article><i>❄</i><h3>Kyla, is och salt</h3><p>Korta, tunpälsade, unga, äldre eller sjuka hundar kan behöva extra skydd. Vägsalt torkar ut och kan spricka upp trampdynorna, så skölj och torka tassarna noga efter promenaden. Hundskor eller tassalva kan skydda men kräver försiktig tillvänjning.</p><a href="https://www.agria.se/hund/artiklar/skotsel-och-vard/ta-hand-om-tassarna-vintertid/" target="_blank" rel="noopener">Mer om tassar och vägsalt, Agria ↗</a></article>
-<article><i>⚡</i><h3>Åska och oro</h3><p>Låt hunden välja en trygg plats inomhus, dämpa ljud och ljus och undvik att tvinga fram kontakt. Överdriven tröst kan förstärka stressen hos vissa hundar – håll dig lugn och låt hunden vara. Vid stark rädsla kan veterinären ge råd om ljudträning, lugnande hjälpmedel eller receptbelagd medicinering.</p><a href="https://evidensia.se/djurvardguiden/skottradsla/" target="_blank" rel="noopener">Råd vid ljud- och skotträdsla, Evidensia ↗</a></article>
+<article><i>☂</i><div data-i18n="tip1Body"><h3>Rain gear?</h3><p>A light rain coat can be practical for some dogs, but it should fit comfortably and not restrict movement, vision or the ability to relieve themselves. Introduce it calmly and respect your dog's signals.</p></div></article>
+<article><i>❄</i><div data-i18n="tip2Body"><h3>Cold, ice and salt</h3><p>Short-coated, young, senior or unwell dogs may need extra protection. Road salt dries out and can crack paw pads, so rinse and dry the paws thoroughly after the walk. Dog boots or paw balm can help but need careful, gradual introduction.</p><a href="https://www.agria.se/hund/artiklar/skotsel-och-vard/ta-hand-om-tassarna-vintertid/" target="_blank" rel="noopener">More on paws and road salt, Agria ↗</a></div></article>
+<article><i>⚡</i><div data-i18n="tip3Body"><h3>Thunder and anxiety</h3><p>Let your dog choose a safe spot indoors, dampen sound and light, and avoid forcing contact. Excessive comforting can reinforce stress in some dogs — stay calm and let your dog be. For severe fear, a vet can advise on sound training, calming aids or prescription medication.</p><a href="https://evidensia.se/djurvardguiden/skottradsla/" target="_blank" rel="noopener">Advice on noise and gunshot phobia, Evidensia ↗</a></div></article>
 </div></section>
 
-<section id="kunskap" class="science"><div class="science-copy"><span class="kicker">VAD VETENSKAPEN SÄGER</span><h2>Vädret kan ändra aktiviteten, men inte alla hundar reagerar lika</h2><p>Forskning baserad på ägarenkäter visar samband mellan väder och rapporterad aktivitet. Den ger inte stöd för att vädret påverkar varje hunds ”humör” på samma sätt. Läs därför kroppsspråket och anpassa promenaden efter individen.</p><div class="stat"><b>3 153</b><span>hundägare deltog i en internationell enkätstudie om säsongsväder och hundars aktivitet.</span></div><div class="source-links"><a href="https://www.mdpi.com/2076-2615/11/11/3302" target="_blank" rel="noopener">Studien i Animals ↗</a><a href="https://www.frontiersin.org/journals/veterinary-science/articles/10.3389/fvets.2022.973574/full" target="_blank" rel="noopener">Studie om extrema väderhändelser ↗</a><a href="https://www.sva.se/djurhaelsa/djurslag-a-oe/sport-och-saellskapsdjur/hund/" target="_blank" rel="noopener">SVA om hundhälsa ↗</a></div></div><aside class="note"><span>VIKTIGT</span><h3>Värmeslag är akut och livshotande</h3><p>Kraftig hässjning, slöhet, vinglighet, kräkningar, kollaps eller medvetslöshet kan vara tecken på värmeslag. Flytta hunden till svalka, erbjud vatten och kontakta veterinär omedelbart – detsamma gäller om hunden blir förvirrad, får tydliga andningsproblem eller snabbt försämras av någon annan anledning.</p><a href="https://evidensia.se/djurvardguiden/varmeslag-hund-ett-livshotande-tillstand/" target="_blank" rel="noopener">Läs mer om värmeslag hos Evidensia ↗</a></aside></section>
+<section id="kunskap" class="science"><div class="science-copy"><span class="kicker" data-i18n="scienceKicker">WHAT THE SCIENCE SAYS</span><h2 data-i18n="scienceTitle">Weather can change activity levels, but not all dogs react the same way</h2><p data-i18n="scienceText">Research based on owner surveys shows a link between weather and reported activity levels. It does not support the idea that weather affects every dog's "mood" the same way. So read your dog's body language and adapt the walk to the individual.</p><div class="stat" data-i18n="scienceStat"><b>3,153</b><span>dog owners took part in an international survey study on seasonal weather and dogs' activity levels.</span></div><div class="source-links" data-i18n="scienceLinks"><a href="https://www.mdpi.com/2076-2615/11/11/3302" target="_blank" rel="noopener">The study in Animals ↗</a><a href="https://www.frontiersin.org/journals/veterinary-science/articles/10.3389/fvets.2022.973574/full" target="_blank" rel="noopener">Study on extreme weather events ↗</a><a href="https://www.sva.se/djurhaelsa/djurslag-a-oe/sport-och-saellskapsdjur/hund/" target="_blank" rel="noopener">SVA on dog health ↗</a></div></div><aside class="note"><span data-i18n="noteKicker">IMPORTANT</span><h3 data-i18n="noteTitle">Heatstroke is acute and life-threatening</h3><p data-i18n="noteText">Heavy panting, lethargy, wobbliness, vomiting, collapse or loss of consciousness can be signs of heatstroke. Move your dog to a cool place, offer water and contact a vet immediately — the same applies if your dog becomes confused, shows clear breathing difficulty, or rapidly deteriorates for any other reason.</p><a href="https://evidensia.se/djurvardguiden/varmeslag-hund-ett-livshotande-tillstand/" target="_blank" rel="noopener" data-i18n="noteLink">Read more about heatstroke at Evidensia ↗</a></aside></section>
 
 <section id="komfortindex-forklaring" class="index-explainer">
-  <h2>Så räknas Hundkomfortindex ut</h2>
-  <p>Hundkomfortindex (0–10) är en egen, pedagogisk uppskattning som räknas fram lokalt utifrån aktuell väderdata — ingen klinisk eller vetenskapligt fastställd metod. Poängen börjar på 10 och sänks stegvis beroende på hur förhållandena bedöms påverka en genomsnittlig hund:</p>
-  <ul>
-    <li><b>Upplevd temperatur</b> – störst avdrag vid stark värme (≥ 26–30 °C) och sträng kyla (≤ −8 till −15 °C), mindre avdrag vid mildare värme eller svalka.</li>
-    <li><b>Luftfuktighet</b> – hög luftfuktighet i kombination med värme gör förhållandena tyngre och sänker poängen ytterligare.</li>
-    <li><b>Nederbörd</b> – regn eller blötsnö ger avdrag som ökar med mängden.</li>
-    <li><b>Snöfall</b> – ett mindre avdrag, bland annat för risken att snö och is fastnar mellan trampdynorna.</li>
-    <li><b>Vind och vindbyar</b> – kraftiga byvindar ger störst avdrag, måttlig blåst ett mindre.</li>
+  <h2 data-i18n="indexTitle">How the Dog Comfort Index is calculated</h2>
+  <p data-i18n="indexIntro">The Dog Comfort Index (0–10) is our own, educational estimate calculated locally from current weather data — not a clinical or scientifically established method. The score starts at 10 and is reduced step by step depending on how conditions are judged to affect an average dog:</p>
+  <ul data-i18n="indexList">
+    <li><b>Perceived temperature</b> – the largest deduction for intense heat (≥ 26–30°C / 79–86°F) and severe cold (≤ −8 to −15°C / 18 to 5°F), a smaller deduction for milder heat or coolness.</li>
+    <li><b>Humidity</b> – high humidity combined with heat makes conditions more strenuous and lowers the score further.</li>
+    <li><b>Precipitation</b> – rain or wet snow leads to a deduction that increases with the amount.</li>
+    <li><b>Snowfall</b> – a smaller deduction, partly for the risk of snow and ice getting stuck between the paw pads.</li>
+    <li><b>Wind and gusts</b> – strong gusts cause the largest deduction, moderate wind a smaller one.</li>
   </ul>
-  <p>Poängen ger nivåerna Utmärkt, Bra, Okej med anpassning, Ta det försiktigt och Olämpligt för längre aktivitet, tillsammans med de förhållanden som bidragit mest och ett kort råd. Samma index används dessutom timme för timme i "Bästa promenadtiden just nu", där den kommande timmen med högst poäng lyfts fram, samt som ett dagtidssnitt för varje dag i "Kommande dagar" — klicka på en dag där för att se klockslagen bakom snittet. Hundens ras, storlek, ålder, hälsa, päls, kondition och individuella tolerans påverkar alltid vad som faktiskt är lämpligt, och indexet ersätter aldrig bedömning från veterinär.</p>
-  <a href="#prognos">↑ Tillbaka till dagens väder</a>
+  <p data-i18n="indexOutro">The score maps to the levels Excellent, Good, Okay with some adjustments, Take it easy, and Unsuitable for longer activity, along with the conditions that contributed most and a short piece of advice. The same index is also used hour by hour in "Best walk time right now", where the coming hour with the highest score is highlighted, as well as a daytime average for each day in "Upcoming days" — click a day there to see the times of day behind the average. Your dog's breed, size, age, health, coat, fitness and individual tolerance always affect what's actually suitable, and the index never replaces a vet's judgement.</p>
+  <a href="#prognos" data-i18n="indexBackLink">↑ Back to today's weather</a>
 </section>
 
-<section class="sources"><h2>Källor och datatransparens</h2><div class="source-grid"><a href="https://opendata.smhi.se/metfcst/snow1gv1" target="_blank" rel="noopener"><b>SMHI Open Data</b><span>Prognosdata, SNOW1gv1</span></a><a href="https://www.smhi.se/data" target="_blank" rel="noopener"><b>SMHI</b><span>Öppna data och användning</span></a><a href="https://jordbruksverket.se/djur/hundar-katter-och-smadjur/hundar" target="_blank" rel="noopener"><b>Jordbruksverket</b><span>Skötsel, transport och djurskydd</span></a><a href="https://www.sva.se/djurhaelsa/djurslag-a-oe/sport-och-saellskapsdjur/hund/" target="_blank" rel="noopener"><b>SVA</b><span>Statens veterinärmedicinska anstalt</span></a><a href="https://www.agria.se/hund/artiklar/skotsel-och-vard/sa-tar-du-hand-om-hunden-i-varmen/" target="_blank" rel="noopener"><b>Agria</b><span>Veterinärgranskade artiklar</span></a><a href="https://evidensia.se/djurvardguiden/" target="_blank" rel="noopener"><b>Evidensia</b><span>Djurvårdsguiden</span></a><a href="https://www.mdpi.com/2076-2615/11/11/3302" target="_blank" rel="noopener"><b>Animals, 2021</b><span>Säsongsväder och aktivitet</span></a><a href="https://www.frontiersin.org/journals/veterinary-science/articles/10.3389/fvets.2022.973574/full" target="_blank" rel="noopener"><b>Frontiers in Vet. Science, 2022</b><span>Extrema väderhändelser</span></a></div><p class="fine">Platsökning använder OpenStreetMaps Nominatim-tjänst. Prognoser är väderleksmodeller och kan ändras — visa alltid SMHI:s officiella varningar separat i en skarp tjänst innan du planerar utomhusaktiviteter i extremväder. Råden på den här sidan är allmänna och ersätter aldrig bedömning från veterinär.</p></section>
+<section class="sources"><h2 data-i18n="sourcesTitle">Sources and data transparency</h2><div class="source-grid" data-i18n="sourcesGrid"><a href="https://opendata.smhi.se/metfcst/snow1gv1" target="_blank" rel="noopener"><b>SMHI Open Data</b><span>Forecast data, SNOW1gv1</span></a><a href="https://www.smhi.se/data" target="_blank" rel="noopener"><b>SMHI</b><span>Open data and usage</span></a><a href="https://jordbruksverket.se/djur/hundar-katter-och-smadjur/hundar" target="_blank" rel="noopener"><b>Jordbruksverket</b><span>Care, transport and animal welfare</span></a><a href="https://www.sva.se/djurhaelsa/djurslag-a-oe/sport-och-saellskapsdjur/hund/" target="_blank" rel="noopener"><b>SVA</b><span>Swedish National Veterinary Institute</span></a><a href="https://www.agria.se/hund/artiklar/skotsel-och-vard/sa-tar-du-hand-om-hunden-i-varmen/" target="_blank" rel="noopener"><b>Agria</b><span>Vet-reviewed articles</span></a><a href="https://evidensia.se/djurvardguiden/" target="_blank" rel="noopener"><b>Evidensia</b><span>Animal Care Guide</span></a><a href="https://www.mdpi.com/2076-2615/11/11/3302" target="_blank" rel="noopener"><b>Animals, 2021</b><span>Seasonal weather and activity</span></a><a href="https://www.frontiersin.org/journals/veterinary-science/articles/10.3389/fvets.2022.973574/full" target="_blank" rel="noopener"><b>Frontiers in Vet. Science, 2022</b><span>Extreme weather events</span></a></div><p class="fine" data-i18n="sourcesFine">Place search uses OpenStreetMap's Nominatim service. Forecasts are weather models and can change — always check SMHI's official warnings separately on a live service before planning outdoor activities in extreme weather. The advice on this page is general and never replaces a vet's judgement.</p></section>
 </main>
-<footer><div class="brand">Hundväder <span>•</span></div><p>Gjord med omtanke om blöta nosar och trygga promenader.</p><p>Väderdata: © SMHI, öppna data.</p></footer>
+<footer><div class="brand">Hundväder <span>•</span></div><p data-i18n="footerTagline">Made with care for wet noses and safe walks.</p><p data-i18n="footerSource">Weather data: © SMHI, open data.</p></footer>
 <script src="app.js"></script></body></html>

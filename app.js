@@ -1,6 +1,6 @@
-/* Hundväder – väderlogik
-   Källor: SMHI Open Data (svenska platser, i första hand) och Open-Meteo (globalt, samt reserv om SMHI inte svarar).
-   Ingen API-nyckel krävs för någon av tjänsterna. */
+/* Dog Weather – weather logic and bilingual (English/Swedish) UI text.
+   Sources: SMHI Open Data (Swedish locations, primary) and Open-Meteo (global, and fallback
+   if SMHI doesn't respond). No API key required for either service. */
 
 const $ = s => document.querySelector(s);
 const statusEl = $('#searchStatus');
@@ -13,10 +13,284 @@ const placeResultsEl = $('#placeResults');
 const updatedEl = $('#updated');
 const heroImgEl = $('#heroImg');
 const heroImgWebpEl = $('#heroImgWebp');
+const langBtnSvEl = $('#langBtnSv');
+const langBtnEnEl = $('#langBtnEn');
 
 const SMHI_BASE = 'https://opendata-download-metfcst.smhi.se/api/category/snow1g/version/1';
 
-/* ---------- Hjälpfunktioner ---------- */
+/* ==================================================================================
+   Language / i18n
+   ================================================================================== */
+
+const LOCALE = { en: 'en-GB', sv: 'sv-SE' };
+
+let lang = (() => {
+  try {
+    const saved = localStorage.getItem('dogWeatherLang');
+    if (saved === 'en' || saved === 'sv') return saved;
+  } catch { /* localStorage may be unavailable */ }
+  return 'en';
+})();
+
+/* Static UI strings, applied to elements marked with data-i18n(-attr) in the HTML,
+   and reused by the JS-rendered dynamic content below. */
+const STR = {
+  en: {
+    pageTitle: "Dog Weather | The walk forecast for you and your dog",
+    metaDescription: "Local weather forecast from your dog's perspective, using open forecast data from SMHI.",
+    skipLink: "Skip to content",
+    navAriaLabel: "Main menu",
+    navForecast: "Forecast",
+    navDogAdvice: "Dog advice",
+    navKnowledge: "Knowledge",
+    heroEyebrow: "WEATHER FOR FOUR PAWS",
+    heroTitle: "Going to be a long walk<br> with playtime today?",
+    heroSubtitle: "Check the weather where you are and get gentle walk advice tailored to today's conditions.",
+    searchLabel: "Search location",
+    searchPlaceholder: "Search for a place, e.g. Umeå",
+    searchButton: "Search weather",
+    locateAriaLabel: "Use my location",
+    searchStatusInitial: "Search for a place or use your location.",
+    placeResultsAriaLabel: "Search results, choose the right place",
+    heroWeatherKicker: "TODAY'S WEATHER",
+    emptyTitle: "Ready when you are",
+    emptyText: "Choose a place to get temperature, precipitation, wind and dog-friendly advice.",
+    heroImgAlt: "Dog out on a walk",
+    forecastKicker: "WALK CONDITIONS",
+    forecastTitle: "Weather right now",
+    updatedInitial: "Forecast data is fetched from SMHI when you search.",
+    bestWalkHeading: "Best walk time right now",
+    bestWalkFootnote: 'The ranking is based on the same Dog Comfort Index as above, calculated hour by hour for the coming hours from SMHI/Open-Meteo\'s hourly forecast (temperature, feels-like temperature, precipitation, wind and snowfall) — the hour with the highest score is highlighted. No AI model, just the same rule-based calculation. <a href="#komfortindex-forklaring">How the index is calculated *</a>',
+    adviceHeading: "Weather interpretation for your dog",
+    adviceDisclaimer: 'These assessments are calculated automatically from weather data (temperature, precipitation, wind) and time of year — no AI model and no connection to real pollen or tick measurements. See current pollen levels at the <a href="https://www.nrm.se/natur--och-miljoovervakning/pollenovervakning/pollenrapporten" target="_blank" rel="noopener">Pollen Report (Swedish Museum of Natural History)</a> and the current tick situation at <a href="https://www.sva.se/aktuellt/insamlingar/rapportera-faesting/karta-och-tabell-oever-faestingfynd/" target="_blank" rel="noopener">SVA\'s tick map</a> (Swedish-language sites). Read more about how the Dog Comfort Index is calculated <a href="#komfortindex-forklaring">here</a>.',
+    dailyHeading: "Upcoming days",
+    dayHoursCloseBtn: "Close",
+    dailyFootnote: 'The Dog Comfort Index for each day is a daytime average (approx. 07:00–21:00), calculated the same way as above. Click or press Enter on a day to see the times of day and hour-by-hour index where available. <a href="#komfortindex-forklaring">How the index is calculated *</a>',
+    hundradKicker: "ADAPT TO THE INDIVIDUAL",
+    hundradTitle: "Gentle advice for all weather",
+    hundradSubtitle: "Your dog's age, breed, coat, health and habits all affect what feels right.",
+    story1ImgAlt: "Dog resting in the shade by a water bowl",
+    story1Body: '<span>HOT DAYS</span><h3>Water, shade and a slower pace</h3><p>Bring fresh water, choose cooler times of day, and watch for signs of overheating such as heavy panting, restlessness or lethargy. Never leave your dog in a car: under Swedish Board of Agriculture (Jordbruksverket) regulations, an animal must not be left unattended in a car if the inside temperature risks rising above 25°C (77°F), and in as little as 20–50 minutes in a hot car the damage can become life-threatening.</p><a href="https://www.agria.se/hund/artiklar/skotsel-och-vard/sa-tar-du-hand-om-hunden-i-varmen/" target="_blank" rel="noopener">Vet-reviewed advice from Agria ↗</a><a href="https://jordbruksverket.se/djur/hundar-katter-och-smadjur/hundar/transportera-hundar" target="_blank" rel="noopener">Rules on animals in cars, Jordbruksverket ↗</a>',
+    story2ImgAlt: "Dog in a yellow raincoat on a wet park path",
+    story2Body: '<span>RAIN &amp; FOUL WEATHER</span><h3>Dry gently after the walk</h3><p>Towel-dry the coat, belly and paws. Check paw pads, claws and the fur between the toes, and let your dog rest somewhere warm and draught-free. In colder months, road salt draws moisture out of the paw pads, so rinse off the salt extra carefully then.</p><a href="https://evidensia.se/djurvardguiden/tips-tassar-vinter-hund/" target="_blank" rel="noopener">Paw tips from Evidensia veterinary care ↗</a>',
+    tip1Body: '<h3>Rain gear?</h3><p>A light rain coat can be practical for some dogs, but it should fit comfortably and not restrict movement, vision or the ability to relieve themselves. Introduce it calmly and respect your dog\'s signals.</p>',
+    tip2Body: '<h3>Cold, ice and salt</h3><p>Short-coated, young, senior or unwell dogs may need extra protection. Road salt dries out and can crack paw pads, so rinse and dry the paws thoroughly after the walk. Dog boots or paw balm can help but need careful, gradual introduction.</p><a href="https://www.agria.se/hund/artiklar/skotsel-och-vard/ta-hand-om-tassarna-vintertid/" target="_blank" rel="noopener">More on paws and road salt, Agria ↗</a>',
+    tip3Body: '<h3>Thunder and anxiety</h3><p>Let your dog choose a safe spot indoors, dampen sound and light, and avoid forcing contact. Excessive comforting can reinforce stress in some dogs — stay calm and let your dog be. For severe fear, a vet can advise on sound training, calming aids or prescription medication.</p><a href="https://evidensia.se/djurvardguiden/skottradsla/" target="_blank" rel="noopener">Advice on noise and gunshot phobia, Evidensia ↗</a>',
+    scienceKicker: "WHAT THE SCIENCE SAYS",
+    scienceTitle: "Weather can change activity levels, but not all dogs react the same way",
+    scienceText: 'Research based on owner surveys shows a link between weather and reported activity levels. It does not support the idea that weather affects every dog\'s "mood" the same way. So read your dog\'s body language and adapt the walk to the individual.',
+    scienceStat: '<b>3,153</b><span>dog owners took part in an international survey study on seasonal weather and dogs\' activity levels.</span>',
+    scienceLinks: '<a href="https://www.mdpi.com/2076-2615/11/11/3302" target="_blank" rel="noopener">The study in Animals ↗</a><a href="https://www.frontiersin.org/journals/veterinary-science/articles/10.3389/fvets.2022.973574/full" target="_blank" rel="noopener">Study on extreme weather events ↗</a><a href="https://www.sva.se/djurhaelsa/djurslag-a-oe/sport-och-saellskapsdjur/hund/" target="_blank" rel="noopener">SVA on dog health ↗</a>',
+    noteKicker: "IMPORTANT",
+    noteTitle: "Heatstroke is acute and life-threatening",
+    noteText: "Heavy panting, lethargy, wobbliness, vomiting, collapse or loss of consciousness can be signs of heatstroke. Move your dog to a cool place, offer water and contact a vet immediately — the same applies if your dog becomes confused, shows clear breathing difficulty, or rapidly deteriorates for any other reason.",
+    noteLink: "Read more about heatstroke at Evidensia ↗",
+    indexTitle: "How the Dog Comfort Index is calculated",
+    indexIntro: "The Dog Comfort Index (0–10) is our own, educational estimate calculated locally from current weather data — not a clinical or scientifically established method. The score starts at 10 and is reduced step by step depending on how conditions are judged to affect an average dog:",
+    indexList: '<li><b>Perceived temperature</b> – the largest deduction for intense heat (≥ 26–30°C / 79–86°F) and severe cold (≤ −8 to −15°C / 18 to 5°F), a smaller deduction for milder heat or coolness.</li><li><b>Humidity</b> – high humidity combined with heat makes conditions more strenuous and lowers the score further.</li><li><b>Precipitation</b> – rain or wet snow leads to a deduction that increases with the amount.</li><li><b>Snowfall</b> – a smaller deduction, partly for the risk of snow and ice getting stuck between the paw pads.</li><li><b>Wind and gusts</b> – strong gusts cause the largest deduction, moderate wind a smaller one.</li>',
+    indexOutro: 'The score maps to the levels Excellent, Good, Okay with some adjustments, Take it easy, and Unsuitable for longer activity, along with the conditions that contributed most and a short piece of advice. The same index is also used hour by hour in "Best walk time right now", where the coming hour with the highest score is highlighted, as well as a daytime average for each day in "Upcoming days" — click a day there to see the times of day behind the average. Your dog\'s breed, size, age, health, coat, fitness and individual tolerance always affect what\'s actually suitable, and the index never replaces a vet\'s judgement.',
+    indexBackLink: "↑ Back to today's weather",
+    sourcesTitle: "Sources and data transparency",
+    sourcesGrid: '<a href="https://opendata.smhi.se/metfcst/snow1gv1" target="_blank" rel="noopener"><b>SMHI Open Data</b><span>Forecast data, SNOW1gv1</span></a><a href="https://www.smhi.se/data" target="_blank" rel="noopener"><b>SMHI</b><span>Open data and usage</span></a><a href="https://jordbruksverket.se/djur/hundar-katter-och-smadjur/hundar" target="_blank" rel="noopener"><b>Jordbruksverket</b><span>Care, transport and animal welfare</span></a><a href="https://www.sva.se/djurhaelsa/djurslag-a-oe/sport-och-saellskapsdjur/hund/" target="_blank" rel="noopener"><b>SVA</b><span>Swedish National Veterinary Institute</span></a><a href="https://www.agria.se/hund/artiklar/skotsel-och-vard/sa-tar-du-hand-om-hunden-i-varmen/" target="_blank" rel="noopener"><b>Agria</b><span>Vet-reviewed articles</span></a><a href="https://evidensia.se/djurvardguiden/" target="_blank" rel="noopener"><b>Evidensia</b><span>Animal Care Guide</span></a><a href="https://www.mdpi.com/2076-2615/11/11/3302" target="_blank" rel="noopener"><b>Animals, 2021</b><span>Seasonal weather and activity</span></a><a href="https://www.frontiersin.org/journals/veterinary-science/articles/10.3389/fvets.2022.973574/full" target="_blank" rel="noopener"><b>Frontiers in Vet. Science, 2022</b><span>Extreme weather events</span></a>',
+    sourcesFine: "Place search uses OpenStreetMap's Nominatim service. Forecasts are weather models and can change — always check SMHI's official warnings separately on a live service before planning outdoor activities in extreme weather. The advice on this page is general and never replaces a vet's judgement.",
+    footerTagline: "Made with care for wet noses and safe walks.",
+    footerSource: "Weather data: © SMHI, open data.",
+
+    metricWind: "Wind",
+    metricGust: "Gusts",
+    metricHumidity: "Humidity",
+    feelsLike: "Feels like",
+    comfortIndexLabel: "Dog Comfort Index",
+    howIndexCalculated: "How the index is calculated *",
+    heroAltPrefix: "Dog outside in weather",
+    updatedPrefix: "Updated",
+    localTimeSuffix: "(local time)",
+    sourceLabel: "Source:",
+    showingForecastFor: "Showing the forecast for {place}.",
+    fetchingForecastFor: "Fetching the forecast for {place}…",
+    theLocation: "the location",
+    errFetchWeatherGeneric: "Couldn't fetch the weather forecast right now. Check your connection and try again.",
+    errDisplayFailed: "Something went wrong while showing the forecast. Please try again shortly.",
+    searchingPlace: "Searching for the place…",
+    multipleMatches: 'Several places match "{query}". Choose the right one below.',
+    errPlaceSearchGeneric: "Something went wrong with the place search. Please try again.",
+    geoNotSupported: "Your browser doesn't support location sharing.",
+    gettingLocation: "Getting your location…",
+    errWeatherForYourLocation: "Couldn't fetch the weather for your location right now.",
+    geoDenied: "Location access was denied. Search for a place instead.",
+    placeListHint: "Several places match your search. Choose the right one:",
+    bestWalkEvenComfort: "Comfort is fairly even for the rest of the day — most of it works well for a walk.",
+    bestWalkBestWindow: "The best walking window for the rest of the day, compared with the other coming hours.",
+    hourStripCaption: "Weather and Dog Comfort Index, hour by hour",
+    outOf10: "out of 10",
+    today: "Today",
+    showHours: "Show times ▾",
+    noHourlyYet: "No hourly forecast yet",
+    hoursForTitle: "Hours",
+    noHourlyDetail: "No hourly forecast available for this day yet. It usually becomes available closer to the day — check back soon.",
+    yourLocation: "Your location",
+    errGeocodeNetwork: "Couldn't reach the place search. Check your internet connection.",
+    errGeocodeBadResponse: "The place search didn't respond as expected. Please try again shortly.",
+    errNoPlaceFound: "I couldn't find a place with that name. Try entering a town, region or country.",
+    errSmhiNetwork: "The SMHI request failed.",
+    errSmhiBadResponse: "SMHI didn't respond as expected.",
+    errNoTimeSeries: "The forecast is missing time series data.",
+    errOpenMeteoNetwork: "Couldn't reach Open-Meteo right now.",
+    errOpenMeteoBadResponse: "Open-Meteo didn't respond as expected.",
+    errOpenMeteoNoData: "The forecast is missing data."
+  },
+  sv: {
+    pageTitle: "Hundväder | Promenadprognosen för dig och din hund",
+    metaDescription: "Lokal väderprognos ur hundens perspektiv med öppna prognosdata från SMHI.",
+    skipLink: "Hoppa till innehållet",
+    navAriaLabel: "Huvudmeny",
+    navForecast: "Prognos",
+    navDogAdvice: "Hundråd",
+    navKnowledge: "Kunskap",
+    heroEyebrow: "VÄDER FÖR FYRA TASSAR",
+    heroTitle: "Blir det en långrunda<br> med lek idag?",
+    heroSubtitle: "Se vädret där du är och få varsamma promenadråd anpassade för dagens förhållanden.",
+    searchLabel: "Sök ort",
+    searchPlaceholder: "Sök ort, till exempel Umeå",
+    searchButton: "Sök väder",
+    locateAriaLabel: "Använd min position",
+    searchStatusInitial: "Sök efter en plats eller använd din position.",
+    placeResultsAriaLabel: "Sökresultat, välj rätt plats",
+    heroWeatherKicker: "DAGENS VÄDER",
+    emptyTitle: "Redo när du är",
+    emptyText: "Välj en plats för att få temperatur, nederbörd, vind och hundanpassade råd.",
+    heroImgAlt: "Hund ute på promenad",
+    forecastKicker: "PROMENADLÄGET",
+    forecastTitle: "Vädret just nu",
+    updatedInitial: "Prognosdata hämtas från SMHI när du söker.",
+    bestWalkHeading: "Bästa promenadtiden just nu",
+    bestWalkFootnote: 'Rangordningen bygger på samma Hundkomfortindex som ovan, uträknat timme för timme för de kommande timmarna utifrån SMHI/Open-Meteos timprognos (temperatur, känns-som-temperatur, nederbörd, vind och snöfall) — den timme med högst poäng lyfts fram. Ingen AI-modell, bara samma regelbaserade beräkning. <a href="#komfortindex-forklaring">Så räknas indexet ut *</a>',
+    adviceHeading: "Vädertolkning för hunden",
+    adviceDisclaimer: 'Bedömningarna räknas fram automatiskt utifrån väderdata (temperatur, nederbörd, vind) och årstid — ingen AI-modell och ingen koppling till riktiga pollen- eller fästingmätningar. Se aktuell pollennivå hos <a href="https://www.nrm.se/natur--och-miljoovervakning/pollenovervakning/pollenrapporten" target="_blank" rel="noopener">Pollenrapporten (Naturhistoriska riksmuseet)</a> och fästingläget hos <a href="https://www.sva.se/aktuellt/insamlingar/rapportera-faesting/karta-och-tabell-oever-faestingfynd/" target="_blank" rel="noopener">SVA:s fästingkarta</a>. Läs mer om hur Hundkomfortindex räknas ut <a href="#komfortindex-forklaring">här</a>.',
+    dailyHeading: "Kommande dagar",
+    dayHoursCloseBtn: "Stäng",
+    dailyFootnote: 'Hundkomfortindex per dag är ett snitt för dagtid (ca 07–21), uträknat med samma metod som ovan. Klicka eller tryck Enter på en dag för att se klockslag och timme-för-timme-index där det finns tillgängligt. <a href="#komfortindex-forklaring">Så räknas indexet ut *</a>',
+    hundradKicker: "ANPASSA EFTER INDIVIDEN",
+    hundradTitle: "Snälla råd i alla väder",
+    hundradSubtitle: "Hundens ålder, ras, päls, hälsa och vana påverkar vad som känns bra.",
+    story1ImgAlt: "Hund vilar i skugga vid en vattenskål",
+    story1Body: '<span>VARMA DAGAR</span><h3>Vatten, skugga och lugnare tempo</h3><p>Ta med färskt vatten, välj svalare tider och håll uppsikt efter tecken på överhettning som kraftig hässjning, orolighet eller slöhet. Lämna aldrig hunden i en bil: enligt Jordbruksverkets föreskrifter får ett djur inte lämnas utan tillsyn i en bil om innetemperaturen riskerar att stiga över 25 °C, och redan på 20–50 minuter i en het bil kan skadorna bli livshotande.</p><a href="https://www.agria.se/hund/artiklar/skotsel-och-vard/sa-tar-du-hand-om-hunden-i-varmen/" target="_blank" rel="noopener">Veterinärgranskade råd hos Agria ↗</a><a href="https://jordbruksverket.se/djur/hundar-katter-och-smadjur/hundar/transportera-hundar" target="_blank" rel="noopener">Reglerna om djur i bil, Jordbruksverket ↗</a>',
+    story2ImgAlt: "Hund i gul regnjacka på våt parkväg",
+    story2Body: '<span>REGN &amp; RUSK</span><h3>Torka varsamt efter promenaden</h3><p>Handdukstorka päls, mage och tassar. Gå igenom trampdynor, klor och pälsen mellan tårna, och låt hunden vila varmt och dragfritt. Under kallare delar av året drar vägsalt ut fukt ur trampdynorna, så skölj gärna bort saltet extra noga då.</p><a href="https://evidensia.se/djurvardguiden/tips-tassar-vinter-hund/" target="_blank" rel="noopener">Tasstips från Evidensia djursjukvård ↗</a>',
+    tip1Body: '<h3>Regnkläder?</h3><p>Ett lätt regntäcke kan vara praktiskt för vissa hundar, men plagget ska sitta bekvämt och inte begränsa rörelse, syn eller möjlighet att kissa. Vänj in det lugnt och respektera hundens signaler.</p>',
+    tip2Body: '<h3>Kyla, is och salt</h3><p>Korta, tunpälsade, unga, äldre eller sjuka hundar kan behöva extra skydd. Vägsalt torkar ut och kan spricka upp trampdynorna, så skölj och torka tassarna noga efter promenaden. Hundskor eller tassalva kan skydda men kräver försiktig tillvänjning.</p><a href="https://www.agria.se/hund/artiklar/skotsel-och-vard/ta-hand-om-tassarna-vintertid/" target="_blank" rel="noopener">Mer om tassar och vägsalt, Agria ↗</a>',
+    tip3Body: '<h3>Åska och oro</h3><p>Låt hunden välja en trygg plats inomhus, dämpa ljud och ljus och undvik att tvinga fram kontakt. Överdriven tröst kan förstärka stressen hos vissa hundar – håll dig lugn och låt hunden vara. Vid stark rädsla kan veterinären ge råd om ljudträning, lugnande hjälpmedel eller receptbelagd medicinering.</p><a href="https://evidensia.se/djurvardguiden/skottradsla/" target="_blank" rel="noopener">Råd vid ljud- och skotträdsla, Evidensia ↗</a>',
+    scienceKicker: "VAD VETENSKAPEN SÄGER",
+    scienceTitle: "Vädret kan ändra aktiviteten, men inte alla hundar reagerar lika",
+    scienceText: 'Forskning baserad på ägarenkäter visar samband mellan väder och rapporterad aktivitet. Den ger inte stöd för att vädret påverkar varje hunds ”humör” på samma sätt. Läs därför kroppsspråket och anpassa promenaden efter individen.',
+    scienceStat: '<b>3 153</b><span>hundägare deltog i en internationell enkätstudie om säsongsväder och hundars aktivitet.</span>',
+    scienceLinks: '<a href="https://www.mdpi.com/2076-2615/11/11/3302" target="_blank" rel="noopener">Studien i Animals ↗</a><a href="https://www.frontiersin.org/journals/veterinary-science/articles/10.3389/fvets.2022.973574/full" target="_blank" rel="noopener">Studie om extrema väderhändelser ↗</a><a href="https://www.sva.se/djurhaelsa/djurslag-a-oe/sport-och-saellskapsdjur/hund/" target="_blank" rel="noopener">SVA om hundhälsa ↗</a>',
+    noteKicker: "VIKTIGT",
+    noteTitle: "Värmeslag är akut och livshotande",
+    noteText: "Kraftig hässjning, slöhet, vinglighet, kräkningar, kollaps eller medvetslöshet kan vara tecken på värmeslag. Flytta hunden till svalka, erbjud vatten och kontakta veterinär omedelbart – detsamma gäller om hunden blir förvirrad, får tydliga andningsproblem eller snabbt försämras av någon annan anledning.",
+    noteLink: "Läs mer om värmeslag hos Evidensia ↗",
+    indexTitle: "Så räknas Hundkomfortindex ut",
+    indexIntro: "Hundkomfortindex (0–10) är en egen, pedagogisk uppskattning som räknas fram lokalt utifrån aktuell väderdata — ingen klinisk eller vetenskapligt fastställd metod. Poängen börjar på 10 och sänks stegvis beroende på hur förhållandena bedöms påverka en genomsnittlig hund:",
+    indexList: '<li><b>Upplevd temperatur</b> – störst avdrag vid stark värme (≥ 26–30 °C) och sträng kyla (≤ −8 till −15 °C), mindre avdrag vid mildare värme eller svalka.</li><li><b>Luftfuktighet</b> – hög luftfuktighet i kombination med värme gör förhållandena tyngre och sänker poängen ytterligare.</li><li><b>Nederbörd</b> – regn eller blötsnö ger avdrag som ökar med mängden.</li><li><b>Snöfall</b> – ett mindre avdrag, bland annat för risken att snö och is fastnar mellan trampdynorna.</li><li><b>Vind och vindbyar</b> – kraftiga byvindar ger störst avdrag, måttlig blåst ett mindre.</li>',
+    indexOutro: 'Poängen ger nivåerna Utmärkt, Bra, Okej med anpassning, Ta det försiktigt och Olämpligt för längre aktivitet, tillsammans med de förhållanden som bidragit mest och ett kort råd. Samma index används dessutom timme för timme i "Bästa promenadtiden just nu", där den kommande timmen med högst poäng lyfts fram, samt som ett dagtidssnitt för varje dag i "Kommande dagar" — klicka på en dag där för att se klockslagen bakom snittet. Hundens ras, storlek, ålder, hälsa, päls, kondition och individuella tolerans påverkar alltid vad som faktiskt är lämpligt, och indexet ersätter aldrig bedömning från veterinär.',
+    indexBackLink: "↑ Tillbaka till dagens väder",
+    sourcesTitle: "Källor och datatransparens",
+    sourcesGrid: '<a href="https://opendata.smhi.se/metfcst/snow1gv1" target="_blank" rel="noopener"><b>SMHI Open Data</b><span>Prognosdata, SNOW1gv1</span></a><a href="https://www.smhi.se/data" target="_blank" rel="noopener"><b>SMHI</b><span>Öppna data och användning</span></a><a href="https://jordbruksverket.se/djur/hundar-katter-och-smadjur/hundar" target="_blank" rel="noopener"><b>Jordbruksverket</b><span>Skötsel, transport och djurskydd</span></a><a href="https://www.sva.se/djurhaelsa/djurslag-a-oe/sport-och-saellskapsdjur/hund/" target="_blank" rel="noopener"><b>SVA</b><span>Statens veterinärmedicinska anstalt</span></a><a href="https://www.agria.se/hund/artiklar/skotsel-och-vard/sa-tar-du-hand-om-hunden-i-varmen/" target="_blank" rel="noopener"><b>Agria</b><span>Veterinärgranskade artiklar</span></a><a href="https://evidensia.se/djurvardguiden/" target="_blank" rel="noopener"><b>Evidensia</b><span>Djurvårdsguiden</span></a><a href="https://www.mdpi.com/2076-2615/11/11/3302" target="_blank" rel="noopener"><b>Animals, 2021</b><span>Säsongsväder och aktivitet</span></a><a href="https://www.frontiersin.org/journals/veterinary-science/articles/10.3389/fvets.2022.973574/full" target="_blank" rel="noopener"><b>Frontiers in Vet. Science, 2022</b><span>Extrema väderhändelser</span></a>',
+    sourcesFine: "Platsökning använder OpenStreetMaps Nominatim-tjänst. Prognoser är väderleksmodeller och kan ändras — visa alltid SMHI:s officiella varningar separat i en skarp tjänst innan du planerar utomhusaktiviteter i extremväder. Råden på den här sidan är allmänna och ersätter aldrig bedömning från veterinär.",
+    footerTagline: "Gjord med omtanke om blöta nosar och trygga promenader.",
+    footerSource: "Väderdata: © SMHI, öppna data.",
+
+    metricWind: "Vind",
+    metricGust: "Byvind",
+    metricHumidity: "Luftfuktighet",
+    feelsLike: "Känns som",
+    comfortIndexLabel: "Hundkomfortindex",
+    howIndexCalculated: "Så räknas indexet ut *",
+    heroAltPrefix: "Hund ute i väder",
+    updatedPrefix: "Uppdaterad",
+    localTimeSuffix: "(lokal tid)",
+    sourceLabel: "Källa:",
+    showingForecastFor: "Visar prognos för {place}.",
+    fetchingForecastFor: "Hämtar prognosen för {place}…",
+    theLocation: "platsen",
+    errFetchWeatherGeneric: "Kunde inte hämta väderprognosen just nu. Kontrollera anslutningen och försök igen.",
+    errDisplayFailed: "Något gick fel när prognosen skulle visas. Försök igen om en stund.",
+    searchingPlace: "Söker plats…",
+    multipleMatches: 'Flera platser matchar "{query}". Välj rätt plats nedan.',
+    errPlaceSearchGeneric: "Något gick fel vid platssökningen. Försök igen.",
+    geoNotSupported: "Din webbläsare stöder inte platsdelning.",
+    gettingLocation: "Hämtar din position…",
+    errWeatherForYourLocation: "Kunde inte hämta väder för din position just nu.",
+    geoDenied: "Platsåtkomst nekades. Sök efter ort i stället.",
+    placeListHint: "Flera platser matchar sökningen. Välj rätt plats:",
+    bestWalkEvenComfort: "Jämn komfort den närmaste tiden — det mesta av dagen fungerar bra för en promenad.",
+    bestWalkBestWindow: "Det bästa promenadfönstret den närmaste tiden, jämfört med övriga kommande timmar.",
+    hourStripCaption: "Väder och Hundkomfortindex timme för timme",
+    outOf10: "av 10",
+    today: "Idag",
+    showHours: "Visa klockslag ▾",
+    noHourlyYet: "Ingen timprognos ännu",
+    hoursForTitle: "Klockslag",
+    noHourlyDetail: "Ingen timupplöst prognos tillgänglig för den här dagen ännu. Det brukar klarna när dagen kommer närmare — kika gärna tillbaka.",
+    yourLocation: "Din position",
+    errGeocodeNetwork: "Kunde inte nå platssökningen. Kontrollera din internetanslutning.",
+    errGeocodeBadResponse: "Platssökningen svarade inte som väntat. Försök igen om en stund.",
+    errNoPlaceFound: "Jag hittade ingen plats med det namnet. Prova att skriva ort, region eller land.",
+    errSmhiNetwork: "SMHI-anropet misslyckades.",
+    errSmhiBadResponse: "SMHI svarade inte som väntat.",
+    errNoTimeSeries: "Prognosen saknar tidsserier.",
+    errOpenMeteoNetwork: "Kunde inte nå Open-Meteo just nu.",
+    errOpenMeteoBadResponse: "Open-Meteo svarade inte som väntat.",
+    errOpenMeteoNoData: "Prognosen saknar data."
+  }
+};
+
+function t(key, vars) {
+  let s = (STR[lang] && STR[lang][key] != null) ? STR[lang][key] : key;
+  if (vars) {
+    for (const k in vars) s = s.replace(`{${k}}`, vars[k]);
+  }
+  return s;
+}
+
+function applyStaticTranslations() {
+  document.documentElement.lang = lang;
+  document.title = t('pageTitle');
+  const metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) metaDesc.setAttribute('content', t('metaDescription'));
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (STR[lang][key] != null) el.innerHTML = STR[lang][key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (STR[lang][key] != null) el.setAttribute('placeholder', STR[lang][key]);
+  });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
+    const key = el.getAttribute('data-i18n-aria-label');
+    if (STR[lang][key] != null) el.setAttribute('aria-label', STR[lang][key]);
+  });
+  document.querySelectorAll('[data-i18n-alt]').forEach(el => {
+    const key = el.getAttribute('data-i18n-alt');
+    if (STR[lang][key] != null) el.setAttribute('alt', STR[lang][key]);
+  });
+
+  if (langBtnSvEl) langBtnSvEl.hidden = lang !== 'en';
+  if (langBtnEnEl) langBtnEnEl.hidden = lang !== 'sv';
+}
+
+function setLang(newLang) {
+  if ((newLang !== 'en' && newLang !== 'sv') || newLang === lang) return;
+  lang = newLang;
+  try { localStorage.setItem('dogWeatherLang', lang); } catch { /* ignore */ }
+  applyStaticTranslations();
+  if (lastWeatherData && lastLoc) {
+    render(lastWeatherData, lastLoc, lastSource);
+  }
+}
+
+/* ---------- Hjälpfunktioner / helpers ---------- */
 
 function escapeHtml(str) {
   if (str == null) return '';
@@ -61,26 +335,50 @@ function formatTemp(celsius, unit, decimals = 0) {
   return value.toFixed(decimals);
 }
 
-/* ---------- Vädersymboler: en gemensam uppsättning oavsett datakälla ---------- */
+/* ---------- Vädersymboler: en gemensam uppsättning oavsett datakälla, per språk ---------- */
 
-const conditionInfo = {
-  clear: ['☀️', 'Klart'],
-  mostlyClear: ['🌤️', 'Nästan klart'],
-  partlyCloudy: ['⛅', 'Växlande molnighet'],
-  cloudy: ['☁️', 'Halvklart'],
-  overcast: ['☁️', 'Mulet'],
-  fog: ['🌫️', 'Dimma'],
-  drizzle: ['🌦️', 'Lätt duggregn'],
-  rainLight: ['🌦️', 'Lätta regnskurar'],
-  rain: ['🌧️', 'Regn'],
-  rainHeavy: ['🌧️', 'Kraftigt regn'],
-  thunder: ['⛈️', 'Åska'],
-  sleet: ['🌨️', 'Snöblandat regn'],
-  snowLight: ['🌨️', 'Lätt snöfall'],
-  snow: ['❄️', 'Snöfall'],
-  snowHeavy: ['❄️', 'Kraftigt snöfall'],
-  unknown: ['🌤️', 'Växlande väder']
+const CONDITION_INFO = {
+  en: {
+    clear: ['☀️', 'Clear'],
+    mostlyClear: ['🌤️', 'Mostly clear'],
+    partlyCloudy: ['⛅', 'Partly cloudy'],
+    cloudy: ['☁️', 'Mostly cloudy'],
+    overcast: ['☁️', 'Overcast'],
+    fog: ['🌫️', 'Fog'],
+    drizzle: ['🌦️', 'Light drizzle'],
+    rainLight: ['🌦️', 'Light rain showers'],
+    rain: ['🌧️', 'Rain'],
+    rainHeavy: ['🌧️', 'Heavy rain'],
+    thunder: ['⛈️', 'Thunder'],
+    sleet: ['🌨️', 'Sleet'],
+    snowLight: ['🌨️', 'Light snow'],
+    snow: ['❄️', 'Snow'],
+    snowHeavy: ['❄️', 'Heavy snow'],
+    unknown: ['🌤️', 'Changeable weather']
+  },
+  sv: {
+    clear: ['☀️', 'Klart'],
+    mostlyClear: ['🌤️', 'Nästan klart'],
+    partlyCloudy: ['⛅', 'Växlande molnighet'],
+    cloudy: ['☁️', 'Halvklart'],
+    overcast: ['☁️', 'Mulet'],
+    fog: ['🌫️', 'Dimma'],
+    drizzle: ['🌦️', 'Lätt duggregn'],
+    rainLight: ['🌦️', 'Lätta regnskurar'],
+    rain: ['🌧️', 'Regn'],
+    rainHeavy: ['🌧️', 'Kraftigt regn'],
+    thunder: ['⛈️', 'Åska'],
+    sleet: ['🌨️', 'Snöblandat regn'],
+    snowLight: ['🌨️', 'Lätt snöfall'],
+    snow: ['❄️', 'Snöfall'],
+    snowHeavy: ['❄️', 'Kraftigt snöfall'],
+    unknown: ['🌤️', 'Växlande väder']
+  }
 };
+
+function conditionInfo(key) {
+  return CONDITION_INFO[lang][key] || CONDITION_INFO[lang].unknown;
+}
 
 /* ---------- Hero-bakgrund: väljer en av de fördefinierade foton beroende på väder ---------- */
 /* "hero-fog" och "hero-windy" är reserverade som stillbilder för sektionerna "Vädertolkning
@@ -137,20 +435,20 @@ async function geocodeOpenMeteo(query) {
   const u = new URL('https://geocoding-api.open-meteo.com/v1/search');
   u.searchParams.set('name', query);
   u.searchParams.set('count', '5');
-  u.searchParams.set('language', 'sv');
+  u.searchParams.set('language', lang === 'sv' ? 'sv' : 'en');
   u.searchParams.set('format', 'json');
 
   let r;
   try {
     r = await fetch(u);
   } catch (err) {
-    throw new Error('Kunde inte nå platssökningen. Kontrollera din internetanslutning.');
+    throw new Error(t('errGeocodeNetwork'));
   }
-  if (!r.ok) throw new Error('Platssökningen svarade inte som väntat. Försök igen om en stund.');
+  if (!r.ok) throw new Error(t('errGeocodeBadResponse'));
 
   const data = await r.json();
   const results = Array.isArray(data.results) ? data.results : [];
-  if (!results.length) throw new Error('Jag hittade ingen plats med det namnet. Prova att skriva ort, region eller land.');
+  if (!results.length) throw new Error(t('errNoPlaceFound'));
 
   return results.map(x => ({
     lat: x.latitude,
@@ -167,15 +465,15 @@ async function geocodeOpenMeteo(query) {
 async function reverseGeocode(lat, lon) {
   try {
     const u = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=10`;
-    const r = await fetch(u, { headers: { 'Accept-Language': 'sv' } });
+    const r = await fetch(u, { headers: { 'Accept-Language': lang === 'sv' ? 'sv' : 'en' } });
     if (!r.ok) throw new Error('no');
     const x = await r.json();
     const addr = x.address || {};
-    const name = addr.city || addr.town || addr.village || addr.municipality || addr.county || 'Din position';
+    const name = addr.city || addr.town || addr.village || addr.municipality || addr.county || t('yourLocation');
     const countryCode = (addr.country_code || '').toUpperCase();
     return { name, countryCode };
   } catch {
-    return { name: 'Din position', countryCode: '' };
+    return { name: t('yourLocation'), countryCode: '' };
   }
 }
 
@@ -187,24 +485,24 @@ async function fetchSmhi(loc) {
   try {
     r = await fetch(u);
   } catch (err) {
-    throw new Error('SMHI-anropet misslyckades.');
+    throw new Error(t('errSmhiNetwork'));
   }
-  if (!r.ok) throw new Error('SMHI svarade inte som väntat.');
+  if (!r.ok) throw new Error(t('errSmhiBadResponse'));
   const data = await r.json();
   return normalizeSmhi(data);
 }
 
 function normalizeSmhi(data) {
   const ts = Array.isArray(data.timeSeries) ? data.timeSeries : [];
-  if (!ts.length) throw new Error('Prognosen saknar tidsserier.');
+  if (!ts.length) throw new Error(t('errNoTimeSeries'));
 
   const now = Date.now();
   const cur = ts.find(x => new Date(x.time).getTime() >= now) || ts[0];
 
-  const t = val(cur, 'air_temperature');
+  const tVal = val(cur, 'air_temperature');
   const w = val(cur, 'wind_speed');
   const g = val(cur, 'wind_speed_of_gust');
-  const h = val(cur, 'relative_humidity');
+  const hum = val(cur, 'relative_humidity');
   const p = val(cur, 'precipitation_amount_mean') ?? val(cur, 'precipitation_amount_median') ?? val(cur, 'precipitation_amount_max');
   const sym = Number(val(cur, 'symbol_code') ?? 1);
   const conditionKey = smhiCondition(sym);
@@ -216,7 +514,7 @@ function normalizeSmhi(data) {
   const snowfallEstimate = isSnowCondition ? (p ?? 0) : 0;
 
   const current = {
-    temp: t, apparentTemp: null, humidity: h, wind: w, gust: g, precip: p, snowfall: snowfallEstimate,
+    temp: tVal, apparentTemp: null, humidity: hum, wind: w, gust: g, precip: p, snowfall: snowfallEstimate,
     condition: conditionKey, isDay: true
   };
 
@@ -236,7 +534,7 @@ function normalizeSmhi(data) {
     const rain = arr.map(x => val(x, 'precipitation_amount_mean') ?? val(x, 'precipitation_amount_median') ?? 0);
     const mid = arr[Math.floor(arr.length / 2)];
     const sc = Number(val(mid, 'symbol_code') ?? 1);
-    const hours = arr.map(mapSmhiHour).filter(h => new Date(h.time).getTime() >= hourCutoff);
+    const hours = arr.map(mapSmhiHour).filter(hh => new Date(hh.time).getTime() >= hourCutoff);
     return {
       date: mid.time,
       tempMax: temps.length ? Math.max(...temps) : null,
@@ -289,12 +587,12 @@ async function fetchOpenMeteo(loc) {
   try {
     r = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
   } catch (err) {
-    throw new Error('Kunde inte nå Open-Meteo just nu.');
+    throw new Error(t('errOpenMeteoNetwork'));
   }
-  if (!r.ok) throw new Error('Open-Meteo svarade inte som väntat.');
+  if (!r.ok) throw new Error(t('errOpenMeteoBadResponse'));
 
   const data = await r.json();
-  if (!data.current || !data.daily) throw new Error('Prognosen saknar data.');
+  if (!data.current || !data.daily) throw new Error(t('errOpenMeteoNoData'));
   return normalizeOpenMeteo(data);
 }
 
@@ -375,17 +673,103 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
+const TIER_TEXT = {
+  en: {
+    excellent: 'Excellent walking weather',
+    good: 'Good walking weather',
+    moderate: 'Okay with some adjustments',
+    poor: 'Take it easy',
+    veryPoor: 'Unsuitable for longer activity'
+  },
+  sv: {
+    excellent: 'Utmärkt promenadväder',
+    good: 'Bra promenadväder',
+    moderate: 'Okej med anpassning',
+    poor: 'Ta det försiktigt',
+    veryPoor: 'Olämpligt för längre aktivitet'
+  }
+};
+
 // Delar upp en poäng (0–10) i samma nivåer/etiketter/färger som används genomgående i appen,
 // så att både en enskild avläsning och ett dagssnitt (se summarizeDayComfort) blir konsekventa.
 function comfortTier(score) {
-  if (score >= 8.5) return { level: 'excellent', label: 'Utmärkt promenadväder', color: '#2f7d5c' };
-  if (score >= 7) return { level: 'good', label: 'Bra promenadväder', color: '#659b4b' };
-  if (score >= 5) return { level: 'moderate', label: 'Okej med anpassning', color: '#d5a33c' };
-  if (score >= 3) return { level: 'poor', label: 'Ta det försiktigt', color: '#dc7835' };
-  return { level: 'very-poor', label: 'Olämpligt för längre aktivitet', color: '#bd4747' };
+  const tt = TIER_TEXT[lang];
+  if (score >= 8.5) return { level: 'excellent', label: tt.excellent, color: '#2f7d5c' };
+  if (score >= 7) return { level: 'good', label: tt.good, color: '#659b4b' };
+  if (score >= 5) return { level: 'moderate', label: tt.moderate, color: '#d5a33c' };
+  if (score >= 3) return { level: 'poor', label: tt.poor, color: '#dc7835' };
+  return { level: 'very-poor', label: tt.veryPoor, color: '#bd4747' };
 }
 
+const COMFORT_TEXT = {
+  en: {
+    veryHighApparent: 'very high perceived temperature',
+    recVeryHighApparent: 'Avoid strenuous walks and stick to only very short breaks in the shade.',
+    highApparent: 'high perceived temperature',
+    recHighApparent: 'Choose a shorter walk, keep an easy pace, and bring fresh water.',
+    warmApparent: 'warm weather',
+    recWarmApparent: 'Bring water and look for shade or a cooler time of day.',
+    mildWarmApparent: 'mild to warm weather',
+    extremeCold: 'extreme cold',
+    recExtremeCold: 'Limit time outdoors and adjust protection to your dog\u2019s individual needs.',
+    veryCold: 'very cold weather',
+    recVeryCold: 'Consider a shorter walk and check paws and body temperature.',
+    cold: 'cold weather',
+    recCold: 'Keep an eye on the paws and adjust the length of the walk.',
+    cool: 'cool weather',
+    humidHeat: 'high humidity combined with heat',
+    recHumidHeat: 'High humidity can make warm weather more strenuous. Slow the pace and offer water.',
+    heavyRain: 'heavy precipitation',
+    recHeavyRain: 'Plan a shorter route and dry the coat, belly and paws thoroughly afterwards.',
+    rainOrWetSnow: 'rain or wet snow',
+    recRain: 'Dry your dog\u2019s coat, belly and paws after the walk.',
+    lightRain: 'light precipitation',
+    snowfall: 'snowfall',
+    recSnowfall: 'Check whether snow or ice is getting stuck between the paw pads.',
+    veryStrongGusts: 'very strong gusts',
+    recVeryStrongGusts: 'Avoid forests and places where branches or loose objects could fall.',
+    strongGusts: 'strong gusts',
+    recStrongGusts: 'Choose a sheltered route and keep your dog close.',
+    windy: 'windy conditions',
+    comfortable: 'comfortable weather conditions',
+    recDefault: 'The weather looks suitable for a normal walk, but always adapt to your dog\u2019s signals.'
+  },
+  sv: {
+    veryHighApparent: 'mycket hög upplevd temperatur',
+    recVeryHighApparent: 'Undvik ansträngande promenader och välj endast mycket korta rastningar i skugga.',
+    highApparent: 'hög upplevd temperatur',
+    recHighApparent: 'Välj en kortare promenad, håll lugnt tempo och ta med färskt vatten.',
+    warmApparent: 'varmt väder',
+    recWarmApparent: 'Ta med vatten och välj gärna skugga eller en svalare tid på dagen.',
+    mildWarmApparent: 'milt till varmt väder',
+    extremeCold: 'extrem kyla',
+    recExtremeCold: 'Begränsa tiden utomhus och anpassa skyddet efter hundens individuella behov.',
+    veryCold: 'mycket kallt väder',
+    recVeryCold: 'Överväg kortare promenad och kontrollera tassar och kroppstemperatur.',
+    cold: 'kallt väder',
+    recCold: 'Håll uppsikt över tassarna och anpassa promenadens längd.',
+    cool: 'svalt väder',
+    humidHeat: 'hög luftfuktighet i kombination med värme',
+    recHumidHeat: 'Hög luftfuktighet kan göra varmt väder mer ansträngande. Sänk tempot och erbjud vatten.',
+    heavyRain: 'kraftig nederbörd',
+    recHeavyRain: 'Planera en kortare runda och torka päls, mage och tassar noggrant efteråt.',
+    rainOrWetSnow: 'regn eller blötsnö',
+    recRain: 'Torka hundens päls, mage och tassar efter promenaden.',
+    lightRain: 'lätt nederbörd',
+    snowfall: 'snöfall',
+    recSnowfall: 'Kontrollera om snö eller is fastnar mellan trampdynorna.',
+    veryStrongGusts: 'mycket kraftiga vindbyar',
+    recVeryStrongGusts: 'Undvik skog och platser där grenar eller lösa föremål kan falla.',
+    strongGusts: 'kraftiga vindbyar',
+    recStrongGusts: 'Välj en skyddad promenadväg och håll hunden nära.',
+    windy: 'blåsigt väder',
+    comfortable: 'behagliga väderförhållanden',
+    recDefault: 'Vädret ser lämpligt ut för en vanlig promenad, men anpassa alltid efter hundens signaler.'
+  }
+};
+
 function calculateDogComfortIndex(weather) {
+  const C = COMFORT_TEXT[lang];
   const temperature = Number(weather.temperature ?? 0);
   const apparentTemperature = Number(
     weather.apparentTemperature ?? temperature
@@ -402,111 +786,85 @@ function calculateDogComfortIndex(weather) {
 
   if (apparentTemperature >= 30) {
     score -= 7;
-    reasons.push("mycket hög upplevd temperatur");
-    recommendations.push(
-      "Undvik ansträngande promenader och välj endast mycket korta rastningar i skugga."
-    );
+    reasons.push(C.veryHighApparent);
+    recommendations.push(C.recVeryHighApparent);
   } else if (apparentTemperature >= 26) {
     score -= 5;
-    reasons.push("hög upplevd temperatur");
-    recommendations.push(
-      "Välj en kortare promenad, håll lugnt tempo och ta med färskt vatten."
-    );
+    reasons.push(C.highApparent);
+    recommendations.push(C.recHighApparent);
   } else if (apparentTemperature >= 22) {
     score -= 2.5;
-    reasons.push("varmt väder");
-    recommendations.push(
-      "Ta med vatten och välj gärna skugga eller en svalare tid på dagen."
-    );
+    reasons.push(C.warmApparent);
+    recommendations.push(C.recWarmApparent);
   } else if (apparentTemperature >= 18) {
     score -= 1;
-    reasons.push("milt till varmt väder");
+    reasons.push(C.mildWarmApparent);
   }
 
   if (apparentTemperature <= -15) {
     score -= 6;
-    reasons.push("extrem kyla");
-    recommendations.push(
-      "Begränsa tiden utomhus och anpassa skyddet efter hundens individuella behov."
-    );
+    reasons.push(C.extremeCold);
+    recommendations.push(C.recExtremeCold);
   } else if (apparentTemperature <= -8) {
     score -= 4;
-    reasons.push("mycket kallt väder");
-    recommendations.push(
-      "Överväg kortare promenad och kontrollera tassar och kroppstemperatur."
-    );
+    reasons.push(C.veryCold);
+    recommendations.push(C.recVeryCold);
   } else if (apparentTemperature <= -2) {
     score -= 2;
-    reasons.push("kallt väder");
-    recommendations.push(
-      "Håll uppsikt över tassarna och anpassa promenadens längd."
-    );
+    reasons.push(C.cold);
+    recommendations.push(C.recCold);
   } else if (apparentTemperature <= 3) {
     score -= 0.5;
-    reasons.push("svalt väder");
+    reasons.push(C.cool);
   }
 
   if (humidity >= 80 && apparentTemperature >= 22) {
     score -= 1.5;
-    reasons.push("hög luftfuktighet i kombination med värme");
-    recommendations.push(
-      "Hög luftfuktighet kan göra varmt väder mer ansträngande. Sänk tempot och erbjud vatten."
-    );
+    reasons.push(C.humidHeat);
+    recommendations.push(C.recHumidHeat);
   }
 
   if (precipitation >= 5) {
     score -= 2.5;
-    reasons.push("kraftig nederbörd");
-    recommendations.push(
-      "Planera en kortare runda och torka päls, mage och tassar noggrant efteråt."
-    );
+    reasons.push(C.heavyRain);
+    recommendations.push(C.recHeavyRain);
   } else if (precipitation >= 1) {
     score -= 1.5;
-    reasons.push("regn eller blötsnö");
-    recommendations.push(
-      "Torka hundens päls, mage och tassar efter promenaden."
-    );
+    reasons.push(C.rainOrWetSnow);
+    recommendations.push(C.recRain);
   } else if (precipitation > 0) {
     score -= 0.5;
-    reasons.push("lätt nederbörd");
+    reasons.push(C.lightRain);
   }
 
   if (snowfall >= 2) {
     score -= 1;
-    reasons.push("snöfall");
-    recommendations.push(
-      "Kontrollera om snö eller is fastnar mellan trampdynorna."
-    );
+    reasons.push(C.snowfall);
+    recommendations.push(C.recSnowfall);
   }
 
   if (windGusts >= 20) {
     score -= 3.5;
-    reasons.push("mycket kraftiga vindbyar");
-    recommendations.push(
-      "Undvik skog och platser där grenar eller lösa föremål kan falla."
-    );
+    reasons.push(C.veryStrongGusts);
+    recommendations.push(C.recVeryStrongGusts);
   } else if (windGusts >= 15) {
     score -= 2;
-    reasons.push("kraftiga vindbyar");
-    recommendations.push(
-      "Välj en skyddad promenadväg och håll hunden nära."
-    );
+    reasons.push(C.strongGusts);
+    recommendations.push(C.recStrongGusts);
   } else if (windSpeed >= 10) {
     score -= 1;
-    reasons.push("blåsigt väder");
+    reasons.push(C.windy);
   }
 
   score = clamp(score, 0, 10);
   const { level, label, color } = comfortTier(score);
 
   if (reasons.length === 0) {
-    reasons.push("behagliga väderförhållanden");
+    reasons.push(C.comfortable);
   }
 
   if (recommendations.length === 0) {
-    recommendations.push(
-      "Vädret ser lämpligt ut för en vanlig promenad, men anpassa alltid efter hundens signaler."
-    );
+    recommendations.push(C.recDefault);
   }
 
   return {
@@ -533,7 +891,7 @@ function renderPlaceResults(results, query) {
 
   const hint = document.createElement('p');
   hint.className = 'place-list-hint';
-  hint.textContent = 'Flera platser matchar sökningen. Välj rätt plats:';
+  hint.textContent = t('placeListHint');
   wrap.appendChild(hint);
 
   results.forEach(loc => {
@@ -568,19 +926,27 @@ function hidePlaceResults() {
   placeResultsEl.innerHTML = '';
 }
 
+const ALERT_TEXT = {
+  en: {
+    heat: '<div class="alert"><b>Heat worth taking seriously.</b> Bring water and shorten or move strenuous activity to cooler hours. Never leave your dog in the car: animals must not be left unattended in a car if the inside temperature risks exceeding 25°C (77°F).</div>',
+    wet: '<div class="alert"><b>Really wet out there.</b> Plan for drying and checking paws and between the paw pads after the walk.</div>',
+    cold: '<div class="alert"><b>Severe cold.</b> Shorten the walk and keep extra watch on paws, ears and tail.</div>'
+  },
+  sv: {
+    heat: '<div class="alert"><b>Värme att ta på allvar.</b> Ta med vatten och korta ned eller flytta ansträngande aktivitet till svalare timmar. Lämna aldrig hunden i bilen: djur får inte lämnas utan tillsyn i en bil om innetemperaturen riskerar att överstiga 25 °C.</div>',
+    wet: '<div class="alert"><b>Rejält blött.</b> Planera för torkning och kontroll av tassar och mellan trampdynorna efter rundan.</div>',
+    cold: '<div class="alert"><b>Sträng kyla.</b> Korta ned promenaden och håll extra koll på tassar, öron och svans.</div>'
+  }
+};
+
 function renderAlerts(cur) {
-  const t = cur.apparentTemp != null ? cur.apparentTemp : cur.temp;
+  const A = ALERT_TEXT[lang];
+  const temp = cur.apparentTemp != null ? cur.apparentTemp : cur.temp;
   const alerts = [];
 
-  if (t != null && t >= 25) {
-    alerts.push('<div class="alert"><b>Värme att ta på allvar.</b> Ta med vatten och korta ned eller flytta ansträngande aktivitet till svalare timmar. Lämna aldrig hunden i bilen: djur får inte lämnas utan tillsyn i en bil om innetemperaturen riskerar att överstiga 25 °C.</div>');
-  }
-  if (cur.precip != null && cur.precip > 2) {
-    alerts.push('<div class="alert"><b>Rejält blött.</b> Planera för torkning och kontroll av tassar och mellan trampdynorna efter rundan.</div>');
-  }
-  if (t != null && t <= -10) {
-    alerts.push('<div class="alert"><b>Sträng kyla.</b> Korta ned promenaden och håll extra koll på tassar, öron och svans.</div>');
-  }
+  if (temp != null && temp >= 25) alerts.push(A.heat);
+  if (cur.precip != null && cur.precip > 2) alerts.push(A.wet);
+  if (temp != null && temp <= -10) alerts.push(A.cold);
 
   alertsEl.innerHTML = alerts.join('');
 }
@@ -596,14 +962,14 @@ let dailyState = { days: [], tz: 'Europe/Stockholm', unit: 'C', openIndex: null 
 
 function renderDaily(weatherData, unit) {
   const tz = weatherData.timezone || 'Europe/Stockholm';
-  const names = new Intl.DateTimeFormat('sv-SE', { weekday: 'short', day: 'numeric', month: 'short', timeZone: tz });
+  const names = new Intl.DateTimeFormat(LOCALE[lang], { weekday: 'short', day: 'numeric', month: 'short', timeZone: tz });
 
   dailyState = { days: weatherData.daily, tz, unit, openIndex: null };
   if (dayHoursEl) { dayHoursEl.hidden = true; dayHoursBodyEl.innerHTML = ''; }
 
   dailyEl.innerHTML = weatherData.daily.map((d, i) => {
-    const [icon, desc] = conditionInfo[d.condition] || conditionInfo.unknown;
-    const label = i === 0 ? 'Idag' : names.format(new Date(d.date));
+    const [icon, desc] = conditionInfo(d.condition);
+    const label = i === 0 ? t('today') : names.format(new Date(d.date));
     const max = formatTemp(d.tempMax, unit);
     const min = formatTemp(d.tempMin, unit);
     const rain = d.precipSum != null ? n(d.precipSum, 1) : '–';
@@ -611,13 +977,13 @@ function renderDaily(weatherData, unit) {
       ? `<span class="day-comfort" style="color:${d.comfort.color};background:${d.comfort.color}1a">${n(d.comfort.score, 1)}/10 · ${escapeHtml(d.comfort.label)}</span>`
       : '';
     const hint = (d.hours && d.hours.length)
-      ? `<p class="day-hint">Visa klockslag ▾</p>`
-      : `<p class="day-hint">Ingen timprognos ännu</p>`;
+      ? `<p class="day-hint">${escapeHtml(t('showHours'))}</p>`
+      : `<p class="day-hint">${escapeHtml(t('noHourlyYet'))}</p>`;
     return `<article class="day ${i === 0 ? 'today' : ''}" role="button" tabindex="0" aria-expanded="false" aria-controls="dayHours" data-day-index="${i}">
-      <b>${label}</b>
+      <b>${escapeHtml(label)}</b>
       <div class="day-icon">${icon}</div>
       <div class="range">${max}° / ${min}°${unit}</div>
-      <small>${desc} · nederbörd ${rain} mm</small>
+      <small>${escapeHtml(desc)} · ${escapeHtml(n(rain === '–' ? null : rain))}${rain !== '–' ? ' mm' : ''}</small>
       ${comfortPill}
       ${hint}
     </article>`;
@@ -645,23 +1011,24 @@ function showDayHours(index) {
     el.setAttribute('aria-expanded', String(active));
   });
 
-  const dayNameFmt = new Intl.DateTimeFormat('sv-SE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: dailyState.tz });
-  dayHoursTitleEl.textContent = `Klockslag ${index === 0 ? 'idag' : dayNameFmt.format(new Date(d.date))}`;
+  const dayNameFmt = new Intl.DateTimeFormat(LOCALE[lang], { weekday: 'long', day: 'numeric', month: 'long', timeZone: dailyState.tz });
+  const dayLabel = index === 0 ? t('today').toLowerCase() : dayNameFmt.format(new Date(d.date));
+  dayHoursTitleEl.textContent = `${t('hoursForTitle')} ${dayLabel}`;
 
   const hours = d.hours || [];
   if (!hours.length) {
-    dayHoursBodyEl.innerHTML = `<p class="day-hours-empty">Ingen timupplöst prognos tillgänglig för den här dagen ännu. Det brukar klarna när dagen kommer närmare — kika gärna tillbaka.</p>`;
+    dayHoursBodyEl.innerHTML = `<p class="day-hours-empty">${escapeHtml(t('noHourlyDetail'))}</p>`;
   } else {
     const withComfort = computeHourlyComfort(hours);
     const best = withComfort.reduce((a, b) => (b.comfort.score > a.comfort.score ? b : a), withComfort[0]);
-    const timeFmt = new Intl.DateTimeFormat('sv-SE', { hour: '2-digit', minute: '2-digit', timeZone: dailyState.tz });
+    const timeFmt = new Intl.DateTimeFormat(LOCALE[lang], { hour: '2-digit', minute: '2-digit', timeZone: dailyState.tz });
 
     const chips = withComfort.map(h => {
-      const [icon, desc] = conditionInfo[h.condition] || conditionInfo.unknown;
+      const [icon, desc] = conditionInfo(h.condition);
       const isBest = h.time === best.time;
       const timeStr = timeFmt.format(new Date(h.time));
       const tempStr = `${formatTemp(h.temp, dailyState.unit)}°${dailyState.unit}`;
-      const chipLabel = `${timeStr}, ${desc}, ${tempStr}, Hundkomfortindex ${n(h.comfort.score, 1)} av 10, ${h.comfort.label}`;
+      const chipLabel = `${timeStr}, ${desc}, ${tempStr}, ${t('comfortIndexLabel')} ${n(h.comfort.score, 1)} ${t('outOf10')}, ${h.comfort.label}`;
       return `<div class="hour-chip${isBest ? ' hour-chip--best' : ''}" style="--dot:${h.comfort.color}" role="group" aria-label="${escapeHtml(chipLabel)}">
         <span class="hour-chip-time" aria-hidden="true">${timeStr}</span>
         <span class="hour-chip-icon" aria-hidden="true">${icon}</span>
@@ -750,14 +1117,14 @@ function renderBestWalk(weatherData, unit) {
   }
 
   const best = withComfort.reduce((a, b) => (b.comfort.score > a.comfort.score ? b : a));
-  const timeFmt = new Intl.DateTimeFormat('sv-SE', { hour: '2-digit', minute: '2-digit', timeZone: tz });
+  const timeFmt = new Intl.DateTimeFormat(LOCALE[lang], { hour: '2-digit', minute: '2-digit', timeZone: tz });
 
   const chips = withComfort.map(h => {
-    const [icon, desc] = conditionInfo[h.condition] || conditionInfo.unknown;
+    const [icon, desc] = conditionInfo(h.condition);
     const best_ = h.time === best.time;
     const timeStr = timeFmt.format(new Date(h.time));
     const tempStr = `${formatTemp(h.temp, unit)}°${unit}`;
-    const label = `${timeStr}, ${desc}, ${tempStr}, Hundkomfortindex ${n(h.comfort.score, 1)} av 10, ${h.comfort.label}`;
+    const label = `${timeStr}, ${desc}, ${tempStr}, ${t('comfortIndexLabel')} ${n(h.comfort.score, 1)} ${t('outOf10')}, ${h.comfort.label}`;
     return `<div class="hour-chip${best_ ? ' hour-chip--best' : ''}" style="--dot:${h.comfort.color}" role="group" aria-label="${escapeHtml(label)}">
       <span class="hour-chip-time" aria-hidden="true">${timeStr}</span>
       <span class="hour-chip-icon" aria-hidden="true">${icon}</span>
@@ -767,19 +1134,17 @@ function renderBestWalk(weatherData, unit) {
   }).join('');
 
   const allSimilar = withComfort.every(h => h.comfort.score >= best.comfort.score - 0.5);
-  const introText = allSimilar
-    ? `Jämn komfort den närmaste tiden — det mesta av dagen fungerar bra för en promenad.`
-    : `Det bästa promenadfönstret den närmaste tiden, jämfört med övriga kommande timmar.`;
+  const introText = allSimilar ? t('bestWalkEvenComfort') : t('bestWalkBestWindow');
 
   bestWalkEl.innerHTML = `
     <div class="best-walk-highlight" style="--dot:${best.comfort.color}">
       <div class="best-walk-time">🐾 ${timeFmt.format(new Date(best.time))}</div>
       <div class="best-walk-body">
         <p class="best-walk-label" style="color:${best.comfort.color}">${escapeHtml(best.comfort.label)} · ${n(best.comfort.score, 1)}/10</p>
-        <p class="best-walk-desc">${introText}</p>
+        <p class="best-walk-desc">${escapeHtml(introText)}</p>
       </div>
     </div>
-    <p class="hour-strip-caption">Väder och Hundkomfortindex timme för timme</p>
+    <p class="hour-strip-caption">${escapeHtml(t('hourStripCaption'))}</p>
     <div class="hour-strip">${chips}</div>
   `;
 }
@@ -792,12 +1157,103 @@ function renderBestWalk(weatherData, unit) {
    panelens fotnot. */
 
 const LEVELS = {
-  ok: { label: 'Bra', color: '#2f7d5c' },
-  caution: { label: 'Var uppmärksam', color: '#d5a33c' },
-  risk: { label: 'Hög risk', color: '#bd4747' }
+  en: {
+    ok: { label: 'Good', color: '#2f7d5c' },
+    caution: { label: 'Watch out', color: '#d5a33c' },
+    risk: { label: 'High risk', color: '#bd4747' }
+  },
+  sv: {
+    ok: { label: 'Bra', color: '#2f7d5c' },
+    caution: { label: 'Var uppmärksam', color: '#d5a33c' },
+    risk: { label: 'Hög risk', color: '#bd4747' }
+  }
+};
+
+const ADVISORY_TEXT = {
+  en: {
+    hotAsphalt: {
+      title: 'Hot asphalt',
+      risk: 'Sun-warmed asphalt can become scorching hot. Press the back of your hand to the ground for 5 seconds — if it\u2019s uncomfortable for you, it\u2019s too hot for paw pads. Choose grass or shade.',
+      caution: 'Asphalt can get warm in the sun. Test with your hand before a longer walk on hard surfaces.',
+      ok: 'The surface isn\u2019t judged to be hot enough to harm paw pads right now.'
+    },
+    coldPaws: {
+      title: 'Cold on the paws',
+      risk: 'Severe cold. Keep the walk short and check paws, ears and tail often.',
+      caution: 'Cold for paw pads, especially on short-coated or small dogs. Consider paw wax or dog boots.',
+      ok: 'The temperature isn\u2019t judged to be a problem for the paws right now.'
+    },
+    wetCoat: {
+      title: 'Wet coat',
+      risk: 'Heavy rain. Coat and paws get thoroughly wet — plan for a proper dry-off afterwards.',
+      caution: 'Raining right now. Expect to dry the coat, belly and paws after the walk.',
+      ok: 'Dry or nearly dry right now.'
+    },
+    windySmall: {
+      title: 'Windy for small dogs',
+      risk: 'Very strong gusts. Can be scary or tough for small, light dogs — keep the leash short and avoid forests.',
+      caution: 'Windy. Can feel tough for small or short-legged dogs — choose a sheltered route if you can.',
+      ok: 'Wind levels are judged to be fine even for smaller dogs.'
+    },
+    pollen: {
+      title: 'Pollen',
+      offSeason: 'Outside the intense pollen season — levels are usually lower.',
+      rainy: 'The rain binds the pollen, so levels are usually lower right now.',
+      dryWindy: 'Pollen season, dry with a light breeze — levels can be high. Wipe down the coat if your dog reacts.',
+      inSeason: 'Pollen season is under way. Levels vary a lot locally and through the day.'
+    },
+    ticks: {
+      title: 'Tick risk',
+      inactive: 'Ticks are usually inactive at this temperature or time of year.',
+      highSeason: 'Peak tick season. Check your dog thoroughly after the walk, especially in grass and woodland.',
+      active: 'Ticks can be active. Check through the coat after the walk.'
+    },
+    goodWalkWeather: { title: 'Good walking weather' }
+  },
+  sv: {
+    hotAsphalt: {
+      title: 'Varm asfalt',
+      risk: 'Solvärmd asfalt kan bli brännhet. Håll handryggen mot marken i 5 sekunder — obehagligt för dig betyder för hett för trampdynorna. Välj gräs eller skugga.',
+      caution: 'Asfalten kan hinna bli varm i solen. Testa gärna med handen innan en längre runda på hårt underlag.',
+      ok: 'Underlaget bedöms inte vara hett nog för att skada trampdynorna just nu.'
+    },
+    coldPaws: {
+      title: 'Kyla mot tassar',
+      risk: 'Sträng kyla. Håll promenaden kort och kontrollera tassar, öron och svans ofta.',
+      caution: 'Kallt för trampdynorna, särskilt på kortpälsade eller små hundar. Överväg tassvax eller hundskor.',
+      ok: 'Temperaturen bedöms inte vara ett problem för tassarna just nu.'
+    },
+    wetCoat: {
+      title: 'Blöt päls',
+      risk: 'Kraftigt regn. Päls och tassar blir rejält blöta — planera för ordentlig torkning efteråt.',
+      caution: 'Regn just nu. Räkna med att torka päls, mage och tassar efter promenaden.',
+      ok: 'Torrt eller nästan torrt just nu.'
+    },
+    windySmall: {
+      title: 'Blåsigt för små hundar',
+      risk: 'Mycket kraftiga vindbyar. Kan skrämma eller vara jobbigt för små och lätta hundar — håll koppel och undvik skog.',
+      caution: 'Blåsigt. Kan kännas jobbigt för små eller kortbenta hundar — välj gärna en skyddad väg.',
+      ok: 'Vindnivån bedöms vara okej även för mindre hundar.'
+    },
+    pollen: {
+      title: 'Pollen',
+      offSeason: 'Utanför den intensiva pollensäsongen — halterna är oftast lägre.',
+      rainy: 'Regnet binder pollenet, så halterna är oftast lägre just nu.',
+      dryWindy: 'Pollensäsong, torrt och lite bris — halterna kan vara höga. Torka gärna av pälsen om hunden reagerar.',
+      inSeason: 'Pollensäsong pågår. Halterna varierar mycket lokalt och under dagen.'
+    },
+    ticks: {
+      title: 'Fästingrisk',
+      inactive: 'Fästingar är oftast inaktiva vid den här temperaturen eller årstiden.',
+      highSeason: 'Högsäsong för fästingar. Kontrollera hunden noga efter promenaden, särskilt i gräs och skog.',
+      active: 'Fästingar kan vara aktiva. Kolla igenom pälsen efter promenaden.'
+    },
+    goodWalkWeather: { title: 'Bra promenadväder' }
+  }
 };
 
 function computeWalkAdvisories(cur, comfort) {
+  const A = ADVISORY_TEXT[lang];
   const temp = cur.temp;
   const apparent = cur.apparentTemp != null ? cur.apparentTemp : temp;
   const gust = cur.gust != null ? cur.gust : cur.wind;
@@ -809,86 +1265,67 @@ function computeWalkAdvisories(cur, comfort) {
 
   // 1. Varm asfalt
   if (temp != null && (temp >= 28 || (temp >= 24 && isSunnyish))) {
-    items.push({ icon: '🛣️', title: 'Varm asfalt', level: 'risk',
-      text: 'Solvärmd asfalt kan bli brännhet. Håll handryggen mot marken i 5 sekunder — obehagligt för dig betyder för hett för trampdynorna. Välj gräs eller skugga.' });
+    items.push({ icon: '🛣️', title: A.hotAsphalt.title, level: 'risk', text: A.hotAsphalt.risk });
   } else if (temp != null && temp >= 20 && isSunnyish) {
-    items.push({ icon: '🛣️', title: 'Varm asfalt', level: 'caution',
-      text: 'Asfalten kan hinna bli varm i solen. Testa gärna med handen innan en längre runda på hårt underlag.' });
+    items.push({ icon: '🛣️', title: A.hotAsphalt.title, level: 'caution', text: A.hotAsphalt.caution });
   } else {
-    items.push({ icon: '🛣️', title: 'Varm asfalt', level: 'ok',
-      text: 'Underlaget bedöms inte vara hett nog för att skada trampdynorna just nu.' });
+    items.push({ icon: '🛣️', title: A.hotAsphalt.title, level: 'ok', text: A.hotAsphalt.ok });
   }
 
   // 2. Kyla mot tassar
   const coldTemp = apparent;
   if (coldTemp != null && coldTemp <= -15) {
-    items.push({ icon: '❄️', title: 'Kyla mot tassar', level: 'risk',
-      text: 'Sträng kyla. Håll promenaden kort och kontrollera tassar, öron och svans ofta.' });
+    items.push({ icon: '❄️', title: A.coldPaws.title, level: 'risk', text: A.coldPaws.risk });
   } else if (coldTemp != null && coldTemp <= -5) {
-    items.push({ icon: '❄️', title: 'Kyla mot tassar', level: 'caution',
-      text: 'Kallt för trampdynorna, särskilt på kortpälsade eller små hundar. Överväg tassvax eller hundskor.' });
+    items.push({ icon: '❄️', title: A.coldPaws.title, level: 'caution', text: A.coldPaws.caution });
   } else {
-    items.push({ icon: '❄️', title: 'Kyla mot tassar', level: 'ok',
-      text: 'Temperaturen bedöms inte vara ett problem för tassarna just nu.' });
+    items.push({ icon: '❄️', title: A.coldPaws.title, level: 'ok', text: A.coldPaws.ok });
   }
 
   // 3. Blöt päls
   if (precip >= 3) {
-    items.push({ icon: '💧', title: 'Blöt päls', level: 'risk',
-      text: 'Kraftigt regn. Päls och tassar blir rejält blöta — planera för ordentlig torkning efteråt.' });
+    items.push({ icon: '💧', title: A.wetCoat.title, level: 'risk', text: A.wetCoat.risk });
   } else if (precip >= 0.5) {
-    items.push({ icon: '💧', title: 'Blöt päls', level: 'caution',
-      text: 'Regn just nu. Räkna med att torka päls, mage och tassar efter promenaden.' });
+    items.push({ icon: '💧', title: A.wetCoat.title, level: 'caution', text: A.wetCoat.caution });
   } else {
-    items.push({ icon: '💧', title: 'Blöt päls', level: 'ok',
-      text: 'Torrt eller nästan torrt just nu.' });
+    items.push({ icon: '💧', title: A.wetCoat.title, level: 'ok', text: A.wetCoat.ok });
   }
 
   // 4. Blåsigt för små hundar
   if (gust != null && gust >= 20) {
-    items.push({ icon: '💨', title: 'Blåsigt för små hundar', level: 'risk',
-      text: 'Mycket kraftiga vindbyar. Kan skrämma eller vara jobbigt för små och lätta hundar — håll koppel och undvik skog.' });
+    items.push({ icon: '💨', title: A.windySmall.title, level: 'risk', text: A.windySmall.risk });
   } else if (gust != null && gust >= 12) {
-    items.push({ icon: '💨', title: 'Blåsigt för små hundar', level: 'caution',
-      text: 'Blåsigt. Kan kännas jobbigt för små eller kortbenta hundar — välj gärna en skyddad väg.' });
+    items.push({ icon: '💨', title: A.windySmall.title, level: 'caution', text: A.windySmall.caution });
   } else {
-    items.push({ icon: '💨', title: 'Blåsigt för små hundar', level: 'ok',
-      text: 'Vindnivån bedöms vara okej även för mindre hundar.' });
+    items.push({ icon: '💨', title: A.windySmall.title, level: 'ok', text: A.windySmall.ok });
   }
 
   // 5. Pollen (grov uppskattning – se fotnot för riktig mätdata)
   const pollenSeason = month >= 3 && month <= 8;
   if (!pollenSeason) {
-    items.push({ icon: '🌼', title: 'Pollen', level: 'ok',
-      text: 'Utanför den intensiva pollensäsongen — halterna är oftast lägre.' });
+    items.push({ icon: '🌼', title: A.pollen.title, level: 'ok', text: A.pollen.offSeason });
   } else if (precip >= 1) {
-    items.push({ icon: '🌼', title: 'Pollen', level: 'ok',
-      text: 'Regnet binder pollenet, så halterna är oftast lägre just nu.' });
+    items.push({ icon: '🌼', title: A.pollen.title, level: 'ok', text: A.pollen.rainy });
   } else if ((cur.wind || 0) >= 3 && isSunnyish) {
-    items.push({ icon: '🌼', title: 'Pollen', level: 'risk',
-      text: 'Pollensäsong, torrt och lite bris — halterna kan vara höga. Torka gärna av pälsen om hunden reagerar.' });
+    items.push({ icon: '🌼', title: A.pollen.title, level: 'risk', text: A.pollen.dryWindy });
   } else {
-    items.push({ icon: '🌼', title: 'Pollen', level: 'caution',
-      text: 'Pollensäsong pågår. Halterna varierar mycket lokalt och under dagen.' });
+    items.push({ icon: '🌼', title: A.pollen.title, level: 'caution', text: A.pollen.inSeason });
   }
 
   // 6. Fästingrisk (grov uppskattning – se fotnot för riktig mätdata)
   const tickActive = coldTemp != null && coldTemp >= 5 && month >= 3 && month <= 11;
   if (!tickActive) {
-    items.push({ icon: '🕷️', title: 'Fästingrisk', level: 'ok',
-      text: 'Fästingar är oftast inaktiva vid den här temperaturen eller årstiden.' });
+    items.push({ icon: '🕷️', title: A.ticks.title, level: 'ok', text: A.ticks.inactive });
   } else if ([5, 6, 8, 9].includes(month)) {
-    items.push({ icon: '🕷️', title: 'Fästingrisk', level: 'risk',
-      text: 'Högsäsong för fästingar. Kontrollera hunden noga efter promenaden, särskilt i gräs och skog.' });
+    items.push({ icon: '🕷️', title: A.ticks.title, level: 'risk', text: A.ticks.highSeason });
   } else {
-    items.push({ icon: '🕷️', title: 'Fästingrisk', level: 'caution',
-      text: 'Fästingar kan vara aktiva. Kolla igenom pälsen efter promenaden.' });
+    items.push({ icon: '🕷️', title: A.ticks.title, level: 'caution', text: A.ticks.active });
   }
 
   // 7. Helhetsbedömning (bygger på samma Hundkomfortindex som visas ovan)
   const overallLevel = comfort.score >= 7 ? 'ok' : comfort.score >= 5 ? 'caution' : 'risk';
-  items.push({ icon: '🚶', title: 'Bra promenadväder', level: overallLevel,
-    text: `${comfort.label} · Hundkomfortindex ${n(comfort.score, 1)}/10.` });
+  items.push({ icon: '🚶', title: A.goodWalkWeather.title, level: overallLevel,
+    text: `${comfort.label} · ${t('comfortIndexLabel')} ${n(comfort.score, 1)}/10.` });
 
   return items;
 }
@@ -896,7 +1333,7 @@ function computeWalkAdvisories(cur, comfort) {
 function renderWalkAdvisories(cur, comfort) {
   const items = computeWalkAdvisories(cur, comfort);
   walkAdviceEl.innerHTML = items.map(item => {
-    const lvl = LEVELS[item.level];
+    const lvl = LEVELS[lang][item.level];
     return `<article class="advice-card">
       <div class="advice-card-head">
         <span class="advice-icon">${item.icon}</span>
@@ -910,7 +1347,7 @@ function renderWalkAdvisories(cur, comfort) {
 
 function render(weatherData, loc, source) {
   const cur = weatherData.current;
-  const [icon, desc] = conditionInfo[cur.condition] || conditionInfo.unknown;
+  const [icon, desc] = conditionInfo(cur.condition);
 
   const comfort = calculateDogComfortIndex({
     temperature: cur.temp,
@@ -925,10 +1362,10 @@ function render(weatherData, loc, source) {
   const unit = tempUnitFor(loc.countryCode);
 
   const feelsLine = (cur.apparentTemp != null && Math.round(cur.apparentTemp) !== Math.round(cur.temp))
-    ? `${desc} · Känns som ${formatTemp(cur.apparentTemp, unit)}°${unit}`
+    ? `${desc} · ${t('feelsLike')} ${formatTemp(cur.apparentTemp, unit)}°${unit}`
     : desc;
 
-  updateHeroBackground(cur, `Hund ute i väder: ${desc.toLowerCase()}, ${escapeHtml(loc.name)}`);
+  updateHeroBackground(cur, `${t('heroAltPrefix')}: ${desc.toLowerCase()}, ${escapeHtml(loc.name)}`);
 
   const reasonsText = escapeHtml(comfort.reasons.join(', '));
 
@@ -939,22 +1376,22 @@ function render(weatherData, loc, source) {
       <div>
         <div class="place-name">${escapeHtml(loc.name)}</div>
         <div class="temp">${formatTemp(cur.temp, unit)}°${unit}</div>
-        <div>${feelsLine}</div>
+        <div>${escapeHtml(feelsLine)}</div>
       </div>
     </div>
     <div class="metrics">
-      <div class="metric"><span>Vind</span><b>${n(cur.wind, 1)} m/s</b></div>
-      <div class="metric"><span>Byvind</span><b>${n(cur.gust, 1)} m/s</b></div>
-      <div class="metric"><span>Luftfuktighet</span><b>${n(cur.humidity)} %</b></div>
+      <div class="metric"><span>${escapeHtml(t('metricWind'))}</span><b>${n(cur.wind, 1)} m/s</b></div>
+      <div class="metric"><span>${escapeHtml(t('metricGust'))}</span><b>${n(cur.gust, 1)} m/s</b></div>
+      <div class="metric"><span>${escapeHtml(t('metricHumidity'))}</span><b>${n(cur.humidity)} %</b></div>
     </div>
-    <div class="comfort" role="group" aria-label="Hundkomfortindex">
-      <div class="comfort-head"><span>Hundkomfortindex</span><b style="color:${comfort.color}">${n(comfort.score, 1)} / 10</b></div>
+    <div class="comfort" role="group" aria-label="${escapeHtml(t('comfortIndexLabel'))}">
+      <div class="comfort-head"><span>${escapeHtml(t('comfortIndexLabel'))}</span><b style="color:${comfort.color}">${n(comfort.score, 1)} / 10</b></div>
       <div class="comfort-bar"><div class="comfort-fill" style="width:${comfort.score * 10}%;background:${comfort.color}"></div></div>
       <p class="comfort-label" style="color:${comfort.color}">${escapeHtml(comfort.label)}</p>
       <p class="comfort-reasons">${reasonsText}.</p>
     </div>
     <div class="dog-verdict">🐕 ${escapeHtml(comfort.recommendations[0])}</div>
-    <p class="comfort-footnote"><a href="#komfortindex-forklaring">Så räknas indexet ut *</a></p>
+    <p class="comfort-footnote"><a href="#komfortindex-forklaring">${escapeHtml(t('howIndexCalculated'))}</a></p>
   `;
 
   renderAlerts(cur);
@@ -964,15 +1401,20 @@ function render(weatherData, loc, source) {
 
   const tz = weatherData.timezone || 'Europe/Stockholm';
   const sourceName = source === 'smhi' ? 'SMHI' : 'Open-Meteo';
-  updatedEl.textContent = `Uppdaterad ${new Intl.DateTimeFormat('sv-SE', { dateStyle: 'medium', timeStyle: 'short', timeZone: tz }).format(weatherData.updatedAt)} (lokal tid). Källa: ${sourceName}.`;
-  statusEl.textContent = `Visar prognos för ${loc.name}.`;
+  const dateStr = new Intl.DateTimeFormat(LOCALE[lang], { dateStyle: 'medium', timeStyle: 'short', timeZone: tz }).format(weatherData.updatedAt);
+  updatedEl.textContent = `${t('updatedPrefix')} ${dateStr} ${t('localTimeSuffix')}. ${t('sourceLabel')} ${sourceName}.`;
+  statusEl.textContent = t('showingForecastFor', { place: loc.name });
 }
 
 /* ---------- Huvudflöde ---------- */
 
+let lastWeatherData = null;
+let lastLoc = null;
+let lastSource = null;
+
 async function forecast(loc) {
   hidePlaceResults();
-  statusEl.textContent = `Hämtar prognosen för ${loc.name || 'platsen'}…`;
+  statusEl.textContent = t('fetchingForecastFor', { place: loc.name || t('theLocation') });
 
   const isSweden = (loc.countryCode || '').toUpperCase() === 'SE';
   let weatherData = null;
@@ -992,7 +1434,7 @@ async function forecast(loc) {
       weatherData = await fetchOpenMeteo(loc);
       source = 'openmeteo';
     } catch (err) {
-      statusEl.textContent = 'Kunde inte hämta väderprognosen just nu. Kontrollera anslutningen och försök igen.';
+      statusEl.textContent = t('errFetchWeatherGeneric');
       return;
     }
   }
@@ -1000,9 +1442,13 @@ async function forecast(loc) {
   try {
     render(weatherData, loc, source);
   } catch (err) {
-    statusEl.textContent = 'Något gick fel när prognosen skulle visas. Försök igen om en stund.';
+    statusEl.textContent = t('errDisplayFailed');
     return;
   }
+
+  lastWeatherData = weatherData;
+  lastLoc = loc;
+  lastSource = source;
 
   try {
     localStorage.setItem('dogWeatherLocation', JSON.stringify({
@@ -1019,7 +1465,7 @@ $('#searchForm').addEventListener('submit', async e => {
   if (!query) return;
 
   hidePlaceResults();
-  statusEl.textContent = 'Söker plats…';
+  statusEl.textContent = t('searchingPlace');
 
   try {
     const results = await geocodeOpenMeteo(query);
@@ -1027,19 +1473,19 @@ $('#searchForm').addEventListener('submit', async e => {
       await forecast(results[0]);
     } else {
       renderPlaceResults(results, query);
-      statusEl.textContent = `Flera platser matchar "${query}". Välj rätt plats nedan.`;
+      statusEl.textContent = t('multipleMatches', { query });
     }
   } catch (err) {
-    statusEl.textContent = err.message || 'Något gick fel vid platssökningen. Försök igen.';
+    statusEl.textContent = err.message || t('errPlaceSearchGeneric');
   }
 });
 
 $('#locate').addEventListener('click', () => {
   if (!navigator.geolocation) {
-    statusEl.textContent = 'Din webbläsare stöder inte platsdelning.';
+    statusEl.textContent = t('geoNotSupported');
     return;
   }
-  statusEl.textContent = 'Hämtar din position…';
+  statusEl.textContent = t('gettingLocation');
   navigator.geolocation.getCurrentPosition(
     async pos => {
       try {
@@ -1047,13 +1493,20 @@ $('#locate').addEventListener('click', () => {
         const { name, countryCode } = await reverseGeocode(lat, lon);
         await forecast({ lat, lon, name, countryCode });
       } catch (err) {
-        statusEl.textContent = 'Kunde inte hämta väder för din position just nu.';
+        statusEl.textContent = t('errWeatherForYourLocation');
       }
     },
-    () => { statusEl.textContent = 'Platsåtkomst nekades. Sök efter ort i stället.'; },
+    () => { statusEl.textContent = t('geoDenied'); },
     { enableHighAccuracy: false, timeout: 10000 }
   );
 });
+
+langBtnSvEl?.addEventListener('click', () => setLang('sv'));
+langBtnEnEl?.addEventListener('click', () => setLang('en'));
+
+/* ---------- Init ---------- */
+
+applyStaticTranslations();
 
 /* Återställ senaste sökta plats vid sidladdning */
 (async () => {
