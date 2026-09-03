@@ -87,7 +87,7 @@
 .panel .subheading{color:#fff;margin-top:0}
 .panel .advice-disclaimer{color:#dcebe4;border-top-color:#ffffff30}
 .panel .advice-disclaimer a{color:#f5c472}
-.panel--random::before{background-image:url("assets/hero-sun.jpg");background-image:-webkit-image-set(url("assets/hero-sun.webp") 1x);background-image:image-set(url("assets/hero-sun.webp") 1x,url("assets/hero-sun.jpg") 1x)}
+.panel--random::before{background-image:url("assets/hero-fog.jpg");background-image:-webkit-image-set(url("assets/hero-fog.webp") 1x);background-image:image-set(url("assets/hero-fog.webp") 1x,url("assets/hero-fog.jpg") 1x)}
 .panel--advice::before{background-image:url("assets/hero-fog.jpg");background-image:-webkit-image-set(url("assets/hero-fog.webp") 1x);background-image:image-set(url("assets/hero-fog.webp") 1x,url("assets/hero-fog.jpg") 1x)}
 .panel--daily::before{background-image:url("assets/hero-windy.jpg");background-image:-webkit-image-set(url("assets/hero-windy.webp") 1x);background-image:image-set(url("assets/hero-windy.webp") 1x,url("assets/hero-windy.jpg") 1x)}
 .panel--hero-sun::before{background-image:url("assets/hero-sun.jpg");background-image:-webkit-image-set(url("assets/hero-sun.webp") 1x);background-image:image-set(url("assets/hero-sun.webp") 1x,url("assets/hero-sun.jpg") 1x)}

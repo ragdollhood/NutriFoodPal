@@ -1775,8 +1775,11 @@ applyStaticTranslations();
 
 // Slumpar fram ett hero-foto bakom "Vädret idag" och ett bakom "Logga hundens dag"
 // (samma bildbank som används för de väderberoende bakgrunderna på sidan).
-setRandomHeroPanel(heroPanelTodayEl);
-setRandomHeroPanel(heroPanelLogEl);
+// Slumpad väderbild är avstängd för dessa rutor (för att undvika att en saknad
+// bildfil ger en tom ruta) — de använder istället den fasta, garanterat
+// fungerande bakgrunden som redan sätts i CSS via .panel--random::before.
+// setRandomHeroPanel(heroPanelTodayEl);
+// setRandomHeroPanel(heroPanelLogEl);
 
 /* Automatiskt språkval: besökare i Sverige får svenska automatiskt om de inte
    redan valt språk manuellt (då respekteras alltid det sparade valet). */
