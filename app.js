@@ -14,6 +14,10 @@ const placeResultsEl = $('#placeResults');
 const updatedEl = $('#updated');
 const heroImgEl = $('#heroImg');
 const heroImgWebpEl = $('#heroImgWebp');
+const heroImgTodayEl = $('#heroImgToday');
+const heroImgTodayWebpEl = $('#heroImgTodayWebp');
+const heroImgLogEl = $('#heroImgLog');
+const heroImgLogWebpEl = $('#heroImgLogWebp');
 const langBtnSvEl = $('#langBtnSv');
 const langBtnEnEl = $('#langBtnEn');
 
@@ -57,6 +61,8 @@ const STR = {
     emptyTitle: "Ready when you are",
     emptyText: "Choose a place to get temperature, precipitation, wind and dog-friendly advice.",
     heroImgAlt: "Dog out on a walk",
+    weatherPhotoAlt: "Dog photo",
+    logPhotoAlt: "Dog photo",
     forecastKicker: "WALK CONDITIONS",
     forecastTitle: "Weather right now",
     updatedInitial: "Forecast data is fetched from SMHI when you search.",
@@ -219,6 +225,8 @@ const STR = {
     emptyTitle: "Redo när du är",
     emptyText: "Välj en plats för att få temperatur, nederbörd, vind och hundanpassade råd.",
     heroImgAlt: "Hund ute på promenad",
+    weatherPhotoAlt: "Hundfoto",
+    logPhotoAlt: "Hundfoto",
     forecastKicker: "PROMENADLÄGET",
     forecastTitle: "Vädret just nu",
     updatedInitial: "Prognosdata hämtas från SMHI när du söker.",
@@ -521,6 +529,17 @@ function updateHeroBackground(cur, altText) {
   heroImgWebpEl.srcset = `assets/${base}.webp`;
   heroImgEl.src = `assets/${base}.jpg`;
   if (altText) heroImgEl.alt = altText;
+}
+
+/* ---------- Slumpade hero-foton: en under "Vädret idag" och en under "Logga hundens dag" ---------- */
+
+const RANDOM_HERO_BASENAMES = ['hero-sun', 'hero-rain', 'hero-snow', 'hero-hot', 'hero-evening', 'hero-fog', 'hero-windy'];
+
+function setRandomHeroPhoto(imgEl, webpSourceEl) {
+  if (!imgEl) return;
+  const base = RANDOM_HERO_BASENAMES[Math.floor(Math.random() * RANDOM_HERO_BASENAMES.length)];
+  if (webpSourceEl) webpSourceEl.srcset = `assets/${base}.webp`;
+  imgEl.src = `assets/${base}.jpg`;
 }
 
 // SMHI:s kodtabell Wsymb2 (1–27). Källa: SMHI Öppna data, https://opendata.smhi.se/
@@ -1756,6 +1775,11 @@ langBtnEnEl?.addEventListener('click', () => setLang('en'));
 
 applyStaticTranslations();
 
+// Slumpar fram ett hero-foto under "Vädret idag" och ett under "Logga hundens dag"
+// (samma bildbank som används för de väderberoende bakgrunderna på sidan).
+setRandomHeroPhoto(heroImgTodayEl, heroImgTodayWebpEl);
+setRandomHeroPhoto(heroImgLogEl, heroImgLogWebpEl);
+
 /* Automatiskt språkval: besökare i Sverige får svenska automatiskt om de inte
    redan valt språk manuellt (då respekteras alltid det sparade valet). */
 (async () => {
@@ -1944,6 +1968,8 @@ function renderCalendar() {
   calGridEl.querySelectorAll('.cal-cell[data-date]').forEach(btn => {
     btn.addEventListener('click', () => {
       selectedDateKey = btn.getAttribute('data-date');
+      // Dagen man klickar på i kalendern blir samtidigt dagen man loggar mot.
+      if (logDateEl) logDateEl.value = selectedDateKey;
       renderCalendar();
     });
   });
@@ -2006,6 +2032,15 @@ function jumpToEntryDate(entry) {
   calViewYear = d.getFullYear();
   calViewMonth = d.getMonth();
   selectedDateKey = entryDateKey(entry);
+  renderCalendar();
+}
+
+function jumpCalendarToDateKey(k) {
+  const [y, m, d] = k.split('-').map(Number);
+  if (!y || !m || !d) return;
+  calViewYear = y;
+  calViewMonth = m - 1;
+  selectedDateKey = k;
   renderCalendar();
 }
 
@@ -2085,6 +2120,14 @@ $('#walkDurationCancel')?.addEventListener('click', hideWalkDurationPicker);
 
 logDateTodayEl?.addEventListener('click', () => {
   if (logDateEl) logDateEl.value = dateKey(logToday);
+  jumpCalendarToDateKey(dateKey(logToday));
+});
+
+logDateEl?.addEventListener('change', () => {
+  // Om man byter datum manuellt i fältet ska kalendern hoppa till och markera
+  // samma dag, så det alltid är tydligt vilken dag man loggar mot.
+  const k = logDateEl.value;
+  if (k) jumpCalendarToDateKey(k);
 });
 
 logCustomConfirmEl?.addEventListener('click', () => {
