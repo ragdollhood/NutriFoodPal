@@ -1312,11 +1312,6 @@ function renderBestWalk(weatherData, unit) {
     <p class="hour-strip-caption">${escapeHtml(t('hourStripCaption'))}</p>
     <div class="hour-strip">${chips}</div>
   `;
-
-  // Rulla fram timremsan till den framhävda timmen, så man inte behöver skrolla
-  // förbi de redan passerade timmarna för att se dagens bästa promenadtid.
-  const bestChip = bestWalkEl.querySelector('.hour-chip--best');
-  bestChip?.scrollIntoView({ block: 'nearest', inline: 'center' });
 }
 
 /* ---------- Vädertolkning: sju konkreta hundråd baserat på aktuellt väder ---------- */
