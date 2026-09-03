@@ -1,4 +1,4 @@
-/* DogMeteo – weather logic and bilingual (English/Swedish) UI text.
+/* DOGLOGG – weather logic and bilingual (English/Swedish) UI text.
    Sources: SMHI Open Data (Swedish locations, primary) and Open-Meteo (global, and fallback
    if SMHI doesn't respond). No API key required for either service. */
 
@@ -39,7 +39,7 @@ let lang = (() => {
    and reused by the JS-rendered dynamic content below. */
 const STR = {
   en: {
-    pageTitle: "DogMeteo | The walk forecast for you and your dog",
+    pageTitle: "DOGLOGG | The walk forecast for you and your dog",
     metaDescription: "Local weather forecast from your dog's perspective, using open forecast data from SMHI.",
     skipLink: "Skip to content",
     navAriaLabel: "Main menu",
@@ -203,7 +203,7 @@ const STR = {
     sourceAkc: "American Kennel Club"
   },
   sv: {
-    pageTitle: "DogMeteo | Promenadprognosen för dig och din hund",
+    pageTitle: "DOGLOGG | Promenadprognosen för dig och din hund",
     metaDescription: "Lokal väderprognos ur hundens perspektiv med öppna prognosdata från SMHI.",
     skipLink: "Hoppa till innehållet",
     navAriaLabel: "Huvudmeny",
