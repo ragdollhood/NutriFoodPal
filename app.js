@@ -1,4 +1,4 @@
-/* Dog Weather – weather logic and bilingual (English/Swedish) UI text.
+/* DogMeteo – weather logic and bilingual (English/Swedish) UI text.
    Sources: SMHI Open Data (Swedish locations, primary) and Open-Meteo (global, and fallback
    if SMHI doesn't respond). No API key required for either service. */
 
@@ -36,7 +36,7 @@ let lang = (() => {
    and reused by the JS-rendered dynamic content below. */
 const STR = {
   en: {
-    pageTitle: "Dog Weather | The walk forecast for you and your dog",
+    pageTitle: "DogMeteo | The walk forecast for you and your dog",
     metaDescription: "Local weather forecast from your dog's perspective, using open forecast data from SMHI.",
     skipLink: "Skip to content",
     navAriaLabel: "Main menu",
@@ -140,7 +140,7 @@ const STR = {
     errOpenMeteoNoData: "The forecast is missing data."
   },
   sv: {
-    pageTitle: "Hundväder | Promenadprognosen för dig och din hund",
+    pageTitle: "DogMeteo | Promenadprognosen för dig och din hund",
     metaDescription: "Lokal väderprognos ur hundens perspektiv med öppna prognosdata från SMHI.",
     skipLink: "Hoppa till innehållet",
     navAriaLabel: "Huvudmeny",
@@ -475,6 +475,20 @@ async function reverseGeocode(lat, lon) {
   } catch {
     return { name: t('yourLocation'), countryCode: '' };
   }
+}
+
+// Slår upp besökarens land via IP, enbart för att kunna välja svenska automatiskt
+// åt besökare i Sverige. Används inte för att visa väderdata eller fästingdata.
+async function detectVisitorCountryCode() {
+  try {
+    const r = await fetch('https://ipwho.is/');
+    if (!r.ok) return null;
+    const data = await r.json();
+    if (data && data.success !== false && data.country_code) {
+      return String(data.country_code).toUpperCase();
+    }
+  } catch { /* nätverk/tjänst otillgänglig – ignorera tyst, behåll förvalt språk */ }
+  return null;
 }
 
 /* ---------- Väderdata: hämtning och normalisering ---------- */
@@ -1252,7 +1266,7 @@ const ADVISORY_TEXT = {
   }
 };
 
-function computeWalkAdvisories(cur, comfort) {
+function computeWalkAdvisories(cur, comfort, showTicks) {
   const A = ADVISORY_TEXT[lang];
   const temp = cur.temp;
   const apparent = cur.apparentTemp != null ? cur.apparentTemp : temp;
@@ -1312,14 +1326,18 @@ function computeWalkAdvisories(cur, comfort) {
     items.push({ icon: '🌼', title: A.pollen.title, level: 'caution', text: A.pollen.inSeason });
   }
 
-  // 6. Fästingrisk (grov uppskattning – se fotnot för riktig mätdata)
-  const tickActive = coldTemp != null && coldTemp >= 5 && month >= 3 && month <= 11;
-  if (!tickActive) {
-    items.push({ icon: '🕷️', title: A.ticks.title, level: 'ok', text: A.ticks.inactive });
-  } else if ([5, 6, 8, 9].includes(month)) {
-    items.push({ icon: '🕷️', title: A.ticks.title, level: 'risk', text: A.ticks.highSeason });
-  } else {
-    items.push({ icon: '🕷️', title: A.ticks.title, level: 'caution', text: A.ticks.active });
+  // 6. Fästingrisk (grov uppskattning – se fotnot för riktig mätdata).
+  // Visas bara när platsen har tillförlitlig fästingdata (för närvarande: Sverige/SVA).
+  // Utanför Sverige saknas underlag, så kortet utelämnas helt istället för att visa missvisande data.
+  if (showTicks) {
+    const tickActive = coldTemp != null && coldTemp >= 5 && month >= 3 && month <= 11;
+    if (!tickActive) {
+      items.push({ icon: '🕷️', title: A.ticks.title, level: 'ok', text: A.ticks.inactive });
+    } else if ([5, 6, 8, 9].includes(month)) {
+      items.push({ icon: '🕷️', title: A.ticks.title, level: 'risk', text: A.ticks.highSeason });
+    } else {
+      items.push({ icon: '🕷️', title: A.ticks.title, level: 'caution', text: A.ticks.active });
+    }
   }
 
   // 7. Helhetsbedömning (bygger på samma Hundkomfortindex som visas ovan)
@@ -1330,8 +1348,8 @@ function computeWalkAdvisories(cur, comfort) {
   return items;
 }
 
-function renderWalkAdvisories(cur, comfort) {
-  const items = computeWalkAdvisories(cur, comfort);
+function renderWalkAdvisories(cur, comfort, showTicks) {
+  const items = computeWalkAdvisories(cur, comfort, showTicks);
   walkAdviceEl.innerHTML = items.map(item => {
     const lvl = LEVELS[lang][item.level];
     return `<article class="advice-card">
@@ -1394,9 +1412,14 @@ function render(weatherData, loc, source) {
     <p class="comfort-footnote"><a href="#komfortindex-forklaring">${escapeHtml(t('howIndexCalculated'))}</a></p>
   `;
 
+  // Fästingdata (SVA) finns bara tillförlitlig för Sverige, så kortet visas bara då.
+  // Lägg till fler landskoder här den dagen det finns en tillförlitlig källa för ett annat land.
+  const RELIABLE_TICK_DATA_COUNTRIES = new Set(['SE']);
+  const hasReliableTickData = RELIABLE_TICK_DATA_COUNTRIES.has((loc.countryCode || '').toUpperCase());
+
   renderAlerts(cur);
   renderBestWalk(weatherData, unit);
-  renderWalkAdvisories(cur, comfort);
+  renderWalkAdvisories(cur, comfort, hasReliableTickData);
   renderDaily(weatherData, unit);
 
   const tz = weatherData.timezone || 'Europe/Stockholm';
@@ -1507,6 +1530,21 @@ langBtnEnEl?.addEventListener('click', () => setLang('en'));
 /* ---------- Init ---------- */
 
 applyStaticTranslations();
+
+/* Automatiskt språkval: besökare i Sverige får svenska automatiskt om de inte
+   redan valt språk manuellt (då respekteras alltid det sparade valet). */
+(async () => {
+  let hasSavedLang = false;
+  try { hasSavedLang = !!localStorage.getItem('dogWeatherLang'); } catch { /* ignore */ }
+  if (hasSavedLang) return;
+
+  const countryCode = await detectVisitorCountryCode();
+  if (countryCode === 'SE' && lang !== 'sv') {
+    lang = 'sv';
+    applyStaticTranslations();
+    if (lastWeatherData && lastLoc) render(lastWeatherData, lastLoc, lastSource);
+  }
+})();
 
 /* Återställ senaste sökta plats vid sidladdning */
 (async () => {
