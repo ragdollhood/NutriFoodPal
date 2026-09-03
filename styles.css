@@ -7,7 +7,7 @@
 .hero-weather-kicker{display:block;font-size:11px;letter-spacing:.16em;font-weight:700;color:#a9d4c2;margin-bottom:10px}
 .hero-weather .current{width:100%;padding:20px;border-radius:18px;box-shadow:0 16px 40px #0006;font-size:13px;display:flex;flex-direction:column;gap:16px}
 .hero-weather .current.empty{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center}
-.hero-weather .current.empty .paw{font-size:26px}
+.hero-weather .current.empty .paw{font-size:26px;display:inline-flex;align-items:center;justify-content:center;color:var(--pine)}
 .hero-weather .current.empty h3{font-size:16px;margin:0 0 4px}
 .hero-weather .current.empty p{font-size:13px;margin:0;line-height:1.5}
 .hero-weather .current-main{display:flex;align-items:center;gap:14px}
@@ -75,7 +75,7 @@
 .advice-skeleton{min-height:150px}
 .advice-card{border:1px solid var(--line);border-radius:18px;padding:20px;background:#fff;display:flex;flex-direction:column;gap:8px}
 .advice-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.advice-icon{font-size:26px}
+.advice-icon{font-size:26px;display:inline-flex;align-items:center;justify-content:center}
 .advice-pill{font-size:11px;font-weight:700;letter-spacing:.03em;padding:5px 10px;border-radius:999px;white-space:nowrap}
 .advice-card h4{margin:0;font:700 17px Fraunces,serif}
 .advice-card p{margin:0;color:var(--muted);font-size:14px;line-height:1.55}
@@ -106,6 +106,14 @@
 .place-item-meta{font-size:12px;color:var(--muted)}
 .comfort{grid-column:1/-1;background:#ffffff14;padding:20px 22px;border-radius:16px}
 .comfort-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.comfort-row{display:flex;align-items:center;gap:16px}
+.comfort-copy{flex:1;min-width:0}
+.comfort-kicker{display:block;text-transform:uppercase;font-size:10.5px;letter-spacing:.1em;font-weight:700;opacity:.75;margin-bottom:2px}
+.comfort-gauge{--gauge-track:#00000014;width:var(--gauge-size,84px);height:var(--gauge-size,84px);flex:0 0 auto;border-radius:50%;background:conic-gradient(var(--gauge-color,var(--pine2)) var(--gauge-pct,0deg),var(--gauge-track) 0);display:grid;place-items:center;position:relative}
+.comfort-gauge::before{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--gauge-bg,var(--paper))}
+.comfort-gauge-value{position:relative;font:700 21px "Fraunces",serif;line-height:1;color:inherit}
+.comfort-gauge-unit{position:relative;font-size:9px;letter-spacing:.03em;opacity:.6;margin-top:2px;color:inherit}
+.hero-weather .comfort-gauge{--gauge-bg:var(--pine);--gauge-track:#ffffff26;color:#fff}
 .comfort-head span{font-size:12px;letter-spacing:.14em;font-weight:700;color:#a9d4c2}
 .comfort-head b{font-size:22px;color:#f5c472;font-family:Fraunces,serif}
 .comfort-bar{height:10px;border-radius:6px;background:#ffffff26;overflow:hidden;margin:10px 0}
@@ -128,7 +136,7 @@
 .log-date-today:hover,.log-date-today:focus-visible{border-color:var(--pine2);outline:none}
 .log-buttons{display:flex;flex-wrap:wrap;gap:10px}
 .log-btn{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:13px 20px;font:inherit;font-weight:700;font-size:14.5px;color:var(--ink);cursor:pointer;transition:border-color .15s ease,box-shadow .15s ease,background .15s ease,color .15s ease}
-.log-btn-icon{font-size:18px;line-height:1}
+.log-btn-icon{font-size:18px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
 .log-btn:hover,.log-btn:focus-visible{border-color:var(--pine2);box-shadow:0 0 0 2px #245a4c26;outline:none}
 .log-btn.is-active{background:var(--pine);border-color:var(--pine);color:#fff}
 .log-btn.just-logged{background:var(--pine2);border-color:var(--pine2);color:#fff}
@@ -170,7 +178,7 @@
 .log-entry-list{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column}
 .log-entry{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
 .log-entry:last-child{border-bottom:none}
-.log-entry-icon{font-size:19px;flex:0 0 auto}
+.log-entry-icon{font-size:19px;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center}
 .log-entry-label{flex:1;font-weight:600;font-size:14px;min-width:0}
 .log-entry-del{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:16px;flex:0 0 auto;padding:4px}
 .log-entry-del:hover,.log-entry-del:focus-visible{color:#b2483b;outline:none}

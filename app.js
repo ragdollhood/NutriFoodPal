@@ -2,6 +2,28 @@
    Sources: SMHI Open Data (Swedish locations, primary) and Open-Meteo (global, and fallback
    if SMHI doesn't respond). No API key required for either service. */
 
+/* Ikonsystem: enkla, konsekventa SVG-linjeikoner som ersätter emoji rakt av.
+   width/height="1em" gör att de ärver storlek från samma font-size-regler
+   (.advice-icon, .log-btn-icon, .paw m.fl.) som redan finns i styles.css –
+   ingen CSS behövde ändras för att byta ut glyferna. */
+const ICONS = {
+  paw: `<svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true"><ellipse cx="12" cy="16.5" rx="5.2" ry="4.2" fill="currentColor"/><ellipse cx="5.6" cy="9.4" rx="2.1" ry="2.6" fill="currentColor"/><ellipse cx="10.4" cy="6.3" rx="2" ry="2.5" fill="currentColor"/><ellipse cx="14.4" cy="6.3" rx="2" ry="2.5" fill="currentColor"/><ellipse cx="18.6" cy="9.4" rx="2.1" ry="2.6" fill="currentColor"/></svg>`,
+  walk: `<svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true"><g transform="translate(-1,2) scale(.62)"><ellipse cx="12" cy="16.5" rx="5.2" ry="4.2" fill="currentColor" opacity=".55"/><ellipse cx="5.6" cy="9.4" rx="2.1" ry="2.6" fill="currentColor" opacity=".55"/><ellipse cx="10.4" cy="6.3" rx="2" ry="2.5" fill="currentColor" opacity=".55"/><ellipse cx="14.4" cy="6.3" rx="2" ry="2.5" fill="currentColor" opacity=".55"/><ellipse cx="18.6" cy="9.4" rx="2.1" ry="2.6" fill="currentColor" opacity=".55"/></g><g transform="translate(9,-3) scale(.62)"><ellipse cx="12" cy="16.5" rx="5.2" ry="4.2" fill="currentColor"/><ellipse cx="5.6" cy="9.4" rx="2.1" ry="2.6" fill="currentColor"/><ellipse cx="10.4" cy="6.3" rx="2" ry="2.5" fill="currentColor"/><ellipse cx="14.4" cy="6.3" rx="2" ry="2.5" fill="currentColor"/><ellipse cx="18.6" cy="9.4" rx="2.1" ry="2.6" fill="currentColor"/></g></svg>`,
+  poop: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 19c-1.5 0-2.5-1-2.5-2.3 0-1 .6-1.8 1.6-2.1-.5-.4-.8-1-.8-1.7 0-1.1.9-2 2.1-2.1-.3-.4-.5-.9-.5-1.4 0-1.3 1.2-2.4 2.7-2.4.4 0 .8.1 1.1.2C12.1 6 13.2 5.3 14.5 5.3c1.9 0 3.5 1.4 3.5 3.1 0 .4-.1.8-.2 1.1 1.1.3 1.9 1.2 1.9 2.3 0 .7-.3 1.3-.9 1.7 1 .3 1.7 1.2 1.7 2.2 0 1.3-1.1 2.3-2.6 2.3H8z"/></svg>`,
+  droplet: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5c3.2 4.1 5.5 7.4 5.5 10.2a5.5 5.5 0 1 1-11 0c0-2.8 2.3-6.1 5.5-10.2z"/></svg>`,
+  nails: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 12c0-4 2.5-7 4.5-7S15 8 15 12s-2.5 7-4.5 7S6 16 6 12z"/><path d="M14 9l4.5-2.5M14 15l4.5 2.5"/></svg>`,
+  bath: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16v2a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5v-2z"/><path d="M4 12V9.5A2.5 2.5 0 0 1 6.5 7c1 0 1.7.5 2.1 1.3M7 19v1.5M17 19v1.5M2.5 12h19"/></svg>`,
+  scissors: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6.5" r="2.3"/><circle cx="6" cy="17.5" r="2.3"/><path d="M8 8l11 8.5M8 16l11-8.5"/></svg>`,
+  note: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h9l4 4v12H6z"/><path d="M14.5 4v4.5H19M9 12.5h6M9 16h6"/></svg>`,
+  road: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 19l4-14h10l4 14"/><path d="M9.5 8l-2.6 11M14.5 8l2.6 11"/><path d="M8.5 2.5c.6.9.6 1.7 0 2.6M12 2c.6.9.6 1.7 0 2.6M15.5 2.5c.6.9.6 1.7 0 2.6"/></svg>`,
+  snowflake: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M12 3v18M4.5 7.5l15 9M19.5 7.5l-15 9"/><path d="M12 6.5l-2 1M12 6.5l2 1M12 17.5l-2-1M12 17.5l2-1M7 9l1.8 1.4M7 9l-.4 2.2M17 9l-1.8 1.4M17 9l.4 2.2M7 15l1.8-1.4M7 15l-.4-2.2M17 15l-1.8-1.4M17 15l.4-2.2"/></svg>`,
+  wind: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M3 8h10.5a2.5 2.5 0 1 0-2.3-3.5"/><path d="M3 12.5h14.5a2.7 2.7 0 1 1-2.5 3.8"/><path d="M3 17h8.5a2.2 2.2 0 1 1-2 3"/></svg>`,
+  flower: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="2.3" fill="currentColor" stroke="none"/><path d="M12 3.5a3 3 0 0 1 0 6 3 3 0 0 1 0-6zM12 14.5a3 3 0 0 1 0 6 3 3 0 0 1 0-6zM3.5 12a3 3 0 0 1 6 0 3 3 0 0 1-6 0zM14.5 12a3 3 0 0 1 6 0 3 3 0 0 1-6 0z"/></svg>`,
+  tick: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><ellipse cx="12" cy="12" rx="4" ry="5" fill="currentColor" opacity=".15"/><ellipse cx="12" cy="12" rx="4" ry="5"/><path d="M8.5 9L4 6.5M8.5 12H3.5M8.5 15L4 17.5M15.5 9L20 6.5M15.5 12h5M15.5 15L20 17.5"/></svg>`,
+  comb: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16v3H4z"/><path d="M6 9v9M9.4 9v9M12.8 9v9M16.2 9v9M19.6 9v9"/></svg>`,
+  sun: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M21.5 12H19M5 12H2.5M18.4 5.6l-1.8 1.8M7.4 16.6l-1.8 1.8M18.4 18.4l-1.8-1.8M7.4 7.4L5.6 5.6"/></svg>`
+};
+
 const $ = s => document.querySelector(s);
 const statusEl = $('#searchStatus');
 const dailyEl = $('#daily');
@@ -43,8 +65,8 @@ const STR = {
     metaDescription: "Local weather forecast from your dog's perspective, using open forecast data from SMHI.",
     skipLink: "Skip to content",
     navAriaLabel: "Main menu",
-    navForecast: "Forecast",
-    navDogAdvice: "Dog advice",
+    navForecast: "Today",
+    navDogAdvice: "Health & coat",
     navKnowledge: "Knowledge",
     heroEyebrow: "WEATHER FOR FOUR PAWS",
     heroTitle: "Going to be a long walk<br> with playtime today?",
@@ -207,8 +229,8 @@ const STR = {
     metaDescription: "Lokal väderprognos ur hundens perspektiv med öppna prognosdata från SMHI.",
     skipLink: "Hoppa till innehållet",
     navAriaLabel: "Huvudmeny",
-    navForecast: "Prognos",
-    navDogAdvice: "Hundråd",
+    navForecast: "Idag",
+    navDogAdvice: "Hälsa & päls",
     navKnowledge: "Kunskap",
     heroEyebrow: "VÄDER FÖR FYRA TASSAR",
     heroTitle: "Blir det en långrunda<br> med lek idag?",
@@ -849,6 +871,18 @@ const TIER_TEXT = {
 
 // Delar upp en poäng (0–10) i samma nivåer/etiketter/färger som används genomgående i appen,
 // så att både en enskild avläsning och ett dagssnitt (se summarizeDayComfort) blir konsekventa.
+// Bygger en cirkulär "gauge" för Hundkomfortindex istället för en platt stapel/siffra.
+// Använder samma score/color som redan beräknas av calculateDogComfortIndex/comfortTier,
+// så ingen ändring av själva indexlogiken krävs – bara hur den visas.
+function comfortGaugeHtml(score, color, size) {
+  const px = size || 84;
+  const deg = (Math.max(0, Math.min(10, score)) / 10 * 360).toFixed(1);
+  return `<div class="comfort-gauge" style="--gauge-color:${color};--gauge-pct:${deg}deg;--gauge-size:${px}px" aria-hidden="true">
+    <span class="comfort-gauge-value">${n(score, 1)}</span>
+    <span class="comfort-gauge-unit">/10</span>
+  </div>`;
+}
+
 function comfortTier(score) {
   const tt = TIER_TEXT[lang];
   if (score >= 8.5) return { level: 'excellent', label: tt.excellent, color: '#2f7d5c' };
@@ -1306,7 +1340,7 @@ function renderBestWalk(weatherData, unit) {
     <div class="hour-strip">${chips}</div>
     <h3 class="subheading" data-i18n="bestWalkHeading">${escapeHtml(t('bestWalkHeading'))}</h3>
     <div class="best-walk-highlight" style="--dot:${best.comfort.color}">
-      <div class="best-walk-time">🐾 ${timeFmt.format(new Date(best.time))}</div>
+      <div class="best-walk-time">${ICONS.paw} ${timeFmt.format(new Date(best.time))}</div>
       <div class="best-walk-body">
         <p class="best-walk-label" style="color:${best.comfort.color}">${escapeHtml(best.comfort.label)} · ${n(best.comfort.score, 1)}/10</p>
         <p class="best-walk-desc">${escapeHtml(introText)}</p>
@@ -1431,51 +1465,51 @@ function computeWalkAdvisories(cur, comfort, showTicks) {
 
   // 1. Varm asfalt
   if (temp != null && (temp >= 28 || (temp >= 24 && isSunnyish))) {
-    items.push({ icon: '🛣️', title: A.hotAsphalt.title, level: 'risk', text: A.hotAsphalt.risk });
+    items.push({ icon: ICONS.road, title: A.hotAsphalt.title, level: 'risk', text: A.hotAsphalt.risk });
   } else if (temp != null && temp >= 20 && isSunnyish) {
-    items.push({ icon: '🛣️', title: A.hotAsphalt.title, level: 'caution', text: A.hotAsphalt.caution });
+    items.push({ icon: ICONS.road, title: A.hotAsphalt.title, level: 'caution', text: A.hotAsphalt.caution });
   } else {
-    items.push({ icon: '🛣️', title: A.hotAsphalt.title, level: 'ok', text: A.hotAsphalt.ok });
+    items.push({ icon: ICONS.road, title: A.hotAsphalt.title, level: 'ok', text: A.hotAsphalt.ok });
   }
 
   // 2. Kyla mot tassar
   const coldTemp = apparent;
   if (coldTemp != null && coldTemp <= -15) {
-    items.push({ icon: '❄️', title: A.coldPaws.title, level: 'risk', text: A.coldPaws.risk });
+    items.push({ icon: ICONS.snowflake, title: A.coldPaws.title, level: 'risk', text: A.coldPaws.risk });
   } else if (coldTemp != null && coldTemp <= -5) {
-    items.push({ icon: '❄️', title: A.coldPaws.title, level: 'caution', text: A.coldPaws.caution });
+    items.push({ icon: ICONS.snowflake, title: A.coldPaws.title, level: 'caution', text: A.coldPaws.caution });
   } else {
-    items.push({ icon: '❄️', title: A.coldPaws.title, level: 'ok', text: A.coldPaws.ok });
+    items.push({ icon: ICONS.snowflake, title: A.coldPaws.title, level: 'ok', text: A.coldPaws.ok });
   }
 
   // 3. Blöt päls
   if (precip >= 3) {
-    items.push({ icon: '💧', title: A.wetCoat.title, level: 'risk', text: A.wetCoat.risk });
+    items.push({ icon: ICONS.droplet, title: A.wetCoat.title, level: 'risk', text: A.wetCoat.risk });
   } else if (precip >= 0.5) {
-    items.push({ icon: '💧', title: A.wetCoat.title, level: 'caution', text: A.wetCoat.caution });
+    items.push({ icon: ICONS.droplet, title: A.wetCoat.title, level: 'caution', text: A.wetCoat.caution });
   } else {
-    items.push({ icon: '💧', title: A.wetCoat.title, level: 'ok', text: A.wetCoat.ok });
+    items.push({ icon: ICONS.droplet, title: A.wetCoat.title, level: 'ok', text: A.wetCoat.ok });
   }
 
   // 4. Blåsigt för små hundar
   if (gust != null && gust >= 20) {
-    items.push({ icon: '💨', title: A.windySmall.title, level: 'risk', text: A.windySmall.risk });
+    items.push({ icon: ICONS.wind, title: A.windySmall.title, level: 'risk', text: A.windySmall.risk });
   } else if (gust != null && gust >= 12) {
-    items.push({ icon: '💨', title: A.windySmall.title, level: 'caution', text: A.windySmall.caution });
+    items.push({ icon: ICONS.wind, title: A.windySmall.title, level: 'caution', text: A.windySmall.caution });
   } else {
-    items.push({ icon: '💨', title: A.windySmall.title, level: 'ok', text: A.windySmall.ok });
+    items.push({ icon: ICONS.wind, title: A.windySmall.title, level: 'ok', text: A.windySmall.ok });
   }
 
   // 5. Pollen (grov uppskattning – se fotnot för riktig mätdata)
   const pollenSeason = month >= 3 && month <= 8;
   if (!pollenSeason) {
-    items.push({ icon: '🌼', title: A.pollen.title, level: 'ok', text: A.pollen.offSeason });
+    items.push({ icon: ICONS.flower, title: A.pollen.title, level: 'ok', text: A.pollen.offSeason });
   } else if (precip >= 1) {
-    items.push({ icon: '🌼', title: A.pollen.title, level: 'ok', text: A.pollen.rainy });
+    items.push({ icon: ICONS.flower, title: A.pollen.title, level: 'ok', text: A.pollen.rainy });
   } else if ((cur.wind || 0) >= 3 && isSunnyish) {
-    items.push({ icon: '🌼', title: A.pollen.title, level: 'risk', text: A.pollen.dryWindy });
+    items.push({ icon: ICONS.flower, title: A.pollen.title, level: 'risk', text: A.pollen.dryWindy });
   } else {
-    items.push({ icon: '🌼', title: A.pollen.title, level: 'caution', text: A.pollen.inSeason });
+    items.push({ icon: ICONS.flower, title: A.pollen.title, level: 'caution', text: A.pollen.inSeason });
   }
 
   // 6. Fästingrisk (grov uppskattning – se fotnot för riktig mätdata).
@@ -1484,17 +1518,17 @@ function computeWalkAdvisories(cur, comfort, showTicks) {
   if (showTicks) {
     const tickActive = coldTemp != null && coldTemp >= 5 && month >= 3 && month <= 11;
     if (!tickActive) {
-      items.push({ icon: '🕷️', title: A.ticks.title, level: 'ok', text: A.ticks.inactive });
+      items.push({ icon: ICONS.tick, title: A.ticks.title, level: 'ok', text: A.ticks.inactive });
     } else if ([5, 6, 8, 9].includes(month)) {
-      items.push({ icon: '🕷️', title: A.ticks.title, level: 'risk', text: A.ticks.highSeason });
+      items.push({ icon: ICONS.tick, title: A.ticks.title, level: 'risk', text: A.ticks.highSeason });
     } else {
-      items.push({ icon: '🕷️', title: A.ticks.title, level: 'caution', text: A.ticks.active });
+      items.push({ icon: ICONS.tick, title: A.ticks.title, level: 'caution', text: A.ticks.active });
     }
   }
 
   // 7. Helhetsbedömning (bygger på samma Hundkomfortindex som visas ovan)
   const overallLevel = comfort.score >= 7 ? 'ok' : comfort.score >= 5 ? 'caution' : 'risk';
-  items.push({ icon: '🚶', title: A.goodWalkWeather.title, level: overallLevel,
+  items.push({ icon: ICONS.walk, title: A.goodWalkWeather.title, level: overallLevel,
     text: `${comfort.label} · ${t('comfortIndexLabel')} ${n(comfort.score, 1)}/10.` });
 
   return items;
@@ -1546,39 +1580,39 @@ function computeCoatAdvisories(cur) {
 
   // 1. Borstning – alltid med
   if (apparent != null && apparent >= 24) {
-    items.push({ icon: '🪮', title: t('coatBrushTitle'), level: 'ok', text: t('coatBrushHot'), sources: [COAT_SOURCES.arkenZooKlippa] });
+    items.push({ icon: ICONS.comb, title: t('coatBrushTitle'), level: 'ok', text: t('coatBrushHot'), sources: [COAT_SOURCES.arkenZooKlippa] });
   } else if (precip >= 1) {
-    items.push({ icon: '🪮', title: t('coatBrushTitle'), level: 'caution', text: t('coatBrushRain'), sources: [COAT_SOURCES.evidensiaHudPals] });
+    items.push({ icon: ICONS.comb, title: t('coatBrushTitle'), level: 'caution', text: t('coatBrushRain'), sources: [COAT_SOURCES.evidensiaHudPals] });
   } else if (sheddingSeason) {
-    items.push({ icon: '🪮', title: t('coatBrushTitle'), level: 'ok', text: t('coatBrushShed'), sources: [COAT_SOURCES.evidensiaHudPals] });
+    items.push({ icon: ICONS.comb, title: t('coatBrushTitle'), level: 'ok', text: t('coatBrushShed'), sources: [COAT_SOURCES.evidensiaHudPals] });
   } else {
-    items.push({ icon: '🪮', title: t('coatBrushTitle'), level: 'ok', text: t('coatBrushNormal'), sources: [COAT_SOURCES.agriaPalsvard] });
+    items.push({ icon: ICONS.comb, title: t('coatBrushTitle'), level: 'ok', text: t('coatBrushNormal'), sources: [COAT_SOURCES.agriaPalsvard] });
   }
 
   // 2. Bad – alltid med
   if (apparent != null && apparent <= -15) {
-    items.push({ icon: '🛁', title: t('coatBathTitle'), level: 'risk', text: t('coatBathVeryCold'), sources: [COAT_SOURCES.agriaKoldkramp] });
+    items.push({ icon: ICONS.bath, title: t('coatBathTitle'), level: 'risk', text: t('coatBathVeryCold'), sources: [COAT_SOURCES.agriaKoldkramp] });
   } else if (apparent != null && apparent <= -5) {
-    items.push({ icon: '🛁', title: t('coatBathTitle'), level: 'caution', text: t('coatBathCold'), sources: [COAT_SOURCES.agriaKoldkramp] });
+    items.push({ icon: ICONS.bath, title: t('coatBathTitle'), level: 'caution', text: t('coatBathCold'), sources: [COAT_SOURCES.agriaKoldkramp] });
   } else if (apparent != null && apparent >= 20) {
-    items.push({ icon: '🛁', title: t('coatBathTitle'), level: 'ok', text: t('coatBathWarm'), sources: [COAT_SOURCES.arkenZooSommar] });
+    items.push({ icon: ICONS.bath, title: t('coatBathTitle'), level: 'ok', text: t('coatBathWarm'), sources: [COAT_SOURCES.arkenZooSommar] });
   } else {
-    items.push({ icon: '🛁', title: t('coatBathTitle'), level: 'ok', text: t('coatBathNormal'), sources: [COAT_SOURCES.agriaPalsvard] });
+    items.push({ icon: ICONS.bath, title: t('coatBathTitle'), level: 'ok', text: t('coatBathNormal'), sources: [COAT_SOURCES.agriaPalsvard] });
   }
 
   // 3. Snö och is i pälsen – bara vid kyla/snöförhållanden
   if ((cur.snowfall || 0) > 0 || (isSnowyCondition && apparent != null && apparent <= 2)) {
-    items.push({ icon: '❄️', title: t('coatSnowTitle'), level: 'caution', text: t('coatSnowText'), sources: [COAT_SOURCES.agriaVinter] });
+    items.push({ icon: ICONS.snowflake, title: t('coatSnowTitle'), level: 'caution', text: t('coatSnowText'), sources: [COAT_SOURCES.agriaVinter] });
   }
 
   // 4. Fukt och hot spots – bara vid regn/hög luftfuktighet i milt-varmt väder
   if (((precip >= 0.5) || (humidity != null && humidity >= 70)) && apparent != null && apparent >= 12) {
-    items.push({ icon: '💦', title: t('coatMoistureTitle'), level: 'caution', text: t('coatMoistureText'), sources: [COAT_SOURCES.arkenZooSommar] });
+    items.push({ icon: ICONS.droplet, title: t('coatMoistureTitle'), level: 'caution', text: t('coatMoistureText'), sources: [COAT_SOURCES.arkenZooSommar] });
   }
 
   // 5. Solskydd – bara vid soligt och varmt väder
   if (isSunnyish && apparent != null && apparent >= 16) {
-    items.push({ icon: '☀️', title: t('coatSunTitle'), level: 'caution', text: t('coatSunText'), sources: [COAT_SOURCES.vetPartnerSun, COAT_SOURCES.akcSun] });
+    items.push({ icon: ICONS.sun, title: t('coatSunTitle'), level: 'caution', text: t('coatSunText'), sources: [COAT_SOURCES.vetPartnerSun, COAT_SOURCES.akcSun] });
   }
 
   return items;
@@ -1644,12 +1678,16 @@ function render(weatherData, loc, source) {
       <div class="metric"><span>${escapeHtml(t('metricHumidity'))}</span><b>${n(cur.humidity)} %</b></div>
     </div>
     <div class="comfort" role="group" aria-label="${escapeHtml(t('comfortIndexLabel'))}">
-      <div class="comfort-head"><span>${escapeHtml(t('comfortIndexLabel'))}</span><b style="color:${comfort.color}">${n(comfort.score, 1)} / 10</b></div>
-      <div class="comfort-bar"><div class="comfort-fill" style="width:${comfort.score * 10}%;background:${comfort.color}"></div></div>
-      <p class="comfort-label" style="color:${comfort.color}">${escapeHtml(comfort.label)}</p>
-      <p class="comfort-reasons">${reasonsText}.</p>
+      <div class="comfort-row">
+        ${comfortGaugeHtml(comfort.score, comfort.color, 76)}
+        <div class="comfort-copy">
+          <span class="comfort-kicker">${escapeHtml(t('comfortIndexLabel'))}</span>
+          <p class="comfort-label" style="color:${comfort.color}">${escapeHtml(comfort.label)}</p>
+          <p class="comfort-reasons">${reasonsText}.</p>
+        </div>
+      </div>
     </div>
-    <div class="dog-verdict">🐕 ${escapeHtml(comfort.recommendations[0])}</div>
+    <div class="dog-verdict">${ICONS.paw} ${escapeHtml(comfort.recommendations[0])}</div>
     <p class="comfort-footnote"><a href="#komfortindex-forklaring">${escapeHtml(t('howIndexCalculated'))}</a></p>
   `;
 
@@ -1814,17 +1852,17 @@ applyStaticTranslations();
 
 const LOG_STORAGE_KEY = 'dogWeatherLog';
 const LOG_TYPES = [
-  { id: 'walk',  icon: '🚶', labelKey: 'logTypeWalk' },
-  { id: 'poop',  icon: '💩', labelKey: 'logTypePoop' },
-  { id: 'pee',   icon: '💦', labelKey: 'logTypePee' },
-  { id: 'nails', icon: '💅', labelKey: 'logTypeNails' },
-  { id: 'bath',  icon: '🛁', labelKey: 'logTypeBath' },
-  { id: 'coat',  icon: '✂️', labelKey: 'logTypeCoat' }
+  { id: 'walk',  icon: ICONS.walk, labelKey: 'logTypeWalk' },
+  { id: 'poop',  icon: ICONS.poop, labelKey: 'logTypePoop' },
+  { id: 'pee',   icon: ICONS.droplet, labelKey: 'logTypePee' },
+  { id: 'nails', icon: ICONS.nails, labelKey: 'logTypeNails' },
+  { id: 'bath',  icon: ICONS.bath, labelKey: 'logTypeBath' },
+  { id: 'coat',  icon: ICONS.scissors, labelKey: 'logTypeCoat' }
 ];
 const LOG_TYPE_BY_ID = Object.fromEntries(LOG_TYPES.map(x => [x.id, x]));
 // Fritextloggade händelser ("valfri händelse") har ingen fast typ i LOG_TYPES ovan,
 // men behöver ändå en ikon i kalendern och dagvyn.
-LOG_TYPE_BY_ID.custom = { id: 'custom', icon: '📝', labelKey: 'logTypeCustom' };
+LOG_TYPE_BY_ID.custom = { id: 'custom', icon: ICONS.note, labelKey: 'logTypeCustom' };
 
 function loadLogEntries() {
   try {
@@ -1996,7 +2034,7 @@ function renderDayDetail() {
   const itemsHtml = dayEntries.map(e => {
     const info = LOG_TYPE_BY_ID[e.type];
     return `<li class="log-entry" data-id="${e.id}">
-      <span class="log-entry-icon" aria-hidden="true">${info ? info.icon : '🐾'}</span>
+      <span class="log-entry-icon" aria-hidden="true">${info ? info.icon : ICONS.paw}</span>
       <span class="log-entry-label">${escapeHtml(entryLabel(e))}</span>
       <button type="button" class="log-entry-del" data-id="${e.id}" aria-label="${escapeHtml(t('logDeleteAria'))}">✕</button>
     </li>`;

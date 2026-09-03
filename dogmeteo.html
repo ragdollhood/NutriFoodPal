@@ -4,8 +4,34 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#153b32">
-  <meta name="description" content="Local weather forecast from your dog's perspective, using open forecast data from SMHI.">
-  <title>DOGLOGG | The walk forecast for you and your dog</title>
+  <meta name="description" content="Check today's Dog Comfort Index, find the best walk window and get weather-based dog care tips — powered by open SMHI forecast data. Free, no app required.">
+  <title>DogLogg — Dog Walk Weather, Comfort Index & Daily Dog Care</title>
+  <link rel="canonical" href="https://doglogg.se/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="DogLogg">
+  <meta property="og:title" content="DogLogg — dog walk weather, comfort index & daily dog care">
+  <meta property="og:description" content="See today's Dog Comfort Index, find the best walk window and get weather-based dog care tips — based on open SMHI forecast data.">
+  <meta property="og:image" content="https://doglogg.se/assets/og-doglogg.jpg">
+  <meta property="og:url" content="https://doglogg.se/">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="sv_SE">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="DogLogg — dog walk weather & comfort index">
+  <meta name="twitter:description" content="Dog Comfort Index, walk forecasts and a daily dog log — based on open SMHI data.">
+  <meta name="twitter:image" content="https://doglogg.se/assets/og-doglogg.jpg">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "DogLogg",
+    "url": "https://doglogg.se/",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://doglogg.se/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
   <link rel="icon" type="image/png" href="assets/logga-doglogg.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,9 +44,9 @@
   <a class="brand" href="#"><img class="brand-logo" src="assets/logga-doglogg.png" alt="DOGLOGG">DOGLOGG <span>•</span></a>
   <div class="topbar-right">
     <nav aria-label="Main menu" data-i18n-aria-label="navAriaLabel">
-      <a href="#prognos" data-i18n="navForecast">Forecast</a>
+      <a href="#prognos" data-i18n="navForecast">Today</a>
       <a href="#logg" data-i18n="navLog">Log</a>
-      <a href="#hundrad" data-i18n="navDogAdvice">Dog advice</a>
+      <a href="#hundrad" data-i18n="navDogAdvice">Health &amp; coat</a>
       <a href="#kunskap" data-i18n="navKnowledge">Knowledge</a>
     </nav>
     <div class="lang-switch">
@@ -48,7 +74,7 @@
     </div>
     <div class="hero-weather">
       <span class="hero-weather-kicker" data-i18n="heroWeatherKicker">TODAY'S WEATHER</span>
-      <div id="current" class="current empty"><div class="paw">🐾</div><div><h3 data-i18n="emptyTitle">Ready when you are</h3><p data-i18n="emptyText">Choose a place to get temperature, precipitation, wind and dog-friendly advice.</p></div></div>
+      <div id="current" class="current empty"><div class="paw"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true"><ellipse cx="12" cy="16.5" rx="5.2" ry="4.2" fill="currentColor"/><ellipse cx="5.6" cy="9.4" rx="2.1" ry="2.6" fill="currentColor"/><ellipse cx="10.4" cy="6.3" rx="2" ry="2.5" fill="currentColor"/><ellipse cx="14.4" cy="6.3" rx="2" ry="2.5" fill="currentColor"/><ellipse cx="18.6" cy="9.4" rx="2.1" ry="2.6" fill="currentColor"/></svg></div><div><h3 data-i18n="emptyTitle">Ready when you are</h3><p data-i18n="emptyText">Choose a place to get temperature, precipitation, wind and dog-friendly advice.</p></div></div>
     </div>
   </div>
 </section>
@@ -103,12 +129,12 @@
       <button type="button" id="logDateToday" class="log-date-today" data-i18n="logDateToday">Today</button>
     </div>
     <div class="log-buttons" id="logButtons">
-      <button type="button" class="log-btn" data-type="walk"><span class="log-btn-icon" aria-hidden="true">🚶</span><span data-i18n="logTypeWalk">Walk</span></button>
-      <button type="button" class="log-btn" data-type="poop"><span class="log-btn-icon" aria-hidden="true">💩</span><span data-i18n="logTypePoop">Poop</span></button>
-      <button type="button" class="log-btn" data-type="pee"><span class="log-btn-icon" aria-hidden="true">💦</span><span data-i18n="logTypePee">Pee</span></button>
-      <button type="button" class="log-btn" data-type="nails"><span class="log-btn-icon" aria-hidden="true">💅</span><span data-i18n="logTypeNails">Nails trimmed</span></button>
-      <button type="button" class="log-btn" data-type="bath"><span class="log-btn-icon" aria-hidden="true">🛁</span><span data-i18n="logTypeBath">Bath</span></button>
-      <button type="button" class="log-btn" data-type="coat"><span class="log-btn-icon" aria-hidden="true">✂️</span><span data-i18n="logTypeCoat">Coat trimmed</span></button>
+      <button type="button" class="log-btn" data-type="walk"><span class="log-btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="1em" height="1em"><g transform="translate(-1,2) scale(.62)"><ellipse cx="12" cy="16.5" rx="5.2" ry="4.2" fill="currentColor" opacity=".55"/><ellipse cx="5.6" cy="9.4" rx="2.1" ry="2.6" fill="currentColor" opacity=".55"/><ellipse cx="10.4" cy="6.3" rx="2" ry="2.5" fill="currentColor" opacity=".55"/><ellipse cx="14.4" cy="6.3" rx="2" ry="2.5" fill="currentColor" opacity=".55"/><ellipse cx="18.6" cy="9.4" rx="2.1" ry="2.6" fill="currentColor" opacity=".55"/></g><g transform="translate(9,-3) scale(.62)"><ellipse cx="12" cy="16.5" rx="5.2" ry="4.2" fill="currentColor"/><ellipse cx="5.6" cy="9.4" rx="2.1" ry="2.6" fill="currentColor"/><ellipse cx="10.4" cy="6.3" rx="2" ry="2.5" fill="currentColor"/><ellipse cx="14.4" cy="6.3" rx="2" ry="2.5" fill="currentColor"/><ellipse cx="18.6" cy="9.4" rx="2.1" ry="2.6" fill="currentColor"/></g></svg></span><span data-i18n="logTypeWalk">Walk</span></button>
+      <button type="button" class="log-btn" data-type="poop"><span class="log-btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 19c-1.5 0-2.5-1-2.5-2.3 0-1 .6-1.8 1.6-2.1-.5-.4-.8-1-.8-1.7 0-1.1.9-2 2.1-2.1-.3-.4-.5-.9-.5-1.4 0-1.3 1.2-2.4 2.7-2.4.4 0 .8.1 1.1.2C12.1 6 13.2 5.3 14.5 5.3c1.9 0 3.5 1.4 3.5 3.1 0 .4-.1.8-.2 1.1 1.1.3 1.9 1.2 1.9 2.3 0 .7-.3 1.3-.9 1.7 1 .3 1.7 1.2 1.7 2.2 0 1.3-1.1 2.3-2.6 2.3H8z"/></svg></span><span data-i18n="logTypePoop">Poop</span></button>
+      <button type="button" class="log-btn" data-type="pee"><span class="log-btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.2 4.1 5.5 7.4 5.5 10.2a5.5 5.5 0 1 1-11 0c0-2.8 2.3-6.1 5.5-10.2z"/></svg></span><span data-i18n="logTypePee">Pee</span></button>
+      <button type="button" class="log-btn" data-type="nails"><span class="log-btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12c0-4 2.5-7 4.5-7S15 8 15 12s-2.5 7-4.5 7S6 16 6 12z"/><path d="M14 9l4.5-2.5M14 15l4.5 2.5"/></svg></span><span data-i18n="logTypeNails">Nails trimmed</span></button>
+      <button type="button" class="log-btn" data-type="bath"><span class="log-btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16v2a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5v-2z"/><path d="M4 12V9.5A2.5 2.5 0 0 1 6.5 7c1 0 1.7.5 2.1 1.3M7 19v1.5M17 19v1.5M2.5 12h19"/></svg></span><span data-i18n="logTypeBath">Bath</span></button>
+      <button type="button" class="log-btn" data-type="coat"><span class="log-btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6.5" r="2.3"/><circle cx="6" cy="17.5" r="2.3"/><path d="M8 8l11 8.5M8 16l11-8.5"/></svg></span><span data-i18n="logTypeCoat">Coat trimmed</span></button>
     </div>
     <div id="walkDurationPicker" class="walk-duration" hidden>
       <p data-i18n="logWalkPrompt">How long was the walk?</p>
@@ -182,4 +208,4 @@
 <section class="sources"><h2 data-i18n="sourcesTitle">Sources and data transparency</h2><div class="source-grid" data-i18n="sourcesGrid"><a href="https://opendata.smhi.se/metfcst/snow1gv1" target="_blank" rel="noopener"><b>SMHI Open Data</b><span>Forecast data, SNOW1gv1</span></a><a href="https://www.smhi.se/data" target="_blank" rel="noopener"><b>SMHI</b><span>Open data and usage</span></a><a href="https://jordbruksverket.se/djur/hundar-katter-och-smadjur/hundar" target="_blank" rel="noopener"><b>Jordbruksverket</b><span>Care, transport and animal welfare</span></a><a href="https://www.sva.se/djurhaelsa/djurslag-a-oe/sport-och-saellskapsdjur/hund/" target="_blank" rel="noopener"><b>SVA</b><span>Swedish National Veterinary Institute</span></a><a href="https://www.agria.se/hund/artiklar/skotsel-och-vard/sa-tar-du-hand-om-hunden-i-varmen/" target="_blank" rel="noopener"><b>Agria</b><span>Vet-reviewed articles</span></a><a href="https://evidensia.se/djurvardguiden/" target="_blank" rel="noopener"><b>Evidensia</b><span>Animal Care Guide</span></a><a href="https://www.mdpi.com/2076-2615/11/11/3302" target="_blank" rel="noopener"><b>Animals, 2021</b><span>Seasonal weather and activity</span></a><a href="https://www.frontiersin.org/journals/veterinary-science/articles/10.3389/fvets.2022.973574/full" target="_blank" rel="noopener"><b>Frontiers in Vet. Science, 2022</b><span>Extreme weather events</span></a></div><p class="fine" data-i18n="sourcesFine">Place search uses OpenStreetMap's Nominatim service. Forecasts are weather models and can change — always check SMHI's official warnings separately on a live service before planning outdoor activities in extreme weather. The advice on this page is general and never replaces a vet's judgement.</p></section>
 </main>
 <footer><div class="brand"><img class="brand-logo" src="assets/logga-doglogg.png" alt="DOGLOGG">DOGLOGG <span>•</span></div><p data-i18n="footerTagline">Made with care for wet noses and safe walks.</p><p data-i18n="footerSource">Weather data: © SMHI, open data.</p></footer>
-<script src="app.js"></script></body></html>
+<script src="app.js" defer></script></body></html>
