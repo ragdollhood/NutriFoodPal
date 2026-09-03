@@ -9,6 +9,7 @@ const bestWalkEl = $('#bestWalk');
 const currentEl = $('#current');
 const alertsEl = $('#alerts');
 const walkAdviceEl = $('#walkAdvice');
+const coatAdviceEl = $('#coatAdvice');
 const placeResultsEl = $('#placeResults');
 const updatedEl = $('#updated');
 const heroImgEl = $('#heroImg');
@@ -164,7 +165,31 @@ const STR = {
     logDeleteAria: "Remove entry",
     minutesShort: "min",
     weekdaysShort: "Mo,Tu,We,Th,Fr,Sa,Su",
-    monthNames: "January,February,March,April,May,June,July,August,September,October,November,December"
+    monthNames: "January,February,March,April,May,June,July,August,September,October,November,December",
+
+    coatCareHeading: "Coat care for today's weather",
+    coatCareFootnote: "These grooming tips are calculated automatically from today's weather (temperature, precipitation, humidity and sun) and time of year. Each tip links to its source below it — no AI model, and it never replaces judgement from a vet or professional groomer.",
+    coatBrushTitle: "Brushing today",
+    coatBrushHot: "Warm out — brush out the undercoat thoroughly rather than clipping or shaving. A well-brushed, airy coat still insulates against heat and dries faster after a swim.",
+    coatBrushRain: "Rainy — save the thorough brushing for after the walk, once the coat is towel-dried. Brushing a wet, tangled coat makes mats worse rather than better.",
+    coatBrushShed: "Dry and calm — a good day for the usual brushing, and it's shedding season, so extra brushing now means less loose hair indoors.",
+    coatBrushNormal: "Dry and calm weather — a good, ordinary day to brush through the coat.",
+    coatBathTitle: "Bath today",
+    coatBathVeryCold: "Very cold — skip an outdoor bath entirely right now. If your dog truly needs washing, do it indoors in lukewarm water and dry thoroughly before heading back out.",
+    coatBathCold: "Cold — better to wait for a milder day if you can. A dry coat and the skin's natural layer of fat insulate better against the cold than a freshly washed one.",
+    coatBathWarm: "Warm — a cooling bath or dip is perfect today. Dry your dog thoroughly afterwards, especially armpits, groin and under the ears.",
+    coatBathNormal: "Mild weather — bathing is fine as usual. Dry the coat properly afterwards.",
+    coatSnowTitle: "Snow and ice in the coat",
+    coatSnowText: "Snow and ice can clump in the coat and get stuck between the paw pads. Gently work out any clumps after the walk — lukewarm water helps with stubborn ones.",
+    coatMoistureTitle: "Damp coat & hot spots",
+    coatMoistureText: "Humid or wet weather can lead to moist skin irritation (\"hot spots\") in thick-coated dogs, often around the ears, cheeks and neck. Dry your dog thoroughly after the walk or a swim, especially in skin folds and under the coat.",
+    coatSunTitle: "Sun protection",
+    coatSunText: "Sunny and warm. Dogs with thin, light-coloured or freshly clipped coats can get sunburned, especially on the nose, ear tips and belly. A dog-specific sunscreen can protect the most exposed spots.",
+    sourceAgria: "Agria",
+    sourceEvidensia: "Evidensia",
+    sourceArkenZoo: "Arken Zoo",
+    sourceVetPartner: "Veterinary Partner (VIN)",
+    sourceAkc: "American Kennel Club"
   },
   sv: {
     pageTitle: "DogMeteo | Promenadprognosen för dig och din hund",
@@ -295,7 +320,31 @@ const STR = {
     logDeleteAria: "Ta bort post",
     minutesShort: "min",
     weekdaysShort: "Må,Ti,On,To,Fr,Lö,Sö",
-    monthNames: "januari,februari,mars,april,maj,juni,juli,augusti,september,oktober,november,december"
+    monthNames: "januari,februari,mars,april,maj,juni,juli,augusti,september,oktober,november,december",
+
+    coatCareHeading: "Pälsvård för dagens väder",
+    coatCareFootnote: "Dessa pälsvårdsråd räknas fram automatiskt utifrån dagens väder (temperatur, nederbörd, luftfuktighet och sol) och årstid. Varje råd länkar till sin källa nedanför — ingen AI-modell, och det ersätter aldrig bedömning från veterinär eller professionell trimmare.",
+    coatBrushTitle: "Borstning idag",
+    coatBrushHot: "Varmt ute — borsta ur underullen ordentligt istället för att klippa eller raka pälsen. En välborstad, luftig päls isolerar ändå mot värmen och torkar snabbare efter ett dopp.",
+    coatBrushRain: "Regnigt — spara den grundliga borstningen till efter promenaden, när pälsen handdukstorkats. Att borsta en blöt, tovig päls gör tovorna värre snarare än bättre.",
+    coatBrushShed: "Torrt och lugnt väder — ett bra tillfälle för den vanliga borstningen, och det är fällningstid, så extra borstning nu ger mindre lössittande hår i hemmet.",
+    coatBrushNormal: "Torrt och lugnt väder — en bra, vanlig dag att borsta igenom pälsen.",
+    coatBathTitle: "Bad idag",
+    coatBathVeryCold: "Mycket kallt — hoppa helt över bad utomhus just nu. Om hunden verkligen behöver tvättas, gör det inomhus i ljummet vatten och torka noggrant innan ni går ut igen.",
+    coatBathCold: "Kallt — vänta gärna till en mildare dag om du kan. En torr päls och hudens naturliga fettlager isolerar bättre mot kylan än en nytvättad päls.",
+    coatBathWarm: "Varmt — ett svalkande bad eller dopp passar perfekt idag. Torka hunden ordentligt efteråt, särskilt armhålor, ljumskar och under öronen.",
+    coatBathNormal: "Milt väder — bad går bra som vanligt. Torka pälsen ordentligt efteråt.",
+    coatSnowTitle: "Snö och is i pälsen",
+    coatSnowText: "Snö och is kan bilda kokor i pälsen och fastna mellan trampdynorna. Plocka försiktigt bort klumparna efter promenaden — ljummet vatten hjälper mot de som sitter hårt.",
+    coatMoistureTitle: "Fukt i pälsen & hot spots",
+    coatMoistureText: "Fuktigt eller blött väder kan ge fukteksem (\"hot spots\") hos tjockpälsade hundar, ofta vid öron, kinder och hals. Torka hunden noggrant efter promenaden eller badet, särskilt i hudveck och under pälsen.",
+    coatSunTitle: "Solskydd",
+    coatSunText: "Soligt och varmt. Hundar med tunn, ljus eller nyklippt päls kan bli solbrända, särskilt på nosen, öronspetsarna och magen. Solskyddsmedel gjort för hundar kan skydda de mest utsatta ställena.",
+    sourceAgria: "Agria",
+    sourceEvidensia: "Evidensia",
+    sourceArkenZoo: "Arken Zoo",
+    sourceVetPartner: "Veterinary Partner (VIN)",
+    sourceAkc: "American Kennel Club"
   }
 };
 
@@ -1418,6 +1467,95 @@ function renderWalkAdvisories(cur, comfort, showTicks) {
   }).join('');
 }
 
+/* ---------- Pälsvårdsråd baserat på dagens väder ---------- */
+/* Rådtexter bygger på artiklar från Agria (veterinärgranskade), Evidensia (djurvårdsguiden),
+   Arken Zoo:s hundråd samt Veterinary Partner (VIN) / American Kennel Club för solskydd.
+   Se källänken under varje kort. Ingen AI-modell — samma regelbaserade uppskattning som
+   övriga kort på sidan, och ersätter aldrig bedömning från veterinär eller trimmare. */
+
+const COAT_SOURCES = {
+  agriaPalsvard: { key: 'sourceAgria', url: 'https://www.agria.se/hund/artiklar/skotsel-och-vard/palsvard-av-hund/' },
+  agriaKoldkramp: { key: 'sourceAgria', url: 'https://www.agria.se/hund/artiklar/sjukdomar-och-skador/koldkramp-och-forfrysning/' },
+  agriaVinter: { key: 'sourceAgria', url: 'https://www.agria.se/hund/artiklar/skotsel-och-vard/forenkla-vintern-for-hunden/' },
+  evidensiaHudPals: { key: 'sourceEvidensia', url: 'https://evidensia.se/djurvardguiden/hudens-och-palsens-viktiga-uppgifter/' },
+  arkenZooKlippa: { key: 'sourceArkenZoo', url: 'https://www.arkenzoo.se/goda-rad/ska-jag-klippa-eller-raka-min-hund' },
+  arkenZooSommar: { key: 'sourceArkenZoo', url: 'https://www.arkenzoo.se/goda-rad/sommarens-faror-for-hunden' },
+  vetPartnerSun: { key: 'sourceVetPartner', url: 'https://veterinarypartner.vin.com/default.aspx?pid=19239&id=4952515' },
+  akcSun: { key: 'sourceAkc', url: 'https://www.akc.org/expert-advice/health/do-dogs-need-sunscreen/' }
+};
+
+function computeCoatAdvisories(cur) {
+  const temp = cur.temp;
+  const apparent = cur.apparentTemp != null ? cur.apparentTemp : temp;
+  const precip = cur.precip || 0;
+  const humidity = cur.humidity;
+  const isSunnyish = ['clear', 'mostlyClear', 'partlyCloudy'].includes(cur.condition);
+  const isSnowyCondition = ['snow', 'snowLight', 'snowHeavy', 'sleet'].includes(cur.condition);
+  const month = new Date().getMonth() + 1; // 1–12
+  const sheddingSeason = [3, 4, 5, 9, 10, 11].includes(month);
+
+  const items = [];
+
+  // 1. Borstning – alltid med
+  if (apparent != null && apparent >= 24) {
+    items.push({ icon: '🪮', title: t('coatBrushTitle'), level: 'ok', text: t('coatBrushHot'), sources: [COAT_SOURCES.arkenZooKlippa] });
+  } else if (precip >= 1) {
+    items.push({ icon: '🪮', title: t('coatBrushTitle'), level: 'caution', text: t('coatBrushRain'), sources: [COAT_SOURCES.evidensiaHudPals] });
+  } else if (sheddingSeason) {
+    items.push({ icon: '🪮', title: t('coatBrushTitle'), level: 'ok', text: t('coatBrushShed'), sources: [COAT_SOURCES.evidensiaHudPals] });
+  } else {
+    items.push({ icon: '🪮', title: t('coatBrushTitle'), level: 'ok', text: t('coatBrushNormal'), sources: [COAT_SOURCES.agriaPalsvard] });
+  }
+
+  // 2. Bad – alltid med
+  if (apparent != null && apparent <= -15) {
+    items.push({ icon: '🛁', title: t('coatBathTitle'), level: 'risk', text: t('coatBathVeryCold'), sources: [COAT_SOURCES.agriaKoldkramp] });
+  } else if (apparent != null && apparent <= -5) {
+    items.push({ icon: '🛁', title: t('coatBathTitle'), level: 'caution', text: t('coatBathCold'), sources: [COAT_SOURCES.agriaKoldkramp] });
+  } else if (apparent != null && apparent >= 20) {
+    items.push({ icon: '🛁', title: t('coatBathTitle'), level: 'ok', text: t('coatBathWarm'), sources: [COAT_SOURCES.arkenZooSommar] });
+  } else {
+    items.push({ icon: '🛁', title: t('coatBathTitle'), level: 'ok', text: t('coatBathNormal'), sources: [COAT_SOURCES.agriaPalsvard] });
+  }
+
+  // 3. Snö och is i pälsen – bara vid kyla/snöförhållanden
+  if ((cur.snowfall || 0) > 0 || (isSnowyCondition && apparent != null && apparent <= 2)) {
+    items.push({ icon: '❄️', title: t('coatSnowTitle'), level: 'caution', text: t('coatSnowText'), sources: [COAT_SOURCES.agriaVinter] });
+  }
+
+  // 4. Fukt och hot spots – bara vid regn/hög luftfuktighet i milt-varmt väder
+  if (((precip >= 0.5) || (humidity != null && humidity >= 70)) && apparent != null && apparent >= 12) {
+    items.push({ icon: '💦', title: t('coatMoistureTitle'), level: 'caution', text: t('coatMoistureText'), sources: [COAT_SOURCES.arkenZooSommar] });
+  }
+
+  // 5. Solskydd – bara vid soligt och varmt väder
+  if (isSunnyish && apparent != null && apparent >= 16) {
+    items.push({ icon: '☀️', title: t('coatSunTitle'), level: 'caution', text: t('coatSunText'), sources: [COAT_SOURCES.vetPartnerSun, COAT_SOURCES.akcSun] });
+  }
+
+  return items;
+}
+
+function renderCoatAdvice(cur) {
+  if (!coatAdviceEl) return;
+  const items = computeCoatAdvisories(cur);
+  coatAdviceEl.innerHTML = items.map(item => {
+    const lvl = LEVELS[lang][item.level];
+    const sourcesHtml = item.sources.map((src, i) =>
+      `${i > 0 ? '<span class="src-sep">·</span>' : ''}<a href="${src.url}" target="_blank" rel="noopener">${escapeHtml(t(src.key))} ↗</a>`
+    ).join('');
+    return `<article class="advice-card">
+      <div class="advice-card-head">
+        <span class="advice-icon">${item.icon}</span>
+        <span class="advice-pill" style="color:${lvl.color};background:${lvl.color}1a">${lvl.label}</span>
+      </div>
+      <h4>${escapeHtml(item.title)}</h4>
+      <p>${escapeHtml(item.text)}</p>
+      <p class="advice-source">${escapeHtml(t('sourceLabel'))} ${sourcesHtml}</p>
+    </article>`;
+  }).join('');
+}
+
 function render(weatherData, loc, source) {
   const cur = weatherData.current;
   const [icon, desc] = conditionInfo(cur.condition);
@@ -1473,6 +1611,7 @@ function render(weatherData, loc, source) {
   const hasReliableTickData = RELIABLE_TICK_DATA_COUNTRIES.has((loc.countryCode || '').toUpperCase());
 
   renderAlerts(cur);
+  renderCoatAdvice(cur);
   renderBestWalk(weatherData, unit);
   renderWalkAdvisories(cur, comfort, hasReliableTickData);
   renderDaily(weatherData, unit);

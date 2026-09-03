@@ -166,3 +166,13 @@
   .cal-icons{font-size:10px}
   .log-btn{padding:11px 16px;font-size:13.5px}
 }
+
+/* ===== Coat-care advice (weather-based grooming tips) ===== */
+.coat-advice-panel{margin:0 0 40px}
+.coat-advice-heading{margin:0 0 18px}
+.coat-advice-grid{margin-bottom:2px}
+.advice-source{margin:6px 0 0;font-size:12px;color:var(--muted)}
+.advice-source a{color:var(--pine2);font-weight:600;text-decoration:none}
+.advice-source a:hover{text-decoration:underline}
+.advice-source .src-sep{margin:0 4px;color:var(--line)}
+@media(max-width:900px){.coat-advice-panel{padding:26px 22px}}
