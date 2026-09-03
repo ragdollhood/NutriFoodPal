@@ -1807,6 +1807,28 @@ $('#locate').addEventListener('click', () => {
 langBtnSvEl?.addEventListener('click', () => setLang('sv'));
 langBtnEnEl?.addEventListener('click', () => setLang('en'));
 
+/* Mobil bottom tab-bar: markerar vilken sektion man befinner sig i medan man
+   scrollar, ungefär som flikar i en app. Faller tyst tillbaka om webbläsaren
+   saknar IntersectionObserver – länkarna fungerar ändå som vanliga ankare. */
+if ('IntersectionObserver' in window) {
+  const tabItems = document.querySelectorAll('.tabbar-item');
+  const tabSections = ['prognos', 'logg', 'hundrad', 'kunskap']
+    .map(id => document.getElementById(id))
+    .filter(Boolean);
+
+  if (tabItems.length && tabSections.length) {
+    const setActive = id => {
+      tabItems.forEach(a => a.classList.toggle('is-active', a.dataset.tab === id));
+    };
+    const spy = new IntersectionObserver(entries => {
+      const visible = entries.filter(e => e.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (visible) setActive(visible.target.id);
+    }, { rootMargin: '-40% 0px -50% 0px', threshold: [0, 0.25, 0.5, 0.75, 1] });
+    tabSections.forEach(section => spy.observe(section));
+  }
+}
+
 /* ---------- Init ---------- */
 
 applyStaticTranslations();
