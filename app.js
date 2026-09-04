@@ -510,8 +510,8 @@ const DOG_FACTS = {
   ]
 };
 
-// Källa för samtliga hundfakta ovan och i DAILY_TIP_TEXT.facts nedan: American Kennel Club,
-// se källänken som visas tillsammans med fakta i gränssnittet samt i sidans källförteckning.
+// Källa för samtliga hundfakta ovan: American Kennel Club, se källänken som visas
+// tillsammans med fakta i loggpanelen samt i sidans källförteckning.
 const DOG_FACTS_SOURCE_URL = 'https://www.akc.org/expert-advice/lifestyle/dog-facts/';
 
 function todaysDogFact() {
@@ -1903,38 +1903,27 @@ function computeCoatAdvisories(cur) {
 
 /* ==================================================================================
    Today's Tip — lightweight, backend-free retention feature.
-   Picks a short, weather-relevant tip when conditions call for one, otherwise rotates
-   through a general "Dog Fact of the Day" list (seeded by day-of-year so it's stable
-   across reloads on the same day but changes daily — a small reason to check back).
+   Shows a short, weather-relevant tip when conditions call for one. Dog Fact of the Day
+   lives only in the log panel (see renderDailyDogFact below) — this box stays hidden on
+   days when no weather-specific tip applies, rather than falling back to a fact too.
    ================================================================================== */
 
 const DAILY_TIP_TEXT = {
   en: {
     kicker: "TODAY'S TIP",
-    factKicker: 'DOG FACT OF THE DAY',
     hot: 'Dogs can suffer paw burns even when the air feels comfortable to you — hot pavement is often the real risk.',
     rain: 'Dry your dog\u2019s paws and the skin between the pads thoroughly after wet walks to help prevent soreness and infection.',
     cold: 'Road salt and grit can irritate paw pads in winter — rinse and dry paws after walks on treated pavements.',
-    windy: 'Strong wind carries scent further and can make walks more distracting (or more exciting) for a dog\u2019s nose.',
-    // Same source list as the "Dog fact of the day" panel, so facts vary the same way everywhere on the page.
-    facts: DOG_FACTS.en
+    windy: 'Strong wind carries scent further and can make walks more distracting (or more exciting) for a dog\u2019s nose.'
   },
   sv: {
     kicker: 'DAGENS TIPS',
-    factKicker: 'DAGENS HUNDFAKTA',
     hot: 'Hundar kan få brännskador på trampdynorna även när luften känns behaglig för dig — det är ofta den varma marken som är den verkliga risken.',
     rain: 'Torka hundens tassar och huden mellan trampdynorna noga efter blöta promenader för att minska risken för sårighet och infektion.',
     cold: 'Vägsalt och grus kan irritera trampdynorna på vintern — skölj och torka tassarna efter promenader på saltade gator.',
-    windy: 'Kraftig vind bär doft längre och kan göra promenaden mer distraherande (eller mer spännande) för hundens nos.',
-    // Samma källista som rutan "Dagens hundfakta", så fakta varierar likadant överallt på sidan.
-    facts: DOG_FACTS.sv
+    windy: 'Kraftig vind bär doft längre och kan göra promenaden mer distraherande (eller mer spännande) för hundens nos.'
   }
 };
-
-function dayOfYear(d) {
-  const start = new Date(d.getFullYear(), 0, 0);
-  return Math.floor((d - start) / 86400000);
-}
 
 function computeDailyTip(cur) {
   const T = DAILY_TIP_TEXT[lang];
@@ -1946,26 +1935,24 @@ function computeDailyTip(cur) {
   if (temp != null && temp <= -2) return { icon: EMOJI.cold, kicker: T.kicker, text: T.cold };
   if (gust != null && gust >= 12) return { icon: EMOJI.tip, kicker: T.kicker, text: T.windy };
 
-  const idx = dayOfYear(new Date()) % T.facts.length;
-  return { icon: EMOJI.tip, kicker: T.factKicker, text: T.facts[idx] };
+  return null;
 }
 
 function renderDailyTip(cur) {
   const el = $('#dailyTip');
   if (!el) return;
   const tip = computeDailyTip(cur);
-  // The weather-specific tips (heat/rain/cold/wind) are our own advice, not a "fact" — the
-  // source line is only shown when the fallback is actually the Dog Fact of the Day.
-  const isFact = tip.kicker === DAILY_TIP_TEXT[lang].factKicker;
-  const sourceHtml = isFact
-    ? `<p class="advice-source">${escapeHtml(t('sourceLabel'))} <a href="${DOG_FACTS_SOURCE_URL}" target="_blank" rel="noopener">${escapeHtml(t('sourceAkc'))} ↗</a></p>`
-    : '';
+  if (!tip) {
+    el.hidden = true;
+    el.innerHTML = '';
+    return;
+  }
+  el.hidden = false;
   el.innerHTML = `
     <span class="daily-tip-icon" aria-hidden="true">${tip.icon}</span>
     <div>
       <span class="daily-tip-kicker">${escapeHtml(tip.kicker)}</span>
       <p class="daily-tip-text">${escapeHtml(tip.text)}</p>
-      ${sourceHtml}
     </div>
   `;
 }
