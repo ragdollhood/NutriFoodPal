@@ -135,7 +135,9 @@
 .comfort-recommendations li{line-height:1.5}
 .comfort-disclaimer{font-size:12px;line-height:1.5;color:#c9dce8;margin:0}
 @media(max-width:900px){nav{display:none}.hero{min-height:720px}.hero h1 br{display:none}.hero-inner--split{grid-template-columns:1fr;width:91%}.hero-weather{max-width:380px}.search{flex-wrap:wrap}.search input{height:52px;flex-basis:100%}.search button{flex:1}.section-head{display:block}.current{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(3,1fr)}.daily{grid-template-columns:repeat(2,1fr)}.story-grid,.science{grid-template-columns:1fr}.tips,.sources .source-grid{grid-template-columns:1fr}.science{gap:30px}footer{align-items:flex-start;flex-direction:column}.panel{padding:30px 22px}.hero-logo{height:56px}body{padding-bottom:calc(60px + env(safe-area-inset-bottom))}.tabbar{display:flex}}@media(max-width:520px){.weather-wrap,.advice-section,.sources{padding:64px 18px}.hero-inner{width:91%}.hero h1{font-size:48px}.current{padding:22px}.temp{font-size:58px}.metrics{grid-template-columns:1fr}.daily{grid-template-columns:1fr}.story img{height:240px}.panel{padding:24px 16px;margin-top:32px}.best-walk-highlight{flex-direction:column;align-items:flex-start;gap:12px}.panel--random{min-height:170px;flex-direction:column;align-items:flex-start;gap:14px}.panel-fact{position:static;max-width:100%}}
-.dog-profile-panel{margin:0 0 28px}
+.dog-profile-panel{position:relative;isolation:isolate;overflow:hidden;margin:0 0 28px}
+.dog-profile-panel::before{content:"";position:absolute;inset:0;z-index:-2;background-image:url("assets/fur-white.jpg");background-image:-webkit-image-set(url("assets/fur-white.webp") 1x);background-image:image-set(url("assets/fur-white.webp") 1x,url("assets/fur-white.jpg") 1x);background-position:center;background-size:cover}
+.dog-profile-panel::after{content:"";position:absolute;inset:0;z-index:-1;background:rgba(255,253,248,.72)}
 .dog-profile-heading{margin:0 0 6px;font:600 20px "Fraunces",serif}
 .dog-profile-intro{margin:0 0 18px;color:var(--muted);font-size:14px;max-width:56ch}
 .dog-profile-fields{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
