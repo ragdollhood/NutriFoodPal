@@ -97,6 +97,7 @@
 .panel--hero-snow::before{background-image:url("assets/hero-snow.jpg");background-image:-webkit-image-set(url("assets/hero-snow.webp") 1x);background-image:image-set(url("assets/hero-snow.webp") 1x,url("assets/hero-snow.jpg") 1x)}
 .panel--hero-hot::before{background-image:url("assets/hero-hot.jpg");background-image:-webkit-image-set(url("assets/hero-hot.webp") 1x);background-image:image-set(url("assets/hero-hot.webp") 1x,url("assets/hero-hot.jpg") 1x)}
 .panel--hero-evening::before{background-image:url("assets/hero-evening.jpg");background-image:-webkit-image-set(url("assets/hero-evening.webp") 1x);background-image:image-set(url("assets/hero-evening.webp") 1x,url("assets/hero-evening.jpg") 1x)}
+.panel--fur-orange::before{background-image:url("assets/fur-orange.jpg");background-image:-webkit-image-set(url("assets/fur-orange.webp") 1x);background-image:image-set(url("assets/fur-orange.webp") 1x,url("assets/fur-orange.jpg") 1x)}
 .panel--random{display:flex;align-items:flex-end;min-height:220px}
 .panel-caption{margin:0;color:#fff;font:600 19px/1.5 Fraunces,serif;max-width:520px;text-shadow:0 2px 12px rgba(10,25,20,.45)}
 .place-results:not([hidden]){display:block}
