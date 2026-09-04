@@ -529,42 +529,58 @@ function formatTemp(celsius, unit, decimals = 0) {
 
 /* ---------- Vädersymboler: en gemensam uppsättning oavsett datakälla, per språk ---------- */
 
+// Väderikoner: samma linjestil och 1em-storlek som resten av ICONS-systemet,
+// så CONDITION_INFO nedan kan peka på SVG istället för emoji utan att någon CSS
+// (.weather-icon, .hour-chip-icon) behöver ändras – de är redan font-size-baserade.
+const WEATHER_ICONS = {
+  sun: ICONS.sun,
+  sunCloud: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="15.5" cy="7.3" r="3.1"/><path d="M15.5 2.3v1.5M20.5 7.3h-1.5M19 4l-1.1 1.1M12 4l1.1 1.1"/><path d="M5 18.3a3.3 3.3 0 0 1 .4-6.6 4.7 4.7 0 0 1 8.9-1.5A3.6 3.6 0 0 1 15.9 18.3H5z"/></svg>`,
+  cloudSun: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="7.8" r="3.5"/><path d="M16 2.3v1.5M21.7 7.8h-1.5M20.1 4.1l-1.1 1.1M13.1 4.1l1.1 1.1"/><path d="M4.5 19a3.6 3.6 0 0 1 .4-7.2 5.1 5.1 0 0 1 9.7-1.7A3.9 3.9 0 0 1 15.7 19H4.5z"/></svg>`,
+  cloud: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18a3.8 3.8 0 0 1 .4-7.6A5.4 5.4 0 0 1 15.9 8.8 4.1 4.1 0 0 1 16.5 18H5z"/></svg>`,
+  fog: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12.3a3.3 3.3 0 0 1 .3-6.6A4.8 4.8 0 0 1 15.7 4.1 3.6 3.6 0 0 1 16.3 12.3H6z"/><path d="M3.5 16.3h17M5 19.3h14M6.5 22.3h11"/></svg>`,
+  drizzle: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 13.8a3.5 3.5 0 0 1 .3-7 5 5 0 0 1 9.7-1.7A3.8 3.8 0 0 1 16 13.8H5.5z"/><path d="M8.5 17.3v1.6M12 17.3v1.6M15.5 17.3v1.6"/></svg>`,
+  rain: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 13.3a3.5 3.5 0 0 1 .3-7 5 5 0 0 1 9.7-1.7A3.8 3.8 0 0 1 16 13.3H5.5z"/><path d="M8 16.8l-1.3 3M12.3 16.8l-1.3 3M16.6 16.8l-1.3 3"/></svg>`,
+  thunder: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 12.3a3.5 3.5 0 0 1 .3-7 5 5 0 0 1 9.7-1.7A3.8 3.8 0 0 1 16 12.3H5.5z"/><path d="M12.5 12.3l-3 5h3l-1.5 4.4 4.5-6.4h-3z" fill="currentColor" stroke="none"/></svg>`,
+  sleet: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 13.3a3.5 3.5 0 0 1 .3-7 5 5 0 0 1 9.7-1.7A3.8 3.8 0 0 1 16 13.3H5.5z"/><path d="M8 16.8l-1 3M15.5 16.8l-1 3M12 16.8v.01M12 19.8v.01"/></svg>`,
+  snow: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 12.3a3.5 3.5 0 0 1 .3-7 5 5 0 0 1 9.7-1.7A3.8 3.8 0 0 1 16 12.3H5.5z"/><path d="M8 16.3v3M6.7 17.3l2.6 1M9.3 17.3l-2.6 1M15 16.3v3M13.7 17.3l2.6 1M16.3 17.3l-2.6 1"/></svg>`
+};
+
 const CONDITION_INFO = {
   en: {
-    clear: ['☀️', 'Clear'],
-    mostlyClear: ['🌤️', 'Mostly clear'],
-    partlyCloudy: ['⛅', 'Partly cloudy'],
-    cloudy: ['☁️', 'Mostly cloudy'],
-    overcast: ['☁️', 'Overcast'],
-    fog: ['🌫️', 'Fog'],
-    drizzle: ['🌦️', 'Light drizzle'],
-    rainLight: ['🌦️', 'Light rain showers'],
-    rain: ['🌧️', 'Rain'],
-    rainHeavy: ['🌧️', 'Heavy rain'],
-    thunder: ['⛈️', 'Thunder'],
-    sleet: ['🌨️', 'Sleet'],
-    snowLight: ['🌨️', 'Light snow'],
-    snow: ['❄️', 'Snow'],
-    snowHeavy: ['❄️', 'Heavy snow'],
-    unknown: ['🌤️', 'Changeable weather']
+    clear: [WEATHER_ICONS.sun, 'Clear'],
+    mostlyClear: [WEATHER_ICONS.sunCloud, 'Mostly clear'],
+    partlyCloudy: [WEATHER_ICONS.cloudSun, 'Partly cloudy'],
+    cloudy: [WEATHER_ICONS.cloud, 'Mostly cloudy'],
+    overcast: [WEATHER_ICONS.cloud, 'Overcast'],
+    fog: [WEATHER_ICONS.fog, 'Fog'],
+    drizzle: [WEATHER_ICONS.drizzle, 'Light drizzle'],
+    rainLight: [WEATHER_ICONS.drizzle, 'Light rain showers'],
+    rain: [WEATHER_ICONS.rain, 'Rain'],
+    rainHeavy: [WEATHER_ICONS.rain, 'Heavy rain'],
+    thunder: [WEATHER_ICONS.thunder, 'Thunder'],
+    sleet: [WEATHER_ICONS.sleet, 'Sleet'],
+    snowLight: [WEATHER_ICONS.sleet, 'Light snow'],
+    snow: [WEATHER_ICONS.snow, 'Snow'],
+    snowHeavy: [WEATHER_ICONS.snow, 'Heavy snow'],
+    unknown: [WEATHER_ICONS.sunCloud, 'Changeable weather']
   },
   sv: {
-    clear: ['☀️', 'Klart'],
-    mostlyClear: ['🌤️', 'Nästan klart'],
-    partlyCloudy: ['⛅', 'Växlande molnighet'],
-    cloudy: ['☁️', 'Halvklart'],
-    overcast: ['☁️', 'Mulet'],
-    fog: ['🌫️', 'Dimma'],
-    drizzle: ['🌦️', 'Lätt duggregn'],
-    rainLight: ['🌦️', 'Lätta regnskurar'],
-    rain: ['🌧️', 'Regn'],
-    rainHeavy: ['🌧️', 'Kraftigt regn'],
-    thunder: ['⛈️', 'Åska'],
-    sleet: ['🌨️', 'Snöblandat regn'],
-    snowLight: ['🌨️', 'Lätt snöfall'],
-    snow: ['❄️', 'Snöfall'],
-    snowHeavy: ['❄️', 'Kraftigt snöfall'],
-    unknown: ['🌤️', 'Växlande väder']
+    clear: [WEATHER_ICONS.sun, 'Klart'],
+    mostlyClear: [WEATHER_ICONS.sunCloud, 'Nästan klart'],
+    partlyCloudy: [WEATHER_ICONS.cloudSun, 'Växlande molnighet'],
+    cloudy: [WEATHER_ICONS.cloud, 'Halvklart'],
+    overcast: [WEATHER_ICONS.cloud, 'Mulet'],
+    fog: [WEATHER_ICONS.fog, 'Dimma'],
+    drizzle: [WEATHER_ICONS.drizzle, 'Lätt duggregn'],
+    rainLight: [WEATHER_ICONS.drizzle, 'Lätta regnskurar'],
+    rain: [WEATHER_ICONS.rain, 'Regn'],
+    rainHeavy: [WEATHER_ICONS.rain, 'Kraftigt regn'],
+    thunder: [WEATHER_ICONS.thunder, 'Åska'],
+    sleet: [WEATHER_ICONS.sleet, 'Snöblandat regn'],
+    snowLight: [WEATHER_ICONS.sleet, 'Lätt snöfall'],
+    snow: [WEATHER_ICONS.snow, 'Snöfall'],
+    snowHeavy: [WEATHER_ICONS.snow, 'Kraftigt snöfall'],
+    unknown: [WEATHER_ICONS.sunCloud, 'Växlande väder']
   }
 };
 
