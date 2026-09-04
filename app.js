@@ -214,6 +214,7 @@ const STR = {
     logConfirmDeleted: "Entry removed.",
     logConfirmInvalidMinutes: "Enter the walk length in minutes first.",
     logConfirmEmptyCustom: "Type what happened first.",
+    logStreakLine: "{count}-day logging streak.",
     calPrevAria: "Previous month",
     calNextAria: "Next month",
     logDayDetailEmpty: "Nothing logged this day yet.",
@@ -400,6 +401,7 @@ const STR = {
     logConfirmDeleted: "Posten togs bort.",
     logConfirmInvalidMinutes: "Ange promenadens längd i minuter först.",
     logConfirmEmptyCustom: "Skriv vad som hände först.",
+    logStreakLine: "{count} dagar i rad loggat.",
     calPrevAria: "Föregående månad",
     calNextAria: "Nästa månad",
     logDayDetailEmpty: "Inget loggat den här dagen än.",
@@ -2146,6 +2148,31 @@ function entryLabel(entry) {
   return typeLabel;
 }
 
+// Räknar antal sammanhängande dagar (bakåt från idag) med minst en loggad post.
+// Om dagens datum saknar poster ännu räknas streaken ändå från igår, så att den
+// inte "nollställs" bara för att dagen inte är slut — först vid ett helt missat
+// dygn bryts den. Detta är avsiktligt lugnt och textbaserat, inget spelmärke.
+function calculateLogStreak(entries) {
+  const daysWithEntries = new Set(entries.map(entryDateKey));
+  const cursor = new Date(logToday.getFullYear(), logToday.getMonth(), logToday.getDate());
+  if (!daysWithEntries.has(dateKey(cursor))) cursor.setDate(cursor.getDate() - 1);
+  let streak = 0;
+  while (daysWithEntries.has(dateKey(cursor))) {
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+}
+
+function renderLogStreak() {
+  const el = $('#logStreakLine');
+  if (!el) return;
+  const streak = calculateLogStreak(logEntries);
+  if (streak < 2) { el.hidden = true; el.textContent = ''; return; }
+  el.hidden = false;
+  el.textContent = t('logStreakLine', { count: streak });
+}
+
 function renderCalendar() {
   if (!calGridEl || !calMonthLabelEl || !calWeekdaysEl) return;
 
@@ -2202,6 +2229,7 @@ function renderCalendar() {
   });
 
   renderDayDetail();
+  renderLogStreak();
 }
 
 function renderDayDetail() {
