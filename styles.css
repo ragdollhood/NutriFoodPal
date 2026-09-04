@@ -101,7 +101,7 @@
 .panel--random{display:flex;align-items:flex-end;min-height:220px}
 .panel-caption{margin:0;color:#fff;font:600 19px/1.5 Fraunces,serif;max-width:520px;text-shadow:0 2px 12px rgba(10,22,32,.45)}
 .panel--gold::after{background:linear-gradient(165deg,rgba(58,38,12,.82) 0%,rgba(140,92,32,.55) 45%,rgba(233,168,75,.35) 100%)}
-.panel-fact{position:absolute;top:22px;right:22px;max-width:280px;display:flex;align-items:flex-start;gap:12px;background:var(--cream);border:1px solid #e3daca;border-radius:18px;padding:16px 20px;text-align:left;box-shadow:0 14px 34px #00000026}
+.panel-fact{position:absolute;top:22px;right:22px;bottom:22px;left:42%;max-width:none;display:flex;align-items:flex-start;gap:12px;background:var(--cream);border:1px solid #e3daca;border-radius:18px;padding:16px 20px;text-align:left;box-shadow:0 14px 34px #00000026;overflow:auto}
 .panel-fact-icon{font-size:22px;line-height:1;flex:0 0 auto}
 .panel-fact-kicker{display:block;font-size:10.5px;letter-spacing:.14em;font-weight:700;color:#a16d23;text-transform:uppercase;margin-bottom:6px}
 .panel-fact p{margin:0;color:var(--ink);font:600 14.5px/1.5 Fraunces,serif}
