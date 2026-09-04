@@ -24,6 +24,17 @@ const ICONS = {
   sun: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M21.5 12H19M5 12H2.5M18.4 5.6l-1.8 1.8M7.4 16.6l-1.8 1.8M18.4 18.4l-1.8-1.8M7.4 7.4L5.6 5.6"/></svg>`
 };
 
+/* Emoji set for the logging, streak, achievement and comfort-indicator UX.
+   Deliberately separate from ICONS above: ICONS stays the clean line-icon system used for
+   dense data (advisory cards, hour chips), while EMOJI adds warmth and personality to the
+   parts of the app that are about feelings, habits and encouragement. */
+const EMOJI = {
+  walk: '🐾', poop: '💩', pee: '💧', nails: '💅', bath: '🛁', coat: '✂️', custom: '📝',
+  streak: '🔥', achievement: '🏆', happy: '❤️', rest: '😴', paw: '🐾',
+  sun: '☀️', rain: '🌧️', cold: '❄️', tip: '💡'
+};
+const COMFORT_EMOJI = { excellent: '✅', good: '✅', moderate: '⚠️', poor: '⚠️', 'very-poor': '🌧️' };
+
 const $ = s => document.querySelector(s);
 const statusEl = $('#searchStatus');
 const dailyEl = $('#daily');
@@ -70,7 +81,7 @@ const STR = {
     navKnowledge: "Knowledge",
 
     profileHeading: "Your dog's profile",
-    profileIntro: "Add a few details and the comfort index and tips below will be nudged to fit your dog specifically.",
+    profileIntro: "Add a few details and the comfort index and tips below will be nudged to fit your dog specifically — smarter dog walking decisions, made for your dog.",
     profileNameLabel: "Name (optional)",
     profileNamePlaceholder: "E.g. Bella",
     profileSizeLabel: "Size",
@@ -91,8 +102,9 @@ const STR = {
     profileClearedConfirm: "Profile removed — showing the general comfort index again.",
     profileSummaryPrefix: "Personalized for",
     heroEyebrow: "WEATHER FOR FOUR PAWS",
+    heroTagline: "Know what your dog needs before every walk.",
     heroTitle: "Going to be a long walk<br> with playtime today?",
-    heroSubtitle: "Check the weather where you are and get gentle walk advice tailored to today's conditions.",
+    heroSubtitle: "Weather guidance designed for dogs — check the conditions where you are and get gentle walk advice tailored to today.",
     searchLabel: "Search location",
     searchPlaceholder: "Search for a place, e.g. Umeå",
     searchButton: "Search weather",
@@ -100,8 +112,9 @@ const STR = {
     searchStatusInitial: "Search for a place or use your location.",
     placeResultsAriaLabel: "Search results, choose the right place",
     heroWeatherKicker: "TODAY'S WEATHER",
+    heroQuickLog: "🐾 Log a walk",
     emptyTitle: "Ready when you are",
-    emptyText: "Choose a place to get temperature, precipitation, wind and dog-friendly advice.",
+    emptyText: "Choose a place to get temperature, precipitation, wind and dog-friendly advice — comfort-based forecasts for happier walks.",
     heroImgAlt: "Dog out on a walk",
     weatherPhotoCaption: "A little walk inspiration for today.",
     logPhotoCaption: "Every walk and little moment counts.",
@@ -143,7 +156,16 @@ const STR = {
     sourcesGrid: '<a href="https://opendata.smhi.se/metfcst/snow1gv1" target="_blank" rel="noopener"><b>SMHI Open Data</b><span>Forecast data, SNOW1gv1</span></a><a href="https://www.smhi.se/data" target="_blank" rel="noopener"><b>SMHI</b><span>Open data and usage</span></a><a href="https://jordbruksverket.se/djur/hundar-katter-och-smadjur/hundar" target="_blank" rel="noopener"><b>Jordbruksverket</b><span>Care, transport and animal welfare</span></a><a href="https://www.sva.se/djurhaelsa/djurslag-a-oe/sport-och-saellskapsdjur/hund/" target="_blank" rel="noopener"><b>SVA</b><span>Swedish National Veterinary Institute</span></a><a href="https://www.agria.se/hund/artiklar/skotsel-och-vard/sa-tar-du-hand-om-hunden-i-varmen/" target="_blank" rel="noopener"><b>Agria</b><span>Vet-reviewed articles</span></a><a href="https://evidensia.se/djurvardguiden/" target="_blank" rel="noopener"><b>Evidensia</b><span>Animal Care Guide</span></a><a href="https://www.mdpi.com/2076-2615/11/11/3302" target="_blank" rel="noopener"><b>Animals, 2021</b><span>Seasonal weather and activity</span></a><a href="https://www.frontiersin.org/journals/veterinary-science/articles/10.3389/fvets.2022.973574/full" target="_blank" rel="noopener"><b>Frontiers in Vet. Science, 2022</b><span>Extreme weather events</span></a>',
     sourcesFine: "Place search uses OpenStreetMap's Nominatim service. Forecasts are weather models and can change — always check SMHI's official warnings separately on a live service before planning outdoor activities in extreme weather. The advice on this page is general and never replaces a vet's judgement.",
     footerTagline: "Made with care for wet noses and safe walks.",
+    footerBrandLine: "Know what your dog needs before every walk.",
     footerSource: "Weather data: © SMHI, open data.",
+    aboutKicker: "ABOUT DOGLOGG",
+    aboutHeading: "Smarter dog walking decisions, one forecast at a time",
+    aboutText: "DOGLOGG turns open SMHI weather data into comfort-based forecasts for happier walks — a Dog Comfort Index, a best walk window, coat-care tips and a simple log, all built around what your dog actually needs before you head out the door.",
+    achievementMilestone: "{count}-day streak — nice work!",
+    personalBestLine: "New personal best!",
+    knowledgeHubKicker: "DOG KNOWLEDGE",
+    knowledgeHubTitle: "Explore by topic",
+    knowledgeHubSubtitle: "Short, practical reads on the things that matter most for your dog — more added over time.",
 
     metricWind: "Wind",
     metricGust: "Gusts",
@@ -257,7 +279,7 @@ const STR = {
     navKnowledge: "Kunskap",
 
     profileHeading: "Din hunds profil",
-    profileIntro: "Fyll i några detaljer så justeras komfortindexet och råden nedan efter just din hund.",
+    profileIntro: "Fyll i några detaljer så justeras komfortindexet och råden nedan efter just din hund — smartare promenadbeslut, anpassade för din hund.",
     profileNameLabel: "Namn (valfritt)",
     profileNamePlaceholder: "T.ex. Bella",
     profileSizeLabel: "Storlek",
@@ -278,8 +300,9 @@ const STR = {
     profileClearedConfirm: "Profilen borttagen — visar det allmänna komfortindexet igen.",
     profileSummaryPrefix: "Anpassat för",
     heroEyebrow: "VÄDER FÖR FYRA TASSAR",
+    heroTagline: "Veta vad din hund behöver inför varje promenad.",
     heroTitle: "Blir det en långrunda<br> med lek idag?",
-    heroSubtitle: "Se vädret där du är och få varsamma promenadråd anpassade för dagens förhållanden.",
+    heroSubtitle: "Väderguidning gjord för hundar — se förhållandena där du är och få varsamma promenadråd anpassade för dagen.",
     searchLabel: "Sök ort",
     searchPlaceholder: "Sök ort, till exempel Umeå",
     searchButton: "Sök väder",
@@ -287,8 +310,9 @@ const STR = {
     searchStatusInitial: "Sök efter en plats eller använd din position.",
     placeResultsAriaLabel: "Sökresultat, välj rätt plats",
     heroWeatherKicker: "DAGENS VÄDER",
+    heroQuickLog: "🐾 Logga en promenad",
     emptyTitle: "Redo när du är",
-    emptyText: "Välj en plats för att få temperatur, nederbörd, vind och hundanpassade råd.",
+    emptyText: "Välj en plats för att få temperatur, nederbörd, vind och hundanpassade råd — komfortbaserade prognoser för gladare promenader.",
     heroImgAlt: "Hund ute på promenad",
     weatherPhotoCaption: "Lite promenadinspiration för dagen.",
     logPhotoCaption: "Varje promenad och liten stund räknas.",
@@ -330,7 +354,16 @@ const STR = {
     sourcesGrid: '<a href="https://opendata.smhi.se/metfcst/snow1gv1" target="_blank" rel="noopener"><b>SMHI Open Data</b><span>Prognosdata, SNOW1gv1</span></a><a href="https://www.smhi.se/data" target="_blank" rel="noopener"><b>SMHI</b><span>Öppna data och användning</span></a><a href="https://jordbruksverket.se/djur/hundar-katter-och-smadjur/hundar" target="_blank" rel="noopener"><b>Jordbruksverket</b><span>Skötsel, transport och djurskydd</span></a><a href="https://www.sva.se/djurhaelsa/djurslag-a-oe/sport-och-saellskapsdjur/hund/" target="_blank" rel="noopener"><b>SVA</b><span>Statens veterinärmedicinska anstalt</span></a><a href="https://www.agria.se/hund/artiklar/skotsel-och-vard/sa-tar-du-hand-om-hunden-i-varmen/" target="_blank" rel="noopener"><b>Agria</b><span>Veterinärgranskade artiklar</span></a><a href="https://evidensia.se/djurvardguiden/" target="_blank" rel="noopener"><b>Evidensia</b><span>Djurvårdsguiden</span></a><a href="https://www.mdpi.com/2076-2615/11/11/3302" target="_blank" rel="noopener"><b>Animals, 2021</b><span>Säsongsväder och aktivitet</span></a><a href="https://www.frontiersin.org/journals/veterinary-science/articles/10.3389/fvets.2022.973574/full" target="_blank" rel="noopener"><b>Frontiers in Vet. Science, 2022</b><span>Extrema väderhändelser</span></a>',
     sourcesFine: "Platsökning använder OpenStreetMaps Nominatim-tjänst. Prognoser är väderleksmodeller och kan ändras — visa alltid SMHI:s officiella varningar separat i en skarp tjänst innan du planerar utomhusaktiviteter i extremväder. Råden på den här sidan är allmänna och ersätter aldrig bedömning från veterinär.",
     footerTagline: "Gjord med omtanke om blöta nosar och trygga promenader.",
+    footerBrandLine: "Veta vad din hund behöver inför varje promenad.",
     footerSource: "Väderdata: © SMHI, öppna data.",
+    aboutKicker: "OM DOGLOGG",
+    aboutHeading: "Smartare promenadbeslut, en prognos i taget",
+    aboutText: "DOGLOGG omvandlar öppna väderdata från SMHI till komfortbaserade prognoser för gladare promenader — ett hundkomfortindex, ett bästa promenadfönster, pälsvårdstips och en enkel logg, allt byggt kring vad din hund faktiskt behöver innan ni går ut.",
+    achievementMilestone: "{count} dagar i rad — snyggt jobbat!",
+    personalBestLine: "Nytt personbästa!",
+    knowledgeHubKicker: "HUNDKUNSKAP",
+    knowledgeHubTitle: "Utforska ämne för ämne",
+    knowledgeHubSubtitle: "Korta, praktiska texter om det som betyder mest för din hund — fler tillkommer efter hand.",
 
     metricWind: "Vind",
     metricGust: "Byvind",
@@ -469,6 +502,8 @@ function applyStaticTranslations() {
 
   if (langBtnSvEl) langBtnSvEl.hidden = lang !== 'en';
   if (langBtnEnEl) langBtnEnEl.hidden = lang !== 'sv';
+
+  renderKnowledgeHub();
 }
 
 function setLang(newLang) {
@@ -1524,7 +1559,7 @@ function renderBestWalk(weatherData, unit) {
     <div class="hour-strip">${chips}</div>
     <h3 class="subheading" data-i18n="bestWalkHeading">${escapeHtml(t('bestWalkHeading'))}</h3>
     <div class="best-walk-highlight" style="--dot:${best.comfort.color}">
-      <div class="best-walk-time">${ICONS.paw} ${timeFmt.format(new Date(best.time))}</div>
+      <div class="best-walk-time">${EMOJI.paw} ${timeFmt.format(new Date(best.time))}</div>
       <div class="best-walk-body">
         <p class="best-walk-label" style="color:${best.comfort.color}">${escapeHtml(best.comfort.label)} · ${n(best.comfort.score, 1)}/10</p>
         <p class="best-walk-desc">${escapeHtml(introText)}</p>
@@ -1649,9 +1684,9 @@ function computeWalkAdvisories(cur, comfort, showTicks) {
 
   // 1. Varm asfalt
   if (temp != null && (temp >= 28 || (temp >= 24 && isSunnyish))) {
-    items.push({ icon: ICONS.road, title: A.hotAsphalt.title, level: 'risk', text: A.hotAsphalt.risk });
+    items.push({ icon: ICONS.road, title: A.hotAsphalt.title, level: 'risk', text: A.hotAsphalt.risk, learnMore: KNOWLEDGE_ARTICLES.hotPaws });
   } else if (temp != null && temp >= 20 && isSunnyish) {
-    items.push({ icon: ICONS.road, title: A.hotAsphalt.title, level: 'caution', text: A.hotAsphalt.caution });
+    items.push({ icon: ICONS.road, title: A.hotAsphalt.title, level: 'caution', text: A.hotAsphalt.caution, learnMore: KNOWLEDGE_ARTICLES.hotPaws });
   } else {
     items.push({ icon: ICONS.road, title: A.hotAsphalt.title, level: 'ok', text: A.hotAsphalt.ok });
   }
@@ -1659,27 +1694,27 @@ function computeWalkAdvisories(cur, comfort, showTicks) {
   // 2. Kyla mot tassar
   const coldTemp = apparent;
   if (coldTemp != null && coldTemp <= -15) {
-    items.push({ icon: ICONS.snowflake, title: A.coldPaws.title, level: 'risk', text: A.coldPaws.risk });
+    items.push({ icon: ICONS.snowflake, title: A.coldPaws.title, level: 'risk', text: A.coldPaws.risk, learnMore: KNOWLEDGE_ARTICLES.winterWalks });
   } else if (coldTemp != null && coldTemp <= -5) {
-    items.push({ icon: ICONS.snowflake, title: A.coldPaws.title, level: 'caution', text: A.coldPaws.caution });
+    items.push({ icon: ICONS.snowflake, title: A.coldPaws.title, level: 'caution', text: A.coldPaws.caution, learnMore: KNOWLEDGE_ARTICLES.winterWalks });
   } else {
     items.push({ icon: ICONS.snowflake, title: A.coldPaws.title, level: 'ok', text: A.coldPaws.ok });
   }
 
   // 3. Blöt päls
   if (precip >= 3) {
-    items.push({ icon: ICONS.droplet, title: A.wetCoat.title, level: 'risk', text: A.wetCoat.risk });
+    items.push({ icon: ICONS.droplet, title: A.wetCoat.title, level: 'risk', text: A.wetCoat.risk, learnMore: KNOWLEDGE_ARTICLES.heavyRain });
   } else if (precip >= 0.5) {
-    items.push({ icon: ICONS.droplet, title: A.wetCoat.title, level: 'caution', text: A.wetCoat.caution });
+    items.push({ icon: ICONS.droplet, title: A.wetCoat.title, level: 'caution', text: A.wetCoat.caution, learnMore: KNOWLEDGE_ARTICLES.heavyRain });
   } else {
     items.push({ icon: ICONS.droplet, title: A.wetCoat.title, level: 'ok', text: A.wetCoat.ok });
   }
 
   // 4. Blåsigt för små hundar
   if (gust != null && gust >= 20) {
-    items.push({ icon: ICONS.wind, title: A.windySmall.title, level: 'risk', text: A.windySmall.risk });
+    items.push({ icon: ICONS.wind, title: A.windySmall.title, level: 'risk', text: A.windySmall.risk, learnMore: KNOWLEDGE_ARTICLES.windSensitive });
   } else if (gust != null && gust >= 12) {
-    items.push({ icon: ICONS.wind, title: A.windySmall.title, level: 'caution', text: A.windySmall.caution });
+    items.push({ icon: ICONS.wind, title: A.windySmall.title, level: 'caution', text: A.windySmall.caution, learnMore: KNOWLEDGE_ARTICLES.windSensitive });
   } else {
     items.push({ icon: ICONS.wind, title: A.windySmall.title, level: 'ok', text: A.windySmall.ok });
   }
@@ -1729,6 +1764,7 @@ function renderWalkAdvisories(cur, comfort, showTicks) {
       </div>
       <h4>${escapeHtml(item.title)}</h4>
       <p>${escapeHtml(item.text)}</p>
+      ${item.learnMore ? knowledgeCardHtml(item.learnMore) : ''}
     </article>`;
   }).join('');
 }
@@ -1802,6 +1838,137 @@ function computeCoatAdvisories(cur) {
   return items;
 }
 
+/* ==================================================================================
+   Today's Tip — lightweight, backend-free retention feature.
+   Picks a short, weather-relevant tip when conditions call for one, otherwise rotates
+   through a general "Dog Fact of the Day" list (seeded by day-of-year so it's stable
+   across reloads on the same day but changes daily — a small reason to check back).
+   ================================================================================== */
+
+const DAILY_TIP_TEXT = {
+  en: {
+    kicker: "TODAY'S TIP",
+    factKicker: 'DOG FACT OF THE DAY',
+    hot: 'Dogs can suffer paw burns even when the air feels comfortable to you — hot pavement is often the real risk.',
+    rain: 'Dry your dog\u2019s paws and the skin between the pads thoroughly after wet walks to help prevent soreness and infection.',
+    cold: 'Road salt and grit can irritate paw pads in winter — rinse and dry paws after walks on treated pavements.',
+    windy: 'Strong wind carries scent further and can make walks more distracting (or more exciting) for a dog\u2019s nose.',
+    facts: [
+      'A dog\u2019s sense of smell is estimated to be tens of thousands of times more sensitive than a human\u2019s.',
+      'Dogs sweat mainly through their paw pads, which is one reason panting is their main way to cool down.',
+      'A dog\u2019s whiskers can sense tiny changes in air currents, helping them "feel" objects nearby in the dark.',
+      'Puppies are born deaf and blind and rely on smell and touch for their first couple of weeks.',
+      'Dogs curl up to sleep partly as an instinct to conserve body heat and protect vital organs.',
+      'A wet dog nose helps absorb scent chemicals, which is part of why dogs sniff and lick their noses often.',
+      'Senior dogs can develop cloudy-looking eyes (lenticular sclerosis) that\u2019s a normal ageing change, not always cataracts — but it\u2019s still worth a vet check to be sure.'
+    ]
+  },
+  sv: {
+    kicker: 'DAGENS TIPS',
+    factKicker: 'DAGENS HUNDFAKTA',
+    hot: 'Hundar kan få brännskador på trampdynorna även när luften känns behaglig för dig — det är ofta den varma marken som är den verkliga risken.',
+    rain: 'Torka hundens tassar och huden mellan trampdynorna noga efter blöta promenader för att minska risken för sårighet och infektion.',
+    cold: 'Vägsalt och grus kan irritera trampdynorna på vintern — skölj och torka tassarna efter promenader på saltade gator.',
+    windy: 'Kraftig vind bär doft längre och kan göra promenaden mer distraherande (eller mer spännande) för hundens nos.',
+    facts: [
+      'Hundars luktsinne uppskattas vara tiotusentals gånger känsligare än människans.',
+      'Hundar svettas huvudsakligen genom trampdynorna, vilket är en anledning till att flåsning är deras främsta sätt att kyla ner sig.',
+      'Hundens morrhår kan känna av små förändringar i luftströmmar, vilket hjälper dem att "känna" föremål i mörker.',
+      'Valpar föds döva och blinda och förlitar sig på lukt och beröring de första veckorna.',
+      'Att hundar bollar ihop sig när de sover beror delvis på en instinkt att bevara kroppsvärme och skydda inre organ.',
+      'En fuktig nos hjälper till att fånga upp doftämnen, vilket är en av anledningarna till att hundar ofta slickar sig om nosen.',
+      'Äldre hundar kan få en grumlig blick (linsskleros) som är en normal åldersförändring och inte alltid grå starr — men det är ändå värt att låta en veterinär titta.'
+    ]
+  }
+};
+
+function dayOfYear(d) {
+  const start = new Date(d.getFullYear(), 0, 0);
+  return Math.floor((d - start) / 86400000);
+}
+
+function computeDailyTip(cur) {
+  const T = DAILY_TIP_TEXT[lang];
+  const temp = cur.apparentTemp != null ? cur.apparentTemp : cur.temp;
+  const gust = cur.gust != null ? cur.gust : cur.wind;
+
+  if (temp != null && temp >= 22) return { icon: EMOJI.sun, kicker: T.kicker, text: T.hot };
+  if ((cur.precip || 0) >= 0.5) return { icon: EMOJI.rain, kicker: T.kicker, text: T.rain };
+  if (temp != null && temp <= -2) return { icon: EMOJI.cold, kicker: T.kicker, text: T.cold };
+  if (gust != null && gust >= 12) return { icon: EMOJI.tip, kicker: T.kicker, text: T.windy };
+
+  const idx = dayOfYear(new Date()) % T.facts.length;
+  return { icon: EMOJI.tip, kicker: T.factKicker, text: T.facts[idx] };
+}
+
+function renderDailyTip(cur) {
+  const el = $('#dailyTip');
+  if (!el) return;
+  const tip = computeDailyTip(cur);
+  el.innerHTML = `
+    <span class="daily-tip-icon" aria-hidden="true">${tip.icon}</span>
+    <div>
+      <span class="daily-tip-kicker">${escapeHtml(tip.kicker)}</span>
+      <p class="daily-tip-text">${escapeHtml(tip.text)}</p>
+    </div>
+  `;
+}
+
+/* ==================================================================================
+   Dog Knowledge content system — categorised placeholder cards linked from relevant
+   weather conditions, built so real articles can slot in later without changing markup.
+   ================================================================================== */
+
+const KNOWLEDGE_CATEGORIES = {
+  health: { en: 'Health', sv: 'Hälsa' },
+  safety: { en: 'Safety', sv: 'Säkerhet' },
+  walking: { en: 'Walking', sv: 'Promenad' },
+  weather: { en: 'Weather', sv: 'Väder' },
+  training: { en: 'Training', sv: 'Träning' },
+  puppies: { en: 'Puppies', sv: 'Valpar' },
+  seniors: { en: 'Senior dogs', sv: 'Äldre hundar' }
+};
+
+const KNOWLEDGE_ARTICLES = {
+  hotPaws: { category: 'health', slug: 'hot-asphalt-paw-safety',
+    en: 'How hot is too hot for dog paws?', sv: 'Hur varmt är för varmt för hundtassar?' },
+  heavyRain: { category: 'safety', slug: 'walking-dogs-in-heavy-rain',
+    en: 'Should dogs walk in heavy rain?', sv: 'Ska hundar gå ut i kraftigt regn?' },
+  windSensitive: { category: 'walking', slug: 'wind-and-sensitive-dogs',
+    en: 'How wind affects sensitive dogs', sv: 'Så påverkar blåst känsliga hundar' },
+  winterWalks: { category: 'weather', slug: 'safe-winter-walks',
+    en: 'Safe winter walks', sv: 'Säkra vinterpromenader' }
+};
+
+// Placeholder link builder — points to a future /knowledge/{category}/{slug} article
+// architecture. Safe to leave as-is until real articles exist; nothing else depends on
+// the URL resolving today.
+function knowledgeUrl(article) {
+  return `/knowledge/${article.category}/${article.slug}`;
+}
+
+function knowledgeCardHtml(article) {
+  const catLabel = KNOWLEDGE_CATEGORIES[article.category][lang];
+  const title = article[lang];
+  return `<a class="knowledge-card" href="${knowledgeUrl(article)}">
+    <span class="knowledge-card-cat">${escapeHtml(catLabel)}</span>
+    <span class="knowledge-card-title">${escapeHtml(title)} →</span>
+  </a>`;
+}
+
+// Renders the 7 top-level category tiles in the Knowledge hub. Each links to a
+// placeholder /knowledge/{category} index page — ready for real articles to slot in
+// later without any markup changes here.
+function renderKnowledgeHub() {
+  const el = $('#knowledgeHubGrid');
+  if (!el) return;
+  el.innerHTML = Object.entries(KNOWLEDGE_CATEGORIES).map(([key, names]) => `
+    <a class="knowledge-hub-tile" href="/knowledge/${key}">
+      <span class="knowledge-hub-tile-name">${escapeHtml(names[lang])}</span>
+    </a>
+  `).join('');
+}
+
 function renderCoatAdvice(cur) {
   if (!coatAdviceEl) return;
   const items = computeCoatAdvisories(cur);
@@ -1865,13 +2032,13 @@ function render(weatherData, loc, source) {
       <div class="comfort-row">
         ${comfortGaugeHtml(comfort.score, comfort.color, 76)}
         <div class="comfort-copy">
-          <span class="comfort-kicker">${escapeHtml(t('comfortIndexLabel'))}</span>
-          <p class="comfort-label" style="color:${comfort.color}">${escapeHtml(comfort.label)}</p>
+          <span class="comfort-kicker">${EMOJI.paw} ${escapeHtml(t('comfortIndexLabel'))}</span>
+          <p class="comfort-label" style="color:${comfort.color}">${COMFORT_EMOJI[comfort.level] || ''} ${escapeHtml(comfort.label)}</p>
           <p class="comfort-reasons">${reasonsText}.</p>
         </div>
       </div>
     </div>
-    <div class="dog-verdict">${ICONS.paw} ${escapeHtml(comfort.recommendations[0])}</div>
+    <div class="dog-verdict">${EMOJI.paw} ${escapeHtml(comfort.recommendations[0])}</div>
     <p class="comfort-footnote"><a href="#komfortindex-forklaring">${escapeHtml(t('howIndexCalculated'))}</a></p>
   `;
 
@@ -1881,6 +2048,7 @@ function render(weatherData, loc, source) {
   const hasReliableTickData = RELIABLE_TICK_DATA_COUNTRIES.has((loc.countryCode || '').toUpperCase());
 
   renderAlerts(cur);
+  renderDailyTip(cur);
   renderCoatAdvice(cur);
   renderBestWalk(weatherData, unit);
   renderWalkAdvisories(cur, comfort, hasReliableTickData);
@@ -2058,17 +2226,17 @@ applyStaticTranslations();
 
 const LOG_STORAGE_KEY = 'dogWeatherLog';
 const LOG_TYPES = [
-  { id: 'walk',  icon: ICONS.walk, labelKey: 'logTypeWalk' },
-  { id: 'poop',  icon: ICONS.poop, labelKey: 'logTypePoop' },
-  { id: 'pee',   icon: ICONS.droplet, labelKey: 'logTypePee' },
-  { id: 'nails', icon: ICONS.nails, labelKey: 'logTypeNails' },
-  { id: 'bath',  icon: ICONS.bath, labelKey: 'logTypeBath' },
-  { id: 'coat',  icon: ICONS.scissors, labelKey: 'logTypeCoat' }
+  { id: 'walk',  icon: EMOJI.walk, labelKey: 'logTypeWalk' },
+  { id: 'poop',  icon: EMOJI.poop, labelKey: 'logTypePoop' },
+  { id: 'pee',   icon: EMOJI.pee, labelKey: 'logTypePee' },
+  { id: 'nails', icon: EMOJI.nails, labelKey: 'logTypeNails' },
+  { id: 'bath',  icon: EMOJI.bath, labelKey: 'logTypeBath' },
+  { id: 'coat',  icon: EMOJI.coat, labelKey: 'logTypeCoat' }
 ];
 const LOG_TYPE_BY_ID = Object.fromEntries(LOG_TYPES.map(x => [x.id, x]));
 // Fritextloggade händelser ("valfri händelse") har ingen fast typ i LOG_TYPES ovan,
 // men behöver ändå en ikon i kalendern och dagvyn.
-LOG_TYPE_BY_ID.custom = { id: 'custom', icon: ICONS.note, labelKey: 'logTypeCustom' };
+LOG_TYPE_BY_ID.custom = { id: 'custom', icon: EMOJI.custom, labelKey: 'logTypeCustom' };
 
 function loadLogEntries() {
   try {
@@ -2180,13 +2348,42 @@ function calculateLogStreak(entries) {
   return streak;
 }
 
+// Milestone streak lengths that trigger a small celebratory 🏆 moment. Purely a UI touch —
+// no backend, nothing stored beyond the existing log entries plus one small "best streak"
+// number so we can recognise a genuine personal best.
+const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100];
+const STREAK_BEST_KEY = 'dogWeatherStreakBest';
+
+function getBestStreak() {
+  try { return Number(localStorage.getItem(STREAK_BEST_KEY)) || 0; } catch { return 0; }
+}
+
+// Returns true the first time a given streak length beats the previously stored best.
+function checkAndStoreBestStreak(streak) {
+  const best = getBestStreak();
+  if (streak > best) {
+    try { localStorage.setItem(STREAK_BEST_KEY, String(streak)); } catch { /* ignore */ }
+    return true;
+  }
+  return false;
+}
+
 function renderLogStreak() {
   const el = $('#logStreakLine');
-  if (!el) return;
+  const heroEl = $('#heroStreakLine');
   const streak = calculateLogStreak(logEntries);
-  if (streak < 2) { el.hidden = true; el.textContent = ''; return; }
-  el.hidden = false;
-  el.textContent = t('logStreakLine', { count: streak });
+  const isNewBest = streak >= 2 && checkAndStoreBestStreak(streak);
+  const line = streak >= 2
+    ? `${EMOJI.streak} ${t('logStreakLine', { count: streak })}${isNewBest ? ` ${EMOJI.achievement} ${t('personalBestLine')}` : ''}`
+    : '';
+  if (el) {
+    el.hidden = !line;
+    el.textContent = line;
+  }
+  if (heroEl) {
+    heroEl.hidden = !line;
+    heroEl.textContent = line;
+  }
 }
 
 function renderCalendar() {
@@ -2315,11 +2512,24 @@ function jumpCalendarToDateKey(k) {
   renderCalendar();
 }
 
+// Appends a 🏆 milestone note to a log confirmation if the just-logged entry pushed the
+// streak to one of the celebratory lengths. Called AFTER addLogEntry, so the streak
+// calculation already reflects today's new entry.
+function withMilestoneSuffix(msg) {
+  const streak = calculateLogStreak(logEntries);
+  if (STREAK_MILESTONES.includes(streak)) {
+    return `${msg} ${EMOJI.achievement} ${t('achievementMilestone', { count: streak })}`;
+  }
+  return msg;
+}
+
 function logSimpleType(typeId) {
   const entry = addLogEntry(typeId);
   flashLoggedButton(typeId);
-  showLogConfirm(t('logConfirmLogged', { type: t(LOG_TYPE_BY_ID[typeId].labelKey) }));
+  const icon = LOG_TYPE_BY_ID[typeId].icon;
+  showLogConfirm(withMilestoneSuffix(`${icon} ${t('logConfirmLogged', { type: t(LOG_TYPE_BY_ID[typeId].labelKey) })}`));
   jumpToEntryDate(entry);
+  renderLogStreak();
 }
 
 function logWalk(minutes) {
@@ -2330,9 +2540,10 @@ function logWalk(minutes) {
   }
   const entry = addLogEntry('walk', { duration: mins });
   flashLoggedButton('walk');
-  showLogConfirm(t('logConfirmWalkLogged', { min: mins }));
+  showLogConfirm(withMilestoneSuffix(`${EMOJI.walk} ${t('logConfirmWalkLogged', { min: mins })}`));
   hideWalkDurationPicker();
   jumpToEntryDate(entry);
+  renderLogStreak();
 }
 
 function logCustomEvent(text) {
@@ -2342,9 +2553,10 @@ function logCustomEvent(text) {
     return;
   }
   const entry = addLogEntry('custom', { label });
-  showLogConfirm(t('logConfirmLogged', { type: label }));
+  showLogConfirm(withMilestoneSuffix(`${EMOJI.custom} ${t('logConfirmLogged', { type: label })}`));
   if (logCustomTextEl) logCustomTextEl.value = '';
   jumpToEntryDate(entry);
+  renderLogStreak();
 }
 
 function showWalkDurationPicker() {
