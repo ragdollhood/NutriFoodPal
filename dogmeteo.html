@@ -99,6 +99,51 @@
 
 <section id="prognos" class="weather-wrap" aria-labelledby="forecastTitle">
   <div class="section-head"><div><span class="kicker" data-i18n="forecastKicker">WALK CONDITIONS</span><h2 id="forecastTitle" data-i18n="forecastTitle">Weather right now</h2></div><p id="updated" data-i18n="updatedInitial">Forecast data is fetched from SMHI when you search.</p></div>
+  <div class="panel-plain dog-profile-panel" id="dogProfilePanel">
+    <div class="dog-profile-summary" id="dogProfileSummary" hidden>
+      <p class="dog-profile-summary-text"><span id="dogProfileSummaryText"></span></p>
+      <div class="dog-profile-summary-actions">
+        <button type="button" class="dog-profile-edit-btn" id="dogProfileEditBtn" data-i18n="profileEditBtn">Edit profile</button>
+        <button type="button" class="dog-profile-clear-btn" id="dogProfileClearBtn" data-i18n="profileClearBtn">Remove profile</button>
+      </div>
+    </div>
+    <form class="dog-profile-form" id="dogProfileForm">
+      <h3 class="dog-profile-heading" data-i18n="profileHeading">Your dog's profile</h3>
+      <p class="dog-profile-intro" data-i18n="profileIntro">Add a few details and the comfort index and tips below will be nudged to fit your dog specifically.</p>
+      <div class="dog-profile-fields">
+        <label>
+          <span data-i18n="profileNameLabel">Name (optional)</span>
+          <input type="text" id="dogProfileName" maxlength="30" data-i18n-placeholder="profileNamePlaceholder" placeholder="E.g. Bella">
+        </label>
+        <label>
+          <span data-i18n="profileSizeLabel">Size</span>
+          <select id="dogProfileSize">
+            <option value="small" data-i18n="profileSizeSmall">Small</option>
+            <option value="medium" data-i18n="profileSizeMedium" selected>Medium</option>
+            <option value="large" data-i18n="profileSizeLarge">Large</option>
+          </select>
+        </label>
+        <label>
+          <span data-i18n="profileCoatLabel">Coat</span>
+          <select id="dogProfileCoat">
+            <option value="short" selected data-i18n="profileCoatShort">Short / smooth</option>
+            <option value="thick_double" data-i18n="profileCoatThick">Thick or double coat</option>
+          </select>
+        </label>
+        <label>
+          <span data-i18n="profileAgeLabel">Age</span>
+          <select id="dogProfileAge">
+            <option value="puppy" data-i18n="profileAgePuppy">Puppy (under 1)</option>
+            <option value="adult" selected data-i18n="profileAgeAdult">Adult</option>
+            <option value="senior" data-i18n="profileAgeSenior">Senior (8+)</option>
+          </select>
+        </label>
+      </div>
+      <div class="dog-profile-actions">
+        <button type="submit" class="dog-profile-save-btn" data-i18n="profileSaveBtn">Save profile</button>
+      </div>
+    </form>
+  </div>
   <div id="alerts" class="alerts" aria-live="polite"></div>
   <div id="bestWalk" class="best-walk"><div class="skeleton" style="min-height:104px;border-radius:20px"></div></div>
   <p class="best-walk-footnote" data-i18n="bestWalkFootnote">The ranking is based on the same Dog Comfort Index as above, calculated hour by hour for the coming hours from SMHI/Open-Meteo's hourly forecast (temperature, feels-like temperature, precipitation, wind and snowfall) — the hour with the highest score is highlighted. No AI model, just the same rule-based calculation. <a href="#komfortindex-forklaring">How the index is calculated *</a></p>

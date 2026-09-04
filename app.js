@@ -68,6 +68,28 @@ const STR = {
     navForecast: "Today",
     navDogAdvice: "Health & coat",
     navKnowledge: "Knowledge",
+
+    profileHeading: "Your dog's profile",
+    profileIntro: "Add a few details and the comfort index and tips below will be nudged to fit your dog specifically.",
+    profileNameLabel: "Name (optional)",
+    profileNamePlaceholder: "E.g. Bella",
+    profileSizeLabel: "Size",
+    profileSizeSmall: "Small",
+    profileSizeMedium: "Medium",
+    profileSizeLarge: "Large",
+    profileCoatLabel: "Coat",
+    profileCoatShort: "Short / smooth",
+    profileCoatThick: "Thick or double coat",
+    profileAgeLabel: "Age",
+    profileAgePuppy: "Puppy (under 1)",
+    profileAgeAdult: "Adult",
+    profileAgeSenior: "Senior (8+)",
+    profileSaveBtn: "Save profile",
+    profileEditBtn: "Edit profile",
+    profileClearBtn: "Remove profile",
+    profileSavedConfirm: "Saved — the comfort index is now personalized.",
+    profileClearedConfirm: "Profile removed — showing the general comfort index again.",
+    profileSummaryPrefix: "Personalized for",
     heroEyebrow: "WEATHER FOR FOUR PAWS",
     heroTitle: "Going to be a long walk<br> with playtime today?",
     heroSubtitle: "Check the weather where you are and get gentle walk advice tailored to today's conditions.",
@@ -232,6 +254,28 @@ const STR = {
     navForecast: "Idag",
     navDogAdvice: "Hälsa & päls",
     navKnowledge: "Kunskap",
+
+    profileHeading: "Din hunds profil",
+    profileIntro: "Fyll i några detaljer så justeras komfortindexet och råden nedan efter just din hund.",
+    profileNameLabel: "Namn (valfritt)",
+    profileNamePlaceholder: "T.ex. Bella",
+    profileSizeLabel: "Storlek",
+    profileSizeSmall: "Liten",
+    profileSizeMedium: "Mellan",
+    profileSizeLarge: "Stor",
+    profileCoatLabel: "Päls",
+    profileCoatShort: "Kort/slät päls",
+    profileCoatThick: "Tjock päls eller dubbelpäls",
+    profileAgeLabel: "Ålder",
+    profileAgePuppy: "Valp (under 1 år)",
+    profileAgeAdult: "Vuxen",
+    profileAgeSenior: "Senior (8+ år)",
+    profileSaveBtn: "Spara profil",
+    profileEditBtn: "Ändra profil",
+    profileClearBtn: "Ta bort profil",
+    profileSavedConfirm: "Sparat — komfortindexet är nu anpassat.",
+    profileClearedConfirm: "Profilen borttagen — visar det allmänna komfortindexet igen.",
+    profileSummaryPrefix: "Anpassat för",
     heroEyebrow: "VÄDER FÖR FYRA TASSAR",
     heroTitle: "Blir det en långrunda<br> med lek idag?",
     heroSubtitle: "Se vädret där du är och få varsamma promenadråd anpassade för dagens förhållanden.",
@@ -923,7 +967,11 @@ const COMFORT_TEXT = {
     recStrongGusts: 'Choose a sheltered route and keep your dog close.',
     windy: 'windy conditions',
     comfortable: 'comfortable weather conditions',
-    recDefault: 'The weather looks suitable for a normal walk, but always adapt to your dog\u2019s signals.'
+    recDefault: 'The weather looks suitable for a normal walk, but always adapt to your dog\u2019s signals.',
+    profileColdSensitive: 'extra cold-sensitive for {dog}',
+    recProfileCold: '{dog} may feel the cold more than average \u2014 consider a shorter walk or extra protection.',
+    profileHeatSensitive: 'extra heat-sensitive for {dog}',
+    recProfileHeat: '{dog} may feel the heat more than average \u2014 keep the pace easy and offer shade and water often.'
   },
   sv: {
     veryHighApparent: 'mycket hög upplevd temperatur',
@@ -955,9 +1003,40 @@ const COMFORT_TEXT = {
     recStrongGusts: 'Välj en skyddad promenadväg och håll hunden nära.',
     windy: 'blåsigt väder',
     comfortable: 'behagliga väderförhållanden',
-    recDefault: 'Vädret ser lämpligt ut för en vanlig promenad, men anpassa alltid efter hundens signaler.'
+    recDefault: 'Vädret ser lämpligt ut för en vanlig promenad, men anpassa alltid efter hundens signaler.',
+    profileColdSensitive: 'extra köldkänsligt för {dog}',
+    recProfileCold: '{dog} kan uppleva kylan starkare än genomsnittet \u2014 överväg en kortare promenad eller extra skydd.',
+    profileHeatSensitive: 'extra värmekänsligt för {dog}',
+    recProfileHeat: '{dog} kan uppleva värmen starkare än genomsnittet \u2014 håll ett lugnt tempo och erbjud skugga och vatten ofta.'
   }
 };
+
+/* ==================================================================================
+   Hundprofil (personalisering av Hundkomfortindex)
+   ================================================================================== */
+const DOG_PROFILE_KEY = 'dogWeatherProfile';
+
+function loadDogProfile() {
+  try {
+    const raw = localStorage.getItem(DOG_PROFILE_KEY);
+    if (!raw) return null;
+    const p = JSON.parse(raw);
+    if (p && typeof p === 'object') return p;
+  } catch { /* saknad eller ogiltig profil i localStorage – ignorera tyst */ }
+  return null;
+}
+
+let dogProfile = loadDogProfile();
+
+function saveDogProfile(profile) {
+  dogProfile = profile;
+  try { localStorage.setItem(DOG_PROFILE_KEY, JSON.stringify(profile)); } catch { /* localStorage kan vara otillgängligt */ }
+}
+
+function clearDogProfile() {
+  dogProfile = null;
+  try { localStorage.removeItem(DOG_PROFILE_KEY); } catch { /* ignore */ }
+}
 
 function calculateDogComfortIndex(weather) {
   const C = COMFORT_TEXT[lang];
@@ -1045,6 +1124,28 @@ function calculateDogComfortIndex(weather) {
   } else if (windSpeed >= 10) {
     score -= 1;
     reasons.push(C.windy);
+  }
+
+  // Personalisering: om användaren har sparat en hundprofil, nudgas indexet något
+  // för egenskaper som gör en hund mer köld- eller värmekänslig än genomsnittet.
+  // Basalgoritmen ovan är opåverkad – det här är ett tillägg, inte en ersättning.
+  if (dogProfile) {
+    const dogName = (dogProfile.name || '').trim() || (lang === 'sv' ? 'din hund' : 'your dog');
+    const coldSensitive = dogProfile.coat === 'short' || dogProfile.size === 'small' ||
+      dogProfile.age === 'puppy' || dogProfile.age === 'senior';
+    const heatSensitive = dogProfile.coat === 'thick_double' ||
+      dogProfile.age === 'puppy' || dogProfile.age === 'senior';
+
+    if (coldSensitive && apparentTemperature <= 3) {
+      score -= apparentTemperature <= -8 ? 1.5 : 1;
+      reasons.push(C.profileColdSensitive.replace('{dog}', dogName));
+      recommendations.unshift(C.recProfileCold.replace('{dog}', dogName));
+    }
+    if (heatSensitive && apparentTemperature >= 18) {
+      score -= apparentTemperature >= 26 ? 1.5 : 1;
+      reasons.push(C.profileHeatSensitive.replace('{dog}', dogName));
+      recommendations.unshift(C.recProfileHeat.replace('{dog}', dogName));
+    }
   }
 
   score = clamp(score, 0, 10);
@@ -1259,6 +1360,71 @@ dailyEl.addEventListener('keydown', e => {
 });
 
 dayHoursCloseEl?.addEventListener('click', hideDayHours);
+
+/* ---------- Hundprofil: UI-koppling ---------- */
+const dogProfileForm = $('#dogProfileForm');
+const dogProfileSummary = $('#dogProfileSummary');
+const dogProfileSummaryText = $('#dogProfileSummaryText');
+const dogProfileEditBtn = $('#dogProfileEditBtn');
+const dogProfileClearBtn = $('#dogProfileClearBtn');
+const dogProfileNameEl = $('#dogProfileName');
+const dogProfileSizeEl = $('#dogProfileSize');
+const dogProfileCoatEl = $('#dogProfileCoat');
+const dogProfileAgeEl = $('#dogProfileAge');
+
+function dogProfileSummaryLabel(profile) {
+  const sizeKey = { small: 'profileSizeSmall', medium: 'profileSizeMedium', large: 'profileSizeLarge' }[profile.size];
+  const coatKey = { short: 'profileCoatShort', thick_double: 'profileCoatThick' }[profile.coat];
+  const ageKey = { puppy: 'profileAgePuppy', adult: 'profileAgeAdult', senior: 'profileAgeSenior' }[profile.age];
+  const bits = [sizeKey, coatKey, ageKey].filter(Boolean).map(k => t(k).toLowerCase());
+  const who = profile.name || (lang === 'sv' ? 'din hund' : 'your dog');
+  return `${escapeHtml(t('profileSummaryPrefix'))} <b>${escapeHtml(who)}</b> — ${escapeHtml(bits.join(', '))}`;
+}
+
+function renderDogProfileUI() {
+  if (dogProfile) {
+    dogProfileSummaryText.innerHTML = dogProfileSummaryLabel(dogProfile);
+    dogProfileSummary.hidden = false;
+    dogProfileForm.hidden = true;
+  } else {
+    dogProfileSummary.hidden = true;
+    dogProfileForm.hidden = false;
+  }
+}
+
+if (dogProfile) {
+  dogProfileNameEl.value = dogProfile.name || '';
+  dogProfileSizeEl.value = dogProfile.size || 'medium';
+  dogProfileCoatEl.value = dogProfile.coat || 'short';
+  dogProfileAgeEl.value = dogProfile.age || 'adult';
+}
+renderDogProfileUI();
+
+dogProfileForm?.addEventListener('submit', e => {
+  e.preventDefault();
+  saveDogProfile({
+    name: dogProfileNameEl.value.trim().slice(0, 30),
+    size: dogProfileSizeEl.value,
+    coat: dogProfileCoatEl.value,
+    age: dogProfileAgeEl.value
+  });
+  renderDogProfileUI();
+  statusEl.textContent = t('profileSavedConfirm');
+  if (lastWeatherData && lastLoc) render(lastWeatherData, lastLoc, lastSource);
+});
+
+dogProfileEditBtn?.addEventListener('click', () => {
+  dogProfileSummary.hidden = true;
+  dogProfileForm.hidden = false;
+});
+
+dogProfileClearBtn?.addEventListener('click', () => {
+  clearDogProfile();
+  dogProfileForm.reset();
+  renderDogProfileUI();
+  statusEl.textContent = t('profileClearedConfirm');
+  if (lastWeatherData && lastLoc) render(lastWeatherData, lastLoc, lastSource);
+});
 
 /* ---------- Bästa promenadtiden: rankar de kommande timmarna efter Hundkomfortindex ---------- */
 

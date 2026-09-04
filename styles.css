@@ -124,6 +124,22 @@
 .comfort-recommendations li{line-height:1.5}
 .comfort-disclaimer{font-size:12px;line-height:1.5;color:#c7dad2;margin:0}
 @media(max-width:900px){nav{display:none}.hero{min-height:720px}.hero h1 br{display:none}.hero-inner--split{grid-template-columns:1fr;width:91%}.hero-weather{max-width:380px}.search{flex-wrap:wrap}.search input{height:52px;flex-basis:100%}.search button{flex:1}.section-head{display:block}.current{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(3,1fr)}.daily{grid-template-columns:repeat(2,1fr)}.story-grid,.science{grid-template-columns:1fr}.tips,.sources .source-grid{grid-template-columns:1fr}.science{gap:30px}footer{align-items:flex-start;flex-direction:column}.panel{padding:30px 22px}.hero-logo{height:56px}body{padding-bottom:calc(60px + env(safe-area-inset-bottom))}.tabbar{display:flex}}@media(max-width:520px){.weather-wrap,.advice-section,.sources{padding:64px 18px}.hero-inner{width:91%}.hero h1{font-size:48px}.current{padding:22px}.temp{font-size:58px}.metrics{grid-template-columns:1fr}.daily{grid-template-columns:1fr}.story img{height:240px}.panel{padding:24px 16px;margin-top:32px}.best-walk-highlight{flex-direction:column;align-items:flex-start;gap:12px}.panel--random{min-height:170px}}
+.dog-profile-panel{margin:0 0 28px}
+.dog-profile-heading{margin:0 0 6px;font:600 20px "Fraunces",serif}
+.dog-profile-intro{margin:0 0 18px;color:var(--muted);font-size:14px;max-width:56ch}
+.dog-profile-fields{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.dog-profile-fields label{display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:600;color:var(--ink)}
+.dog-profile-fields input,.dog-profile-fields select{border:1px solid var(--line);border-radius:12px;padding:11px 12px;font:inherit;font-size:14px;color:var(--ink);background:#fff}
+.dog-profile-actions{display:flex;align-items:center;gap:14px;margin-top:18px}
+.dog-profile-save-btn{border:0;border-radius:12px;background:var(--amber);color:#1b2a25;font-weight:700;padding:12px 20px;cursor:pointer}
+.dog-profile-summary{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.dog-profile-summary-text{margin:0;font-size:14px}
+.dog-profile-summary-text b{color:var(--pine)}
+.dog-profile-summary-actions{display:flex;gap:10px;flex-wrap:wrap}
+.dog-profile-edit-btn{border:1px solid var(--line);background:#fff;border-radius:12px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink)}
+.dog-profile-clear-btn{border:0;background:none;color:var(--muted);font-size:13px;text-decoration:underline;text-underline-offset:2px;cursor:pointer;padding:9px 4px}
+@media(max-width:700px){.dog-profile-fields{grid-template-columns:1fr 1fr}}
+@media(max-width:420px){.dog-profile-fields{grid-template-columns:1fr}}
 .tabbar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:40;background:#fff;border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -10px 26px #00000014}
 .tabbar-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;color:var(--muted);text-decoration:none;font-size:10.5px;font-weight:600;border-radius:12px;transition:color .15s ease}
 .tabbar-icon{font-size:21px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
