@@ -102,7 +102,8 @@ const STR = {
     profileSummaryPrefix: "Personalized for",
     heroEyebrow: "WEATHER FOR FOUR PAWS",
     heroTagline: "Know what your dog needs before every walk.",
-    heroTitle: "Going to be a long walk<br> with playtime today?",
+    heroTitle: "{name} best day — every day!",
+    heroTitleDefaultName: "Your dog's",
     heroSubtitle: "Weather guidance designed for dogs — check the conditions where you are and get gentle walk advice tailored to today.",
     searchLabel: "Search location",
     searchPlaceholder: "Search for a place, e.g. Umeå",
@@ -301,7 +302,8 @@ const STR = {
     profileSummaryPrefix: "Anpassat för",
     heroEyebrow: "VÄDER FÖR FYRA TASSAR",
     heroTagline: "Veta vad din hund behöver inför varje promenad.",
-    heroTitle: "Blir det en långrunda<br> med lek idag?",
+    heroTitle: "{name} bästa dag — varje dag!",
+    heroTitleDefaultName: "Din hunds",
     heroSubtitle: "Väderguidning gjord för hundar — se förhållandena där du är och få varsamma promenadråd anpassade för dagen.",
     searchLabel: "Sök ort",
     searchPlaceholder: "Sök ort, till exempel Umeå",
@@ -564,8 +566,17 @@ function applyStaticTranslations() {
   if (langBtnSvEl) langBtnSvEl.hidden = lang !== 'en';
   if (langBtnEnEl) langBtnEnEl.hidden = lang !== 'sv';
 
+  updateHeroTitle();
   renderDailyDogFact();
   renderKnowledgeHub();
+}
+
+function updateHeroTitle() {
+  const heroTitleEl = document.querySelector('[data-i18n="heroTitle"]');
+  if (!heroTitleEl) return;
+  const dogName = dogProfile && dogProfile.name && dogProfile.name.trim();
+  const namePart = dogName ? escapeHtml(dogName) : t('heroTitleDefaultName');
+  heroTitleEl.innerHTML = t('heroTitle', { name: namePart });
 }
 
 function setLang(newLang) {
@@ -1524,6 +1535,7 @@ dogProfileForm?.addEventListener('submit', e => {
     age: dogProfileAgeEl.value
   });
   renderDogProfileUI();
+  updateHeroTitle();
   statusEl.textContent = t('profileSavedConfirm');
   if (lastWeatherData && lastLoc) render(lastWeatherData, lastLoc, lastSource);
 });
@@ -1537,6 +1549,7 @@ dogProfileClearBtn?.addEventListener('click', () => {
   clearDogProfile();
   dogProfileForm.reset();
   renderDogProfileUI();
+  updateHeroTitle();
   statusEl.textContent = t('profileClearedConfirm');
   if (lastWeatherData && lastLoc) render(lastWeatherData, lastLoc, lastSource);
 });
