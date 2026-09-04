@@ -118,6 +118,7 @@ const STR = {
     heroImgAlt: "Dog out on a walk",
     weatherPhotoCaption: "A little walk inspiration for today.",
     logPhotoCaption: "Every walk and little moment counts.",
+    dogFactOfDayLabel: "Dog fact of the day",
     forecastKicker: "WALK CONDITIONS",
     forecastTitle: "Weather right now",
     updatedInitial: "Forecast data is fetched from SMHI when you search.",
@@ -316,6 +317,7 @@ const STR = {
     heroImgAlt: "Hund ute på promenad",
     weatherPhotoCaption: "Lite promenadinspiration för dagen.",
     logPhotoCaption: "Varje promenad och liten stund räknas.",
+    dogFactOfDayLabel: "Dagens hundfakta",
     forecastKicker: "PROMENADLÄGET",
     forecastTitle: "Vädret just nu",
     updatedInitial: "Prognosdata hämtas från SMHI när du söker.",
@@ -469,6 +471,42 @@ const STR = {
   }
 };
 
+/* Dagens hundfakta i loggpanelen — 7 verifierade, allmänt vedertagna fakta om hundar,
+   ett per veckodag, så samma index alltid motsvarar samma fakta i båda språken. */
+const DOG_FACTS = {
+  en: [
+    "A dog's nose print is unique — no two dogs have the same pattern, much like human fingerprints.",
+    "Dogs' sense of smell is estimated to be tens of thousands of times more sensitive than ours.",
+    "Dogs mainly cool down by panting — they only sweat through their paw pads and nose.",
+    "Puppies are born deaf and blind; their eyes and ears open at around 10–14 days old.",
+    "A healthy dog's body temperature runs higher than ours, typically around 38–39°C.",
+    "Dogs have a third eyelid, called the nictitating membrane, that helps protect and moisten the eye.",
+    "Adult dogs have 42 teeth — ten more than the 32 in an adult human's mouth."
+  ],
+  sv: [
+    "En hunds nostryck är unikt — inga två hundar har samma mönster, ungefär som fingeravtryck hos oss.",
+    "Hundars luktsinne uppskattas vara tiotusentals gånger känsligare än vårt.",
+    "Hundar kyler främst av sig genom att flåsa — de svettas bara via trampdynorna och nosen.",
+    "Valpar föds döva och blinda; ögon och öron öppnas efter ungefär 10–14 dagar.",
+    "En frisk hund har högre normal kroppstemperatur än vi, oftast omkring 38–39°C.",
+    "Hundar har ett tredje ögonlock, blinkhinnan, som skyddar och håller ögat fuktigt.",
+    "Vuxna hundar har 42 tänder — tio fler än de 32 en vuxen människa har."
+  ]
+};
+
+function todaysDogFact() {
+  const start = new Date(new Date().getFullYear(), 0, 0);
+  const diff = new Date() - start;
+  const dayOfYear = Math.floor(diff / 86400000);
+  const list = DOG_FACTS[lang] || DOG_FACTS.en;
+  return list[dayOfYear % list.length];
+}
+
+function renderDailyDogFact() {
+  const el = $('#logPanelFact');
+  if (el) el.textContent = todaysDogFact();
+}
+
 function t(key, vars) {
   let s = (STR[lang] && STR[lang][key] != null) ? STR[lang][key] : key;
   if (vars) {
@@ -503,6 +541,7 @@ function applyStaticTranslations() {
   if (langBtnSvEl) langBtnSvEl.hidden = lang !== 'en';
   if (langBtnEnEl) langBtnEnEl.hidden = lang !== 'sv';
 
+  renderDailyDogFact();
   renderKnowledgeHub();
 }
 
