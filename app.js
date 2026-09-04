@@ -47,7 +47,6 @@ const placeResultsEl = $('#placeResults');
 const updatedEl = $('#updated');
 const heroImgEl = $('#heroImg');
 const heroImgWebpEl = $('#heroImgWebp');
-const heroPanelTodayEl = $('#heroPanelToday');
 const heroPanelLogEl = $('#heroPanelLog');
 const langBtnSvEl = $('#langBtnSv');
 const langBtnEnEl = $('#langBtnEn');
@@ -2233,7 +2232,6 @@ applyStaticTranslations();
 // Slumpad väderbild är avstängd för dessa rutor (för att undvika att en saknad
 // bildfil ger en tom ruta) — de använder istället den fasta, garanterat
 // fungerande bakgrunden som redan sätts i CSS via .panel--random::before.
-// setRandomHeroPanel(heroPanelTodayEl);
 // setRandomHeroPanel(heroPanelLogEl);
 
 /* Automatiskt språkval: besökare i Sverige får svenska automatiskt om de inte

@@ -162,6 +162,9 @@
 /* ===== Daily log & calendar ===== */
 .log-section{padding:90px max(24px,6vw);max-width:1400px;margin:auto}
 .panel-plain{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:30px clamp(18px,3.5vw,38px)}
+.log-quick{position:relative;isolation:isolate;overflow:hidden}
+.log-quick::before{content:"";position:absolute;inset:0;z-index:-2;background-image:url("assets/fur-white.jpg");background-image:-webkit-image-set(url("assets/fur-white.webp") 1x);background-image:image-set(url("assets/fur-white.webp") 1x,url("assets/fur-white.jpg") 1x);background-position:center;background-size:cover}
+.log-quick::after{content:"";position:absolute;inset:0;z-index:-1;background:rgba(255,253,248,.72)}
 .log-quick-heading{margin:0 0 18px}
 .log-date-row{display:flex;align-items:center;gap:10px;margin:0 0 18px;flex-wrap:wrap}
 .log-date-row label{font-weight:700;font-size:13.5px;color:var(--pine)}
