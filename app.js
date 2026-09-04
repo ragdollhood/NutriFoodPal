@@ -1,4 +1,4 @@
-/* DOGLOGG – weather logic and bilingual (English/Swedish) UI text.
+/* DOGINARY – weather logic and bilingual (English/Swedish) UI text.
    Sources: SMHI Open Data (Swedish locations, primary) and Open-Meteo (global, and fallback
    if SMHI doesn't respond). No API key required for either service. */
 
@@ -71,7 +71,7 @@ let lang = (() => {
    and reused by the JS-rendered dynamic content below. */
 const STR = {
   en: {
-    pageTitle: "DOGLOGG | The walk forecast for you and your dog",
+    pageTitle: "DOGINARY | The walk forecast for you and your dog",
     metaDescription: "Local weather forecast from your dog's perspective, using open forecast data from SMHI.",
     skipLink: "Skip to content",
     navAriaLabel: "Main menu",
@@ -159,9 +159,9 @@ const STR = {
     footerTagline: "Made with care for wet noses and safe walks.",
     footerBrandLine: "Know what your dog needs before every walk.",
     footerSource: "Weather data: © SMHI, open data.",
-    aboutKicker: "ABOUT DOGLOGG",
+    aboutKicker: "ABOUT DOGINARY",
     aboutHeading: "Smarter dog walking decisions, one forecast at a time",
-    aboutText: "DOGLOGG turns open SMHI weather data into comfort-based forecasts for happier walks — a Dog Comfort Index, a best walk window, coat-care tips and a simple log, all built around what your dog actually needs before you head out the door.",
+    aboutText: "DOGINARY turns open SMHI weather data into comfort-based forecasts for happier walks — a Dog Comfort Index, a best walk window, coat-care tips and a simple log, all built around what your dog actually needs before you head out the door.",
     achievementMilestone: "{count}-day streak — nice work!",
     personalBestLine: "New personal best!",
     knowledgeHubKicker: "DOG KNOWLEDGE",
@@ -271,7 +271,7 @@ const STR = {
     sourceAkc: "American Kennel Club"
   },
   sv: {
-    pageTitle: "DOGLOGG | Promenadprognosen för dig och din hund",
+    pageTitle: "DOGINARY | Promenadprognosen för dig och din hund",
     metaDescription: "Lokal väderprognos ur hundens perspektiv med öppna prognosdata från SMHI.",
     skipLink: "Hoppa till innehållet",
     navAriaLabel: "Huvudmeny",
@@ -359,9 +359,9 @@ const STR = {
     footerTagline: "Gjord med omtanke om blöta nosar och trygga promenader.",
     footerBrandLine: "Veta vad din hund behöver inför varje promenad.",
     footerSource: "Väderdata: © SMHI, öppna data.",
-    aboutKicker: "OM DOGLOGG",
+    aboutKicker: "OM DOGINARY",
     aboutHeading: "Smartare promenadbeslut, en prognos i taget",
-    aboutText: "DOGLOGG omvandlar öppna väderdata från SMHI till komfortbaserade prognoser för gladare promenader — ett hundkomfortindex, ett bästa promenadfönster, pälsvårdstips och en enkel logg, allt byggt kring vad din hund faktiskt behöver innan ni går ut.",
+    aboutText: "DOGINARY omvandlar öppna väderdata från SMHI till komfortbaserade prognoser för gladare promenader — ett hundkomfortindex, ett bästa promenadfönster, pälsvårdstips och en enkel logg, allt byggt kring vad din hund faktiskt behöver innan ni går ut.",
     achievementMilestone: "{count} dagar i rad — snyggt jobbat!",
     personalBestLine: "Nytt personbästa!",
     knowledgeHubKicker: "HUNDKUNSKAP",
