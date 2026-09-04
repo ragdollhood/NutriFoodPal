@@ -104,6 +104,9 @@
 .panel-fact{position:absolute;top:22px;right:22px;max-width:250px;background:rgba(255,253,248,.16);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.28);border-radius:16px;padding:14px 16px;text-align:left}
 .panel-fact-kicker{display:block;font-size:10.5px;letter-spacing:.14em;font-weight:700;color:#f5c472;text-transform:uppercase;margin-bottom:6px}
 .panel-fact p{margin:0;color:#fff;font:600 14.5px/1.5 Fraunces,serif;text-shadow:0 2px 10px rgba(10,22,32,.35)}
+.panel-fact-source{margin:6px 0 0;font-size:11px;color:rgba(255,255,255,.78)}
+.panel-fact-source a{color:#f5c472;font-weight:600;text-decoration:none}
+.panel-fact-source a:hover{text-decoration:underline}
 .place-results:not([hidden]){display:block}
 .place-list{display:flex;flex-direction:column;gap:8px;background:#ffffffee;border-radius:16px;padding:10px;max-width:650px;box-shadow:0 16px 40px #0004}
 .place-list-hint{font-size:12px;color:var(--muted);padding:2px 6px 6px}

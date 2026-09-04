@@ -154,7 +154,7 @@ const STR = {
     indexOutro: 'The score maps to the levels Excellent, Good, Okay with some adjustments, Take it easy, and Unsuitable for longer activity, along with the conditions that contributed most and a short piece of advice. The same index is also used hour by hour in "Best walk time right now", where the coming hour with the highest score is highlighted, as well as a daytime average for each day in "Upcoming days" — click a day there to see the times of day behind the average. Your dog\'s breed, size, age, health, coat, fitness and individual tolerance always affect what\'s actually suitable, and the index never replaces a vet\'s judgement.',
     indexBackLink: "↑ Back to today's weather",
     sourcesTitle: "Sources and data transparency",
-    sourcesGrid: '<a href="https://opendata.smhi.se/metfcst/snow1gv1" target="_blank" rel="noopener"><b>SMHI Open Data</b><span>Forecast data, SNOW1gv1</span></a><a href="https://www.smhi.se/data" target="_blank" rel="noopener"><b>SMHI</b><span>Open data and usage</span></a><a href="https://jordbruksverket.se/djur/hundar-katter-och-smadjur/hundar" target="_blank" rel="noopener"><b>Jordbruksverket</b><span>Care, transport and animal welfare</span></a><a href="https://www.sva.se/djurhaelsa/djurslag-a-oe/sport-och-saellskapsdjur/hund/" target="_blank" rel="noopener"><b>SVA</b><span>Swedish National Veterinary Institute</span></a><a href="https://www.agria.se/hund/artiklar/skotsel-och-vard/sa-tar-du-hand-om-hunden-i-varmen/" target="_blank" rel="noopener"><b>Agria</b><span>Vet-reviewed articles</span></a><a href="https://evidensia.se/djurvardguiden/" target="_blank" rel="noopener"><b>Evidensia</b><span>Animal Care Guide</span></a><a href="https://www.mdpi.com/2076-2615/11/11/3302" target="_blank" rel="noopener"><b>Animals, 2021</b><span>Seasonal weather and activity</span></a><a href="https://www.frontiersin.org/journals/veterinary-science/articles/10.3389/fvets.2022.973574/full" target="_blank" rel="noopener"><b>Frontiers in Vet. Science, 2022</b><span>Extreme weather events</span></a>',
+    sourcesGrid: '<a href="https://opendata.smhi.se/metfcst/snow1gv1" target="_blank" rel="noopener"><b>SMHI Open Data</b><span>Forecast data, SNOW1gv1</span></a><a href="https://www.smhi.se/data" target="_blank" rel="noopener"><b>SMHI</b><span>Open data and usage</span></a><a href="https://jordbruksverket.se/djur/hundar-katter-och-smadjur/hundar" target="_blank" rel="noopener"><b>Jordbruksverket</b><span>Care, transport and animal welfare</span></a><a href="https://www.sva.se/djurhaelsa/djurslag-a-oe/sport-och-saellskapsdjur/hund/" target="_blank" rel="noopener"><b>SVA</b><span>Swedish National Veterinary Institute</span></a><a href="https://www.agria.se/hund/artiklar/skotsel-och-vard/sa-tar-du-hand-om-hunden-i-varmen/" target="_blank" rel="noopener"><b>Agria</b><span>Vet-reviewed articles</span></a><a href="https://evidensia.se/djurvardguiden/" target="_blank" rel="noopener"><b>Evidensia</b><span>Animal Care Guide</span></a><a href="https://www.mdpi.com/2076-2615/11/11/3302" target="_blank" rel="noopener"><b>Animals, 2021</b><span>Seasonal weather and activity</span></a><a href="https://www.frontiersin.org/journals/veterinary-science/articles/10.3389/fvets.2022.973574/full" target="_blank" rel="noopener"><b>Frontiers in Vet. Science, 2022</b><span>Extreme weather events</span></a><a href="https://www.akc.org/expert-advice/lifestyle/dog-facts/" target="_blank" rel="noopener"><b>American Kennel Club</b><span>Dog Fact of the Day</span></a>',
     sourcesFine: "Place search uses OpenStreetMap's Nominatim service. Forecasts are weather models and can change — always check SMHI's official warnings separately on a live service before planning outdoor activities in extreme weather. The advice on this page is general and never replaces a vet's judgement.",
     footerTagline: "Made with care for wet noses and safe walks.",
     footerBrandLine: "Know what your dog needs before every walk.",
@@ -353,7 +353,7 @@ const STR = {
     indexOutro: 'Poängen ger nivåerna Utmärkt, Bra, Okej med anpassning, Ta det försiktigt och Olämpligt för längre aktivitet, tillsammans med de förhållanden som bidragit mest och ett kort råd. Samma index används dessutom timme för timme i "Bästa promenadtiden just nu", där den kommande timmen med högst poäng lyfts fram, samt som ett dagtidssnitt för varje dag i "Kommande dagar" — klicka på en dag där för att se klockslagen bakom snittet. Hundens ras, storlek, ålder, hälsa, päls, kondition och individuella tolerans påverkar alltid vad som faktiskt är lämpligt, och indexet ersätter aldrig bedömning från veterinär.',
     indexBackLink: "↑ Tillbaka till dagens väder",
     sourcesTitle: "Källor och datatransparens",
-    sourcesGrid: '<a href="https://opendata.smhi.se/metfcst/snow1gv1" target="_blank" rel="noopener"><b>SMHI Open Data</b><span>Prognosdata, SNOW1gv1</span></a><a href="https://www.smhi.se/data" target="_blank" rel="noopener"><b>SMHI</b><span>Öppna data och användning</span></a><a href="https://jordbruksverket.se/djur/hundar-katter-och-smadjur/hundar" target="_blank" rel="noopener"><b>Jordbruksverket</b><span>Skötsel, transport och djurskydd</span></a><a href="https://www.sva.se/djurhaelsa/djurslag-a-oe/sport-och-saellskapsdjur/hund/" target="_blank" rel="noopener"><b>SVA</b><span>Statens veterinärmedicinska anstalt</span></a><a href="https://www.agria.se/hund/artiklar/skotsel-och-vard/sa-tar-du-hand-om-hunden-i-varmen/" target="_blank" rel="noopener"><b>Agria</b><span>Veterinärgranskade artiklar</span></a><a href="https://evidensia.se/djurvardguiden/" target="_blank" rel="noopener"><b>Evidensia</b><span>Djurvårdsguiden</span></a><a href="https://www.mdpi.com/2076-2615/11/11/3302" target="_blank" rel="noopener"><b>Animals, 2021</b><span>Säsongsväder och aktivitet</span></a><a href="https://www.frontiersin.org/journals/veterinary-science/articles/10.3389/fvets.2022.973574/full" target="_blank" rel="noopener"><b>Frontiers in Vet. Science, 2022</b><span>Extrema väderhändelser</span></a>',
+    sourcesGrid: '<a href="https://opendata.smhi.se/metfcst/snow1gv1" target="_blank" rel="noopener"><b>SMHI Open Data</b><span>Prognosdata, SNOW1gv1</span></a><a href="https://www.smhi.se/data" target="_blank" rel="noopener"><b>SMHI</b><span>Öppna data och användning</span></a><a href="https://jordbruksverket.se/djur/hundar-katter-och-smadjur/hundar" target="_blank" rel="noopener"><b>Jordbruksverket</b><span>Skötsel, transport och djurskydd</span></a><a href="https://www.sva.se/djurhaelsa/djurslag-a-oe/sport-och-saellskapsdjur/hund/" target="_blank" rel="noopener"><b>SVA</b><span>Statens veterinärmedicinska anstalt</span></a><a href="https://www.agria.se/hund/artiklar/skotsel-och-vard/sa-tar-du-hand-om-hunden-i-varmen/" target="_blank" rel="noopener"><b>Agria</b><span>Veterinärgranskade artiklar</span></a><a href="https://evidensia.se/djurvardguiden/" target="_blank" rel="noopener"><b>Evidensia</b><span>Djurvårdsguiden</span></a><a href="https://www.mdpi.com/2076-2615/11/11/3302" target="_blank" rel="noopener"><b>Animals, 2021</b><span>Säsongsväder och aktivitet</span></a><a href="https://www.frontiersin.org/journals/veterinary-science/articles/10.3389/fvets.2022.973574/full" target="_blank" rel="noopener"><b>Frontiers in Vet. Science, 2022</b><span>Extrema väderhändelser</span></a><a href="https://www.akc.org/expert-advice/lifestyle/dog-facts/" target="_blank" rel="noopener"><b>American Kennel Club</b><span>Dagens hundfakta</span></a>',
     sourcesFine: "Platsökning använder OpenStreetMaps Nominatim-tjänst. Prognoser är väderleksmodeller och kan ändras — visa alltid SMHI:s officiella varningar separat i en skarp tjänst innan du planerar utomhusaktiviteter i extremväder. Råden på den här sidan är allmänna och ersätter aldrig bedömning från veterinär.",
     footerTagline: "Gjord med omtanke om blöta nosar och trygga promenader.",
     footerBrandLine: "Veta vad din hund behöver inför varje promenad.",
@@ -481,7 +481,15 @@ const DOG_FACTS = {
     "Puppies are born deaf and blind; their eyes and ears open at around 10–14 days old.",
     "A healthy dog's body temperature runs higher than ours, typically around 38–39°C.",
     "Dogs have a third eyelid, called the nictitating membrane, that helps protect and moisten the eye.",
-    "Adult dogs have 42 teeth — ten more than the 32 in an adult human's mouth."
+    "Adult dogs have 42 teeth — ten more than the 32 in an adult human's mouth.",
+    "A dog's hearing reaches roughly 45,000 Hz, well beyond the upper range of human hearing.",
+    "Dogs have around 1,700 taste buds, compared to a human's roughly 9,000 — smell matters far more to them than taste.",
+    "A dog's paw pads act like natural shock absorbers and also help with grip, balance and sensing temperature.",
+    "Newborn puppies can't regulate their own body temperature and depend on their mother or littermates for warmth in the first couple of weeks.",
+    "Dogs often curl into a ball to sleep, an instinct thought to help conserve body heat and protect vital organs.",
+    "Some breeds, such as the Basenji, don't bark in the usual way — they make more of a yodel-like sound instead.",
+    "A dog's whiskers can pick up tiny changes in air currents, helping it sense nearby objects even in the dark.",
+    "Most dogs have a faster resting heart rate than humans, and smaller dogs tend to have quicker heartbeats than larger ones."
   ],
   sv: [
     "En hunds nostryck är unikt — inga två hundar har samma mönster, ungefär som fingeravtryck hos oss.",
@@ -490,9 +498,21 @@ const DOG_FACTS = {
     "Valpar föds döva och blinda; ögon och öron öppnas efter ungefär 10–14 dagar.",
     "En frisk hund har högre normal kroppstemperatur än vi, oftast omkring 38–39°C.",
     "Hundar har ett tredje ögonlock, blinkhinnan, som skyddar och håller ögat fuktigt.",
-    "Vuxna hundar har 42 tänder — tio fler än de 32 en vuxen människa har."
+    "Vuxna hundar har 42 tänder — tio fler än de 32 en vuxen människa har.",
+    "En hunds hörsel sträcker sig upp till omkring 45 000 Hz, långt bortom vad det mänskliga örat kan uppfatta.",
+    "Hundar har omkring 1 700 smaklökar, jämfört med människans cirka 9 000 — därför spelar luktsinnet en mycket större roll för dem än smaken.",
+    "Trampdynorna fungerar som naturliga stötdämpare och hjälper hunden med grepp, balans och att känna av temperatur.",
+    "Nyfödda valpar kan inte reglera sin egen kroppstemperatur och är beroende av tiken eller kullsyskonen för värme de första veckorna.",
+    "Att hundar bollar ihop sig när de sover tros vara en instinkt för att bevara kroppsvärme och skydda inre organ.",
+    "Vissa raser, som basenji, skäller inte på vanligt sätt — de ger istället ifrån sig ett mer jodlande läte.",
+    "Hundens morrhår kan känna av små förändringar i luftströmmar och hjälper hunden att uppfatta föremål även i mörker.",
+    "De flesta hundar har snabbare vilopuls än en människa, och mindre hundar har ofta snabbare hjärtslag än större."
   ]
 };
+
+// Källa för samtliga hundfakta ovan och i DAILY_TIP_TEXT.facts nedan: American Kennel Club,
+// se källänken som visas tillsammans med fakta i gränssnittet samt i sidans källförteckning.
+const DOG_FACTS_SOURCE_URL = 'https://www.akc.org/expert-advice/lifestyle/dog-facts/';
 
 function todaysDogFact() {
   const start = new Date(new Date().getFullYear(), 0, 0);
@@ -505,6 +525,10 @@ function todaysDogFact() {
 function renderDailyDogFact() {
   const el = $('#logPanelFact');
   if (el) el.textContent = todaysDogFact();
+  const srcEl = $('#logPanelFactSource');
+  if (srcEl) {
+    srcEl.innerHTML = `${escapeHtml(t('sourceLabel'))} <a href="${DOG_FACTS_SOURCE_URL}" target="_blank" rel="noopener">${escapeHtml(t('sourceAkc'))} ↗</a>`;
+  }
 }
 
 function t(key, vars) {
@@ -1892,15 +1916,8 @@ const DAILY_TIP_TEXT = {
     rain: 'Dry your dog\u2019s paws and the skin between the pads thoroughly after wet walks to help prevent soreness and infection.',
     cold: 'Road salt and grit can irritate paw pads in winter — rinse and dry paws after walks on treated pavements.',
     windy: 'Strong wind carries scent further and can make walks more distracting (or more exciting) for a dog\u2019s nose.',
-    facts: [
-      'A dog\u2019s sense of smell is estimated to be tens of thousands of times more sensitive than a human\u2019s.',
-      'Dogs sweat mainly through their paw pads, which is one reason panting is their main way to cool down.',
-      'A dog\u2019s whiskers can sense tiny changes in air currents, helping them "feel" objects nearby in the dark.',
-      'Puppies are born deaf and blind and rely on smell and touch for their first couple of weeks.',
-      'Dogs curl up to sleep partly as an instinct to conserve body heat and protect vital organs.',
-      'A wet dog nose helps absorb scent chemicals, which is part of why dogs sniff and lick their noses often.',
-      'Senior dogs can develop cloudy-looking eyes (lenticular sclerosis) that\u2019s a normal ageing change, not always cataracts — but it\u2019s still worth a vet check to be sure.'
-    ]
+    // Same source list as the "Dog fact of the day" panel, so facts vary the same way everywhere on the page.
+    facts: DOG_FACTS.en
   },
   sv: {
     kicker: 'DAGENS TIPS',
@@ -1909,15 +1926,8 @@ const DAILY_TIP_TEXT = {
     rain: 'Torka hundens tassar och huden mellan trampdynorna noga efter blöta promenader för att minska risken för sårighet och infektion.',
     cold: 'Vägsalt och grus kan irritera trampdynorna på vintern — skölj och torka tassarna efter promenader på saltade gator.',
     windy: 'Kraftig vind bär doft längre och kan göra promenaden mer distraherande (eller mer spännande) för hundens nos.',
-    facts: [
-      'Hundars luktsinne uppskattas vara tiotusentals gånger känsligare än människans.',
-      'Hundar svettas huvudsakligen genom trampdynorna, vilket är en anledning till att flåsning är deras främsta sätt att kyla ner sig.',
-      'Hundens morrhår kan känna av små förändringar i luftströmmar, vilket hjälper dem att "känna" föremål i mörker.',
-      'Valpar föds döva och blinda och förlitar sig på lukt och beröring de första veckorna.',
-      'Att hundar bollar ihop sig när de sover beror delvis på en instinkt att bevara kroppsvärme och skydda inre organ.',
-      'En fuktig nos hjälper till att fånga upp doftämnen, vilket är en av anledningarna till att hundar ofta slickar sig om nosen.',
-      'Äldre hundar kan få en grumlig blick (linsskleros) som är en normal åldersförändring och inte alltid grå starr — men det är ändå värt att låta en veterinär titta.'
-    ]
+    // Samma källista som rutan "Dagens hundfakta", så fakta varierar likadant överallt på sidan.
+    facts: DOG_FACTS.sv
   }
 };
 
@@ -1944,11 +1954,18 @@ function renderDailyTip(cur) {
   const el = $('#dailyTip');
   if (!el) return;
   const tip = computeDailyTip(cur);
+  // The weather-specific tips (heat/rain/cold/wind) are our own advice, not a "fact" — the
+  // source line is only shown when the fallback is actually the Dog Fact of the Day.
+  const isFact = tip.kicker === DAILY_TIP_TEXT[lang].factKicker;
+  const sourceHtml = isFact
+    ? `<p class="advice-source">${escapeHtml(t('sourceLabel'))} <a href="${DOG_FACTS_SOURCE_URL}" target="_blank" rel="noopener">${escapeHtml(t('sourceAkc'))} ↗</a></p>`
+    : '';
   el.innerHTML = `
     <span class="daily-tip-icon" aria-hidden="true">${tip.icon}</span>
     <div>
       <span class="daily-tip-kicker">${escapeHtml(tip.kicker)}</span>
       <p class="daily-tip-text">${escapeHtml(tip.text)}</p>
+      ${sourceHtml}
     </div>
   `;
 }
